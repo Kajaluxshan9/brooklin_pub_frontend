@@ -176,7 +176,7 @@ function App() {
                 textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
               }}
             >
-              Welcome to Brooklin Pub
+              Welcome to Brooklin Pub 1
             </Typography>
             <Typography 
               variant="h5" 
