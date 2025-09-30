@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography';
 const TestGrid = () => {
   return (
     <div>
-      {/* Section 1 */}
       <Box
         sx={{
           display: 'flex',
@@ -26,7 +25,7 @@ const TestGrid = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.5)', // semi-transparent overlay
+            backgroundColor: 'rgba(0,0,0,0.5)', 
             color: 'white',
             p: 4,
           }}
@@ -42,7 +41,6 @@ const TestGrid = () => {
         </Box>
       </Box>
 
-      {/* Section 2 */}
       <Box
         sx={{
           display: 'flex',
@@ -79,7 +77,6 @@ const TestGrid = () => {
         </Box>
       </Box>
 
-      {/* Section 3 */}
       <Box
         sx={{
           display: 'flex',
