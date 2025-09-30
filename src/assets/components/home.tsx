@@ -1,29 +1,16 @@
 import React from 'react';
 import Nav from './nav';
-import Card from '@mui/material/Card';
-import CardMedia from '@mui/material/CardMedia';
 import Item from './items';
+import LandingPage from './landingPage';
+import Footer from './footer';
 
 const Home = () => {
   return (
     <div>
       <Nav />
-      <Card sx={{ width: '100vw', maxWidth: '100%', margin: 0, borderRadius: 0, boxShadow: 0 }}>
-        <CardMedia
-          component="video"
-          src="https://www.w3schools.com/html/mov_bbb.mp4"
-          autoPlay
-          muted
-          loop
-          sx={{ 
-            width: '100%',
-            height: { xs: 300, sm: 500, md: 700 }, 
-            minHeight: 200,                        
-            objectFit: 'cover',
-          }}
-        />
-      </Card>
+      <LandingPage />
         <Item />
+      <Footer />
     </div>
   );
 };

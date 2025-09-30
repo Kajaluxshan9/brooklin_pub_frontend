@@ -1,10 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from './assets/components/home';
-import About from './assets/components/another';
+import About from './assets/components/about';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-
-
+import ContactUs from './assets/components/contactus';
 
 const theme = createTheme({
   palette: {
@@ -31,6 +30,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About/>} />
+          <Route path="/contact" element={<ContactUs/>} />
         </Routes>
       </Router>
     </ThemeProvider>

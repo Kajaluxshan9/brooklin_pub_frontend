@@ -1,11 +1,62 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const TestGrid = () => {
+  const sectionsRef = useRef([]);
+  sectionsRef.current = [];
+
+  const addToRefs = (el) => {
+    if (el && !sectionsRef.current.includes(el)) {
+      sectionsRef.current.push(el);
+    }
+  };
+
+  useEffect(() => {
+    sectionsRef.current.forEach((section, index) => {
+      gsap.fromTo(
+        section,
+        { autoAlpha: 0, scale: 0.9 },
+        {
+          autoAlpha: 1,
+          scale: 1,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top center",
+            end: "bottom center",
+            toggleActions: "play reverse play reverse",
+          },
+        }
+      );
+
+      // Shrink & fade out the previous when next comes in
+      if (index > 0) {
+        gsap.to(sectionsRef.current[index - 1], {
+          scale: 0.8,
+          autoAlpha: 0,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top center",
+            end: "bottom center",
+            scrub: true,
+          },
+        });
+      }
+    });
+  }, []);
+
   return (
     <div>
+      {/* Section 1 */}
       <Box
+        ref={addToRefs}
         sx={{
           display: 'flex',
           height: '100vh',
@@ -20,14 +71,16 @@ const TestGrid = () => {
         }}
       >
         <Box
+          className="text-content"
           sx={{
             flex: 1,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.5)', 
+            backgroundColor: 'rgba(0,0,0,0.5)',
             color: 'white',
             p: 4,
+            textAlign: "center",
           }}
         >
           <Box>
@@ -41,7 +94,9 @@ const TestGrid = () => {
         </Box>
       </Box>
 
+      {/* Section 2 */}
       <Box
+        ref={addToRefs}
         sx={{
           display: 'flex',
           height: '100vh',
@@ -56,6 +111,7 @@ const TestGrid = () => {
         }}
       >
         <Box
+          className="text-content"
           sx={{
             flex: 1,
             display: 'flex',
@@ -64,6 +120,7 @@ const TestGrid = () => {
             backgroundColor: 'rgba(0,0,0,0.5)',
             color: 'white',
             p: 4,
+            textAlign: "center",
           }}
         >
           <Box>
@@ -77,7 +134,9 @@ const TestGrid = () => {
         </Box>
       </Box>
 
+      {/* Section 3 */}
       <Box
+        ref={addToRefs}
         sx={{
           display: 'flex',
           height: '100vh',
@@ -92,6 +151,7 @@ const TestGrid = () => {
         }}
       >
         <Box
+          className="text-content"
           sx={{
             flex: 1,
             display: 'flex',
@@ -100,6 +160,7 @@ const TestGrid = () => {
             backgroundColor: 'rgba(0,0,0,0.5)',
             color: 'white',
             p: 4,
+            textAlign: "center",
           }}
         >
           <Box>
