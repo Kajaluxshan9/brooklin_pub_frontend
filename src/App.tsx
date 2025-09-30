@@ -1,122 +1,137 @@
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { 
-  Container, 
-  Typography, 
-  AppBar, 
-  Toolbar, 
-  Box, 
-  Grid, 
-  Card, 
-  CardContent, 
-  CardMedia, 
-  Button, 
+import * as React from "react";
+import { useState } from "react";
+import {
+  ThemeProvider,
+  createTheme,
+  useMediaQuery,
+} from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
   IconButton,
   Drawer,
+  Box,
+  Container,
+  Button,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
-  useMediaQuery
-} from '@mui/material';
-import {
-  Restaurant as RestaurantIcon,
-  Menu as MenuIcon,
-  Star as StarIcon
-} from '@mui/icons-material';
-import { useState } from 'react';
+  Divider,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import StarIcon from "@mui/icons-material/Star";
 
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#8B4513', // Brown color for pub theme
-    },
-    secondary: {
-      main: '#DAA520', // Gold color
-    },
-    background: {
-      default: '#f5f5f5',
-    },
+    primary: { main: "#8B4513" }, // SaddleBrown
+    secondary: { main: "#DAA520" }, // GoldenRod
+    background: { default: "#f5f5f5" },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
   },
-  components: {
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-          },
-        },
-      },
-    },
-  },
 });
 
-// Sample menu data
 const menuItems = [
   {
     id: 1,
-    name: 'Classic Burger',
-    description: 'Juicy beef patty with lettuce, tomato, and our special sauce',
-    price: 12.99,
-    category: 'main',
-    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=200&fit=crop',
+    name: "Classic Burger",
+    description:
+      "Grilled beef patty, cheddar, lettuce, tomato, house sauce on a toasted bun.",
+    price: 14.99,
+    imageUrl:
+      "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: 2,
-    name: 'Fish & Chips',
-    description: 'Beer-battered cod with crispy fries and mushy peas',
-    price: 15.99,
-    category: 'main',
-    imageUrl: 'https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=300&h=200&fit=crop',
+    name: "Fish & Chips",
+    description:
+      "Crispy battered cod served with fries, coleslaw, lemon & tartar.",
+    price: 16.5,
+    imageUrl:
+      "https://images.unsplash.com/photo-1560813837-d5400f0aa1f3?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: 3,
-    name: 'Chicken Wings',
-    description: 'Spicy buffalo wings served with blue cheese dip',
-    price: 9.99,
-    category: 'appetizer',
-    imageUrl: 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=300&h=200&fit=crop',
+    name: "Chicken Wings",
+    description:
+      "Jumbo wings tossed in your choice of sauce. Served with ranch.",
+    price: 15.0,
+    imageUrl:
+      "https://images.unsplash.com/photo-1606756790138-261c1e3be0a5?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: 4,
-    name: 'Craft Beer',
-    description: 'Local brewery selection - Ask your server',
-    price: 6.99,
-    category: 'beverage',
-    imageUrl: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=300&h=200&fit=crop',
+    name: "Steak & Fries",
+    description: "Grilled striploin, herb butter, crispy fries.",
+    price: 24.0,
+    imageUrl:
+      "https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    id: 5,
+    name: "Caesar Salad",
+    description: "Romaine, parmesan, bacon, croutons, creamy dressing.",
+    price: 12.0,
+    imageUrl:
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    id: 6,
+    name: "Margherita Pizza",
+    description: "San Marzano tomato, fior di latte, basil, olive oil.",
+    price: 17.0,
+    imageUrl:
+      "https://images.unsplash.com/photo-1548365328-9f547fb09530?q=80&w=1200&auto=format&fit=crop",
   },
 ];
 
 function App() {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
 
   const drawer = (
-    <Box sx={{ width: 250, p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Menu Categories
-      </Typography>
+    <Box role="presentation" sx={{ width: 250 }}>
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1.5 }}>
+        <RestaurantIcon color="primary" />
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          Brooklin Pub
+        </Typography>
+      </Box>
+      <Divider />
       <List>
-        {['All Items', 'Appetizers', 'Main Course', 'Beverages', 'Desserts'].map((text) => (
-          <ListItem key={text} sx={{ cursor: 'pointer' }}>
-            <ListItemText primary={text} />
+        {["Home", "Menu", "About", "Contact"].map((text) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <ListItemText primary={text} />
+            </ListItemButton>
           </ListItem>
         ))}
       </List>
+      <Divider />
+      <Box sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          Open daily · Kitchen till late
+        </Typography>
+      </Box>
     </Box>
   );
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+
+      {/* Top App Bar */}
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static" elevation={2}>
           <Toolbar>
@@ -135,6 +150,14 @@ function App() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Brooklin Pub
             </Typography>
+            {!isMobile && (
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button color="inherit">Home</Button>
+                <Button color="inherit">Menu</Button>
+                <Button color="inherit">About</Button>
+                <Button color="inherit">Contact</Button>
+              </Box>
+            )}
           </Toolbar>
         </AppBar>
 
@@ -143,12 +166,10 @@ function App() {
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 250 },
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": { boxSizing: "border-box", width: 250 },
           }}
         >
           {drawer}
@@ -157,56 +178,47 @@ function App() {
         {/* Hero Section */}
         <Box
           sx={{
-            backgroundImage: 'linear-gradient(rgba(139, 69, 19, 0.7), rgba(139, 69, 19, 0.7)), url(https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&h=400&fit=crop)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            color: 'white',
+            backgroundImage:
+              "linear-gradient(rgba(139, 69, 19, 0.6), rgba(139, 69, 19, 0.6)), url(https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1600&h=500&fit=crop)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: "white",
             py: { xs: 6, md: 12 },
-            textAlign: 'center',
+            textAlign: "center",
           }}
         >
           <Container maxWidth="lg">
-            <Typography 
-              variant="h2" 
-              component="h1" 
+            <Typography
+              variant="h2"
+              component="h1"
               gutterBottom
-              sx={{ 
-                fontSize: { xs: '2.5rem', md: '3.75rem' },
-                fontWeight: 'bold',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+              sx={{
+                fontSize: { xs: "2.25rem", md: "3.5rem" },
+                fontWeight: "bold",
+                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
               }}
             >
-              Welcome to Brooklin Pub 1
+              Welcome to Brooklin Pub
             </Typography>
-            <Typography 
-              variant="h5" 
-              component="h2" 
-              sx={{ 
-                mb: 4, 
-                fontSize: { xs: '1.25rem', md: '1.5rem' },
-                textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{
+                mb: 4,
+                fontSize: { xs: "1.1rem", md: "1.25rem" },
+                textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
               }}
             >
               Experience the finest dining and atmosphere in town
             </Typography>
-            <Button 
-              variant="contained" 
-              size="large" 
-              color="secondary"
-              sx={{ 
-                px: 4, 
-                py: 1.5,
-                fontSize: '1.1rem',
-                fontWeight: 'bold'
-              }}
-            >
+            <Button variant="contained" size="large" color="secondary" sx={{ px: 4, py: 1.5 }}>
               View Menu
             </Button>
           </Container>
         </Box>
 
-        {/* Desktop Sidebar and Content */}
-        <Box sx={{ display: 'flex' }}>
+        {/* Desktop Sidebar + Main Content */}
+        <Box sx={{ display: "flex" }}>
           {/* Desktop Sidebar */}
           {!isMobile && (
             <Box
@@ -214,10 +226,10 @@ function App() {
               sx={{
                 width: 250,
                 flexShrink: 0,
-                bgcolor: 'background.paper',
-                borderRight: '1px solid',
-                borderColor: 'divider',
-                minHeight: 'calc(100vh - 64px)',
+                bgcolor: "background.paper",
+                borderRight: "1px solid",
+                borderColor: "divider",
+                minHeight: "calc(100vh - 64px)",
               }}
             >
               {drawer}
@@ -237,32 +249,26 @@ function App() {
               <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 4 }}>
                 Our Menu
               </Typography>
-              
+
               <Grid container spacing={3}>
                 {menuItems.map((item) => (
                   <Grid item xs={12} sm={6} lg={4} key={item.id}>
-                    <Card 
-                      sx={{ 
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
+                    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
                       <CardMedia
                         component="img"
                         height="200"
                         image={item.imageUrl}
                         alt={item.name}
-                        sx={{ objectFit: 'cover' }}
+                        sx={{ objectFit: "cover" }}
                       />
-                      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
                         <Typography gutterBottom variant="h6" component="div" sx={{ mb: 1 }}>
                           {item.name}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1 }}>
                           {item.description}
                         </Typography>
-                        <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="h6" color="primary" sx={{ fontWeight: "bold" }}>
                           ${item.price}
                         </Typography>
                       </CardContent>
@@ -278,8 +284,8 @@ function App() {
                 </Typography>
                 <Grid container spacing={4}>
                   <Grid item xs={12} md={4}>
-                    <Box sx={{ textAlign: 'center', p: 3 }}>
-                      <RestaurantIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+                    <Box sx={{ textAlign: "center", p: 3 }}>
+                      <RestaurantIcon sx={{ fontSize: 60, color: "primary.main", mb: 2 }} />
                       <Typography variant="h6" gutterBottom>
                         Fresh Ingredients
                       </Typography>
@@ -289,8 +295,8 @@ function App() {
                     </Box>
                   </Grid>
                   <Grid item xs={12} md={4}>
-                    <Box sx={{ textAlign: 'center', p: 3 }}>
-                      <StarIcon sx={{ fontSize: 60, color: 'secondary.main', mb: 2 }} />
+                    <Box sx={{ textAlign: "center", p: 3 }}>
+                      <StarIcon sx={{ fontSize: 60, color: "secondary.main", mb: 2 }} />
                       <Typography variant="h6" gutterBottom>
                         Award-Winning
                       </Typography>
@@ -300,8 +306,8 @@ function App() {
                     </Box>
                   </Grid>
                   <Grid item xs={12} md={4}>
-                    <Box sx={{ textAlign: 'center', p: 3 }}>
-                      <StarIcon sx={{ fontSize: 60, color: 'error.main', mb: 2 }} />
+                    <Box sx={{ textAlign: "center", p: 3 }}>
+                      <StarIcon sx={{ fontSize: 60, color: "error.main", mb: 2 }} />
                       <Typography variant="h6" gutterBottom>
                         Community Favorite
                       </Typography>
@@ -320,8 +326,8 @@ function App() {
         <Box
           component="footer"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'white',
+            bgcolor: "primary.main",
+            color: "white",
             py: 4,
             mt: 8,
           }}
@@ -333,8 +339,7 @@ function App() {
                   Brooklin Pub
                 </Typography>
                 <Typography variant="body2">
-                  Experience the finest dining and atmosphere in town. 
-                  Join us for an unforgettable culinary journey.
+                  Experience the finest dining and atmosphere in town. Join us for an unforgettable culinary journey.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
@@ -342,15 +347,17 @@ function App() {
                   Contact Info
                 </Typography>
                 <Typography variant="body2">
-                  123 Main Street, Brooklyn, NY 11201<br />
-                  Phone: (555) 123-4567<br />
+                  15 Baldwin St, Whitby, ON L1M 0K8
+                  <br />
+                  Phone: (905) 425-3055
+                  <br />
                   Email: info@brooklinpub.com
                 </Typography>
               </Grid>
             </Grid>
-            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <Box sx={{ mt: 3, pt: 3, borderTop: "1px solid rgba(255,255,255,0.2)" }}>
               <Typography variant="body2" align="center">
-                © 2025 Brooklin Pub. All rights reserved.
+                © {new Date().getFullYear()} Brooklin Pub. All rights reserved.
               </Typography>
             </Box>
           </Container>
