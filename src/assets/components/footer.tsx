@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Link, IconButton } from "@mui/material";
 import { Facebook, Instagram } from "@mui/icons-material";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";

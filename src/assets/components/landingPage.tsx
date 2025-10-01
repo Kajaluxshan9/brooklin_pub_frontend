@@ -1,28 +1,28 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
-const LandingPage = () => {
-  const containerRef = useRef(null);
-  const cardsRef = useRef([]);
-  const tinyRefs = useRef([]);
+const images = [
+  "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+];
 
-  const images = [
-    "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-    "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  ];
+const LandingPage = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const tinyRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const radius = 800;
   const spacing = 250;
 
-  const shuffleArray = (arr) => {
+  const shuffleArray = (arr: string[]) => {
     const copy = [...arr];
     for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -81,7 +81,7 @@ const LandingPage = () => {
             opacity: 0,
             duration: 0.5,
             onComplete: () => {
-              cards[i].style.background = `url(${src}) center/cover no-repeat`;
+              cards[i]!.style.background = `url(${src}) center/cover no-repeat`;
               gsap.to(cards[i], { opacity: 1, duration: 0.5 });
             },
           });
@@ -91,14 +91,14 @@ const LandingPage = () => {
 
     // Tiny floating images spread all over screen
     const tinyElements = tinyRefs.current;
-    tinyElements.forEach((el, i) => {
+    tinyElements.forEach((el) => {
       if (!el) return;
 
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const count = 50; // number of tiny images
 
-      el.innerHTML = ""; // clear previous tiny images
+      el!.innerHTML = ""; // clear previous tiny images
       for (let j = 0; j < count; j++) {
         const imgEl = document.createElement("div");
         imgEl.classList.add("tiny-img");
@@ -114,7 +114,7 @@ const LandingPage = () => {
         imgEl.style.left = `${x}px`;
         imgEl.style.top = `${y}px`;
 
-        el.appendChild(imgEl);
+        el!.appendChild(imgEl);
 
         // random floating animation
         gsap.to(imgEl, {
@@ -129,7 +129,7 @@ const LandingPage = () => {
     });
 
     return () => clearInterval(interval);
-  }, [images]);
+  }, []);
 
   return (
     <div
@@ -146,7 +146,7 @@ const LandingPage = () => {
       {images.map((src, i) => (
         <div
           key={i}
-          ref={(el) => (cardsRef.current[i] = el)}
+          ref={(el) => { cardsRef.current[i] = el; }}
           className="spiral-card"
           style={{
             width: "90vw",
@@ -160,7 +160,7 @@ const LandingPage = () => {
           }}
         >
           <div
-            ref={(el) => (tinyRefs.current[i] = el)}
+            ref={(el) => { tinyRefs.current[i] = el; }}
             style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
           ></div>
         </div>

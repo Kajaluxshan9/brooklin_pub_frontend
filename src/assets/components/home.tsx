@@ -1,4 +1,3 @@
-import React from 'react';
 import Nav from './nav';
 import Item from './items';
 import LandingPage from './landingPage';

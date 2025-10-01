@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { gsap } from 'gsap';
@@ -7,10 +7,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const TestGrid = () => {
-  const sectionsRef = useRef([]);
-  sectionsRef.current = [];
+  const sectionsRef = useRef<HTMLDivElement[]>([]);
 
-  const addToRefs = (el) => {
+  const addToRefs = (el: HTMLDivElement | null) => {
     if (el && !sectionsRef.current.includes(el)) {
       sectionsRef.current.push(el);
     }

@@ -3,20 +3,6 @@ import Home from './assets/components/home';
 import About from './assets/components/about';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import ContactUs from './assets/components/contactus';
-import * as React from "react";
-import { useState } from "react";
-import {
-  ThemeProvider,
-  createTheme,
-  useMediaQuery,
-} from "@mui/material/styles";
-
-import Home from "./assets/components/home";
-import About from "./assets/components/another";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-
-import CssBaseline from "@mui/material/CssBaseline";
 
 const theme = createTheme({
   palette: {

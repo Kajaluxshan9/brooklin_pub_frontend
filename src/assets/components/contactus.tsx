@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Nav from './nav';
 import Footer from './footer';
-import { Box, TextField, Button, Typography, Container, Paper } from '@mui/material';
+import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 
 const Contactus = () => {
   const [formData, setFormData] = useState({
@@ -10,12 +10,12 @@ const Contactus = () => {
     message: ''
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(formData);
     alert('Message sent!');
