@@ -105,7 +105,9 @@ const LandingPage = () => {
         imgEl.style.width = "20px";
         imgEl.style.height = "20px";
         imgEl.style.borderRadius = "50%";
-        imgEl.style.background = `url(${images[j % images.length]}) center/cover no-repeat`;
+        imgEl.style.background = `url(${
+          images[j % images.length]
+        }) center/cover no-repeat`;
         imgEl.style.position = "absolute";
 
         // random position
@@ -146,7 +148,9 @@ const LandingPage = () => {
       {images.map((src, i) => (
         <div
           key={i}
-          ref={(el) => { cardsRef.current[i] = el; }}
+          ref={(el) => {
+            cardsRef.current[i] = el;
+          }}
           className="spiral-card"
           style={{
             width: "90vw",
@@ -160,8 +164,16 @@ const LandingPage = () => {
           }}
         >
           <div
-            ref={(el) => { tinyRefs.current[i] = el; }}
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+            ref={(el) => {
+              tinyRefs.current[i] = el;
+            }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+            }}
           ></div>
         </div>
       ))}
@@ -183,7 +195,9 @@ const LandingPage = () => {
           padding: "20px",
         }}
       >
-        <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", lineHeight: "1.2" }}>
+        <h1
+          style={{ fontSize: "2.5rem", fontWeight: "bold", lineHeight: "1.2" }}
+        >
           Welcome to My Landing Page
         </h1>
       </div>
