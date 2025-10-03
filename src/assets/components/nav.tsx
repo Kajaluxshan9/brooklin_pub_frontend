@@ -74,30 +74,72 @@ const Nav = () => {
     setMobileOpen(open);
   };
 
-  const drawerContent = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
-      <List>
-        {navLinks.map((link) =>
-          link.dropdown ? (
-            <React.Fragment key={link.label}>
-              <ListItem>
-                <ListItemText primary={link.label} />
-              </ListItem>
-              {link.dropdown.map((item) => (
-                <ListItem key={item.path} component={Link} to={item.path} sx={{ pl: 4 }}>
-                  <ListItemText primary={item.label} />
-                </ListItem>
-              ))}
-            </React.Fragment>
-          ) : (
-            <ListItem key={link.path} component={Link} to={link.path!}>
-              <ListItemText primary={link.label} />
+const drawerContent = (
+  <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+    <List>
+      {navLinks.map((link) =>
+        link.dropdown ? (
+          <React.Fragment key={link.label}>
+            <ListItem>
+              <ListItemText
+                primary={link.label}
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 500,
+                  '&:hover': { color: 'secondary.main' },
+                }}
+              />
             </ListItem>
-          )
-        )}
-      </List>
+            {link.dropdown.map((item) => (
+              <ListItem
+                key={item.path}
+                component={Link}
+                to={item.path}
+                sx={{
+                  pl: 4,
+                  color: 'primary.main',
+                  '&:hover': { color: 'secondary.main' },
+                }}
+              >
+                <ListItemText primary={item.label} sx={{ fontWeight: 500 }} />
+              </ListItem>
+            ))}
+          </React.Fragment>
+        ) : (
+          <ListItem
+            key={link.path}
+            component={Link}
+            to={link.path!}
+            sx={{
+              color: 'primary.main',
+              '&:hover': { color: 'secondary.main' },
+            }}
+          >
+            <ListItemText primary={link.label} sx={{ fontWeight: 500 }} />
+          </ListItem>
+        )
+      )}
+    </List>
+
+    {/* Order Online Button for Mobile */}
+    <Box sx={{ p: 2, textAlign: 'center' }}>
+      <Button
+        variant="contained"
+        color="secondary"
+        fullWidth
+        sx={{
+          borderRadius: 50,
+          textTransform: 'none',
+          fontWeight: 600,
+          py: 1.2,
+        }}
+      >
+        Order Online
+      </Button>
     </Box>
-  );
+  </Box>
+);
+
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -151,8 +193,7 @@ const Nav = () => {
       </>
     ) : (
       <>
-        {/* Centered Nav Links */}
-{/* Centered Nav Links */}
+
 <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: 3 }}>
   {navLinks.map((link) =>
     link.dropdown ? (
