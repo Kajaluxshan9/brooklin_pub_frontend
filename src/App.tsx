@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from './assets/components/home';
-import About from './assets/components/about';
+import Home from '../src/assets/pages/home';
+import About from '../src/assets/pages/about';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import Contactus from '../src/assets/pages/contactus';
 
 const theme = createTheme({
   palette: {
@@ -12,6 +13,18 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  components: {
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          minHeight: '0 !important',
+          '@media (min-width:600px)': {
+            minHeight: '0 !important',
+          },
+        },
+      },
+    },
   },
 });
 
@@ -23,6 +36,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contactus" element={<Contactus />} />
         </Routes>
       </Router>
     </ThemeProvider>

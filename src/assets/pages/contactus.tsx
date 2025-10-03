@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Nav from './nav';
-import Footer from './footer';
+import Nav from '../components/nav';
+import Footer from '../components/footer';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 
 const Contactus = () => {
