@@ -32,6 +32,9 @@ const LandingPage = () => {
   };
 
   useEffect(() => {
+    // prevent global horizontal scrolling while this component is mounted
+    const prevOverflowX = document.documentElement.style.overflowX;
+    document.documentElement.style.overflowX = "hidden";
     const cards = cardsRef.current;
     const total = cards.length;
 
@@ -89,30 +92,29 @@ const LandingPage = () => {
       });
     }, 5000);
 
-    // Tiny floating images spread all over screen
+    // Tiny floating images spread all over the component container
     const tinyElements = tinyRefs.current;
     tinyElements.forEach((el) => {
-      if (!el) return;
+      if (!el || !containerRef.current) return;
 
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      const vw = containerRef.current.clientWidth || window.innerWidth;
+      const vh = containerRef.current.clientHeight || window.innerHeight;
       const count = 50; // number of tiny images
+      const imgSize = 20;
 
       el!.innerHTML = ""; // clear previous tiny images
       for (let j = 0; j < count; j++) {
         const imgEl = document.createElement("div");
         imgEl.classList.add("tiny-img");
-        imgEl.style.width = "20px";
-        imgEl.style.height = "20px";
+        imgEl.style.width = `${imgSize}px`;
+        imgEl.style.height = `${imgSize}px`;
         imgEl.style.borderRadius = "50%";
-        imgEl.style.background = `url(${
-          images[j % images.length]
-        }) center/cover no-repeat`;
+        imgEl.style.background = `url(${images[j % images.length]}) center/cover no-repeat`;
         imgEl.style.position = "absolute";
 
-        // random position
-        const x = Math.random() * vw;
-        const y = Math.random() * vh;
+        // random position constrained to container bounds
+        const x = Math.random() * Math.max(0, vw - imgSize);
+        const y = Math.random() * Math.max(0, vh - imgSize);
         imgEl.style.left = `${x}px`;
         imgEl.style.top = `${y}px`;
 
@@ -130,7 +132,11 @@ const LandingPage = () => {
       }
     });
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // restore document overflow-x
+      document.documentElement.style.overflowX = prevOverflowX;
+    };
   }, []);
 
   return (
@@ -138,7 +144,7 @@ const LandingPage = () => {
       ref={containerRef}
       style={{
         perspective: "1500px",
-        width: "100vw",
+        width: "100%",
         height: "100vh",
         background: "#DAA520",
         overflow: "hidden",
@@ -153,7 +159,7 @@ const LandingPage = () => {
           }}
           className="spiral-card"
           style={{
-            width: "90vw",
+            width: "90%",
             maxWidth: "600px",
             aspectRatio: "16/9",
             background: `url(${src}) center/cover no-repeat`,
