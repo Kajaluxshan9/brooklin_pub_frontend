@@ -94,44 +94,47 @@ const TestGrid = () => {
       </Box>
 
       {/* Section 2 */}
-      <Box
-        ref={addToRefs}
-        sx={{
-          display: 'flex',
-          height: '100vh',
-          width: '100%',
-          flexDirection: { xs: 'column', md: 'row' },
-          backgroundImage:
-            "url('https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg')",
-          backgroundAttachment: 'fixed',
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <Box
-          className="text-content"
-          sx={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            color: 'white',
-            p: 4,
-            textAlign: "center",
-          }}
-        >
-          <Box>
-            <Typography variant="h3" gutterBottom>
-              Right Side Text 2
-            </Typography>
-            <Typography variant="body1">
-              This is the second section's text content on the right side.
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
+  <Box
+  ref={addToRefs}
+  sx={{
+    display: "flex",
+    height: "100vh",
+    width: "100vw",   // force full desktop width
+    flexDirection: { xs: "column", md: "row" },
+    backgroundImage:
+      "url('https://i.pinimg.com/736x/b7/7a/96/b77a96c72fa03abf25c398e565aec1a1.jpg')",
+    backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    overflow: "hidden", // prevent scrollbar shift issues
+  }}
+>
+  {/* Text Content */}
+  <Box
+    className="text-content"
+    sx={{
+      flex: { xs: "unset", md: "1" }, // take half on desktop, full on mobile
+      minWidth: { md: "50%" },        // ensures side-by-side on desktop
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgba(0,0,0,0.5)",
+      color: "white",
+      p: 4,
+      textAlign: "center",
+    }}
+  >
+    <Box maxWidth="600px"> {/* keeps text from stretching too wide */}
+      <Typography variant="h3" gutterBottom>
+        Left Side Text 1
+      </Typography>
+      <Typography variant="body1">
+        This is the first section's text content on the left side.
+      </Typography>
+    </Box>
+  </Box>
+</Box>
 
       {/* Section 3 */}
       <Box

@@ -1,7 +1,0 @@
-* {
-  margin: 0;
-  padding: 0;
-  overflow-y: hidden !important;  /* ✅ Hide vertical scroll globally */
-  height: 100%;
-  width: 100%;
-}

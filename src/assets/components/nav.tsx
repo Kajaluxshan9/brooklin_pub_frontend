@@ -1,19 +1,27 @@
 "use client";
-import React, { useState, MouseEvent } from "react";
+import { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import { Link } from "react-router-dom";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { motion } from "framer-motion";
-import type { Variants } from "framer-motion"; // ✅ type-only import
+import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
+
+// Icons
+import HomeIcon from "@mui/icons-material/Home";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import InfoIcon from "@mui/icons-material/Info";
+import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
+import PhoneIcon from "@mui/icons-material/Phone";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 /** ========= Nav Data ========= */
 type DropdownItem = { label: string; path: string };
@@ -40,275 +48,122 @@ const navLinks: NavLink[] = [
   { label: "Contact Us", path: "/contactus" },
 ];
 
-/** ========= Motion Variants ========= */
-const sidebarVariants: Variants = {
-  open: {
-    x: 0, // fully visible
-    transition: { type: "spring", stiffness: 80 }
-  },
-  closed: {
-    x: "-100%", // push the whole thing out of view
-    transition: { type: "spring", stiffness: 300, damping: 40 }
-  },
-};
-
-
-/** ========= Menu Toggle ========= */
-const Path = (props: any) => (
-  <motion.path
-    fill="transparent"
-    strokeWidth="3"
-    stroke="hsl(0, 0%, 18%)"
-    strokeLinecap="round"
-    {...props}
-  />
-);
-
-const MenuToggle = ({ toggle, isOpen }: { toggle: () => void; isOpen: boolean }) => (
-  <button
-    onClick={toggle}
-    style={{
-      outline: "none",
-      border: "none",
-      background: "transparent",
-      cursor: "pointer",
-      width: 50,
-      height: 50,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <svg width="23" height="23" viewBox="0 0 23 23">
-      <Path
-        variants={{ closed: { d: "M 2 2.5 L 20 2.5" }, open: { d: "M 3 16.5 L 17 2.5" } }}
-        animate={isOpen ? "open" : "closed"}
-      />
-      <Path
-        d="M 2 9.423 L 20 9.423"
-        variants={{ closed: { opacity: 1 }, open: { opacity: 0 } }}
-        animate={isOpen ? "open" : "closed"}
-        transition={{ duration: 0.1 }}
-      />
-      <Path
-        variants={{ closed: { d: "M 2 16.346 L 20 16.346" }, open: { d: "M 3 2.5 L 17 16.346" } }}
-        animate={isOpen ? "open" : "closed"}
-      />
-    </svg>
-  </button>
-);
-
 const Nav = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [arrowY, setArrowY] = useState(100);
+
+  useEffect(() => {
+    const handleResize = () => setArrowY(Math.max(80, window.innerHeight * 0.1));
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const sidebarVariants: Variants = {
+    hidden: {
+      opacity: 0,
+      x: 36,
+      scale: 0.98,
+      transition: { when: "afterChildren" },
+    },
+    visible: {
+      opacity: 1,
+      x: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 26,
+        staggerChildren: 0.06,
+        delayChildren: 0.05,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: -8, scale: 0.96 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 300, damping: 28 },
+    },
+  };
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  const handleOpen = (event: MouseEvent<HTMLElement>, label: string) => {
-    setAnchorEl(event.currentTarget);
-    setOpenDropdown(label);
-  };
+  const handleOpen = (label: string) => setOpenDropdown(label);
+  const handleClose = () => setOpenDropdown(null);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-    setOpenDropdown(null);
-  };
-
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar
-        position="fixed"
-        elevation={3}
-        sx={{
-          top: 25,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: { xs: "100.01%", sm: "100.01%", md: "85%" },
-          bgcolor: "background.paper",
-          borderRadius: 50,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-          height: { xs: 70, sm: 90, md: 110 },
-        }}
-      >
-        <Toolbar
-          disableGutters
+  /** ======= Desktop View ======= */
+  if (!isMobileOrTablet) {
+    return (
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar
+          position="fixed"
+          elevation={3}
           sx={{
-            minHeight: "0 !important",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            height: "100%",
-            px: 4,
+            top: 25,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: { xs: "80%", sm: "95%", md: "85%" },
+            bgcolor: "background.paper",
+            borderRadius: 50,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+            height: { xs: 70, sm: 90, md: 110 },
           }}
         >
-          {/* Logo */}
-          <Box
-            component="img"
-            src="./brooklinpub-logo.png"
-            alt="Logo"
+          <Toolbar
+            disableGutters
             sx={{
-              height: { xs: 40, sm: 55, md: 80 },
-              objectFit: "contain",
-              cursor: "pointer",
-            }}
-          />
-
-          {isMobile ? (
-            <>
-              <MenuToggle toggle={() => setSidebarOpen(!sidebarOpen)} isOpen={sidebarOpen} />
-
-<motion.div
-  initial="closed"
-  animate={sidebarOpen ? "open" : "closed"}
-  variants={sidebarVariants}
-  style={{
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: 200,
-    height: "100vh",
-    background: "#fff",
-    boxShadow: "2px 0 8px rgba(0,0,0,0.15)",
-    padding: "20px",
-    zIndex: 1200,
-    transform: "translateX(-100%)",
-  }}
->
-
-
-<List>
-  {navLinks.map((link) =>
-    link.dropdown ? (
-      <React.Fragment key={link.label}>
-        <ListItem disablePadding>
-          <Button
-            disableRipple
-            fullWidth
-            onClick={() =>
-              setOpenDropdown(openDropdown === link.label ? null : link.label)
-            }
-            sx={{
+              minHeight: "0 !important",
+              display: "flex",
               justifyContent: "space-between",
-              color: "primary.main",
-              textTransform: "none",
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              "&:hover": { color: "secondary.main" },
-              "&.Mui-focusVisible": { outline: "none" },
+              alignItems: "center",
+              height: "100%",
+              px: 4,
             }}
           >
-            {link.label}
-            {openDropdown === link.label ? (
-              <KeyboardArrowUpIcon fontSize="small" />
-            ) : (
-              <KeyboardArrowDownIcon fontSize="small" />
-            )}
-          </Button>
-        </ListItem>
+            <Box
+              component="img"
+              src="./brooklinpub-logo.png"
+              alt="Logo"
+              sx={{
+                height: { xs: 40, sm: 55, md: 80 },
+                objectFit: "contain",
+                cursor: "pointer",
+              }}
+            />
 
-        {/* Dropdown items */}
-        {openDropdown === link.label &&
-          link.dropdown.map((item) => (
-            <ListItem key={item.path} disablePadding sx={{ pl: 3 }}>
-              <Button
-                disableRipple
-                component={Link}
-                to={item.path}
-                fullWidth
-                sx={{
-                  justifyContent: "flex-start",
-                  color: "primary.main",
-                  textTransform: "none",
-                  fontSize: "0.8rem", // 👈 smaller submenu
-                  "&:hover": { color: "secondary.main" },
-                  "&.Mui-focusVisible": { outline: "none" },
-                }}
-                onClick={() => setSidebarOpen(false)}
-              >
-                {item.label}
-              </Button>
-            </ListItem>
-          ))}
-      </React.Fragment>
-    ) : (
-      <ListItem key={link.path} disablePadding>
-        <Button
-          disableRipple
-          component={Link}
-          to={link.path!}
-          fullWidth
-          sx={{
-            justifyContent: "flex-start",
-            color: "primary.main",
-            textTransform: "none",
-            fontSize: "0.85rem", // 👈 smaller font
-            "&:hover": { color: "secondary.main" },
-            "&.Mui-focusVisible": { outline: "none" },
-          }}
-          onClick={() => setSidebarOpen(false)}
-        >
-          {link.label}
-        </Button>
-      </ListItem>
-    )
-  )}
-</List>
-
-
-                {/* CTA Button */}
-                <Box sx={{ mt: 3 }}>
-                  <Button
-                    disableRipple
-                    variant="contained"
-                    color="secondary"
-                    fullWidth
-                    sx={{
-                      borderRadius: 50,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      py: 1.2,
-                      "&.Mui-focusVisible": { outline: "none" },
-                    }}
+            {/* Center Nav Links */}
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: "flex",
+                justifyContent: "center",
+                gap: 3,
+                position: "relative",
+              }}
+            >
+              {navLinks.map((link) =>
+                link.dropdown ? (
+                  <Box
+                    key={link.label}
+                    sx={{ position: "relative" }}
+                    onMouseEnter={() => handleOpen(link.label)}
+                    onMouseLeave={handleClose}
                   >
-                    Order Online
-                  </Button>
-                </Box>
-              </motion.div>
-            </>
-          ) : (
-            <>
-              {/* Desktop Links */}
-              <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", gap: 3 }}>
-                {navLinks.map((link) =>
-                  link.dropdown ? (
-                    <React.Fragment key={link.label}>
-                      <Button
-                        color="primary"
-                        onClick={(e) => handleOpen(e, link.label)}
-                        endIcon={
-                          openDropdown === link.label ? (
-                            <KeyboardArrowUpIcon sx={{ fontSize: 20 }} />
-                          ) : (
-                            <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />
-                          )
-                        }
-                        sx={{
-                          fontWeight: 500,
-                          textTransform: "none",
-                          color: "primary.main",
-                          "&:hover": { color: "secondary.main" },
-                        }}
-                      >
-                        {link.label}
-                      </Button>
-                    </React.Fragment>
-                  ) : (
                     <Button
-                      key={link.path}
-                      component={Link}
-                      to={link.path!}
+                      color="primary"
+                      endIcon={
+                        openDropdown === link.label ? (
+                          <KeyboardArrowUpIcon sx={{ fontSize: 20 }} />
+                        ) : (
+                          <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />
+                        )
+                      }
                       sx={{
                         fontWeight: 500,
                         textTransform: "none",
@@ -318,32 +173,270 @@ const Nav = () => {
                     >
                       {link.label}
                     </Button>
-                  )
-                )}
-              </Box>
 
-              {/* CTA Button */}
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{
-                  ml: 2,
-                  px: 3,
-                  py: 1.2,
-                  borderRadius: 50,
-                  textTransform: "none",
-                  fontWeight: 600,
-                }}
-              >
-                Order Online
-              </Button>
-            </>
-          )}
+                    {openDropdown === link.label && (
+                      <motion.ul
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          background: "white",
+                          borderRadius: 8,
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          padding: "8px 0",
+                          listStyle: "none",
+                          minWidth: 160,
+                          zIndex: 2000,
+                          textAlign: "center",
+                        }}
+                      >
+                        {link.dropdown.map((item) => (
+                          <li key={item.path}>
+                            <Button
+                              component={Link}
+                              to={item.path}
+                              sx={{
+                                width: "100%",
+                                justifyContent: "center",
+                                textAlign: "center",
+                                textTransform: "none",
+                                color: "primary.main",
+                                px: 2,
+                                py: 1,
+                                "&:hover": { bgcolor: "grey.100" },
+                              }}
+                              onClick={handleClose}
+                            >
+                              {item.label}
+                            </Button>
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </Box>
+                ) : (
+                  <Button
+                    key={link.path}
+                    component={Link}
+                    to={link.path!}
+                    sx={{
+                      fontWeight: 500,
+                      textTransform: "none",
+                      color: "primary.main",
+                      "&:hover": { color: "secondary.main" },
+                    }}
+                  >
+                    {link.label}
+                  </Button>
+                )
+              )}
+            </Box>
+
+            <Button
+              variant="contained"
+              color="secondary"
+              sx={{
+                ml: 2,
+                px: 3,
+                py: 1.2,
+                borderRadius: 50,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              Order Online
+            </Button>
+          </Toolbar>
+        </AppBar>
+        <Toolbar disableGutters sx={{ minHeight: 0 }} />
+      </Box>
+    );
+  }
+
+  /** ======= Mobile / Tablet View ======= */
+  return (
+    <>
+      {/* Top bar */}
+      <AppBar
+        position="fixed"
+        sx={{
+          top: 0,
+          bgcolor: "white",
+          color: "black",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+          height: 60,
+          display: "flex",
+          justifyContent: "center",
+          zIndex: 1300,
+        }}
+      >
+        <Toolbar sx={{ display: "flex", alignItems: "center", px: 2, gap: 1 }}>
+          <Box
+            component="img"
+            src="./brooklinpub-logo.png"
+            alt="Logo"
+            sx={{ height: 35, objectFit: "contain" }}
+          />
+          <Box component="span" sx={{ fontWeight: 600, fontSize: "1rem" }}>
+            Brooklin Pub
+          </Box>
         </Toolbar>
       </AppBar>
 
-      <Toolbar disableGutters sx={{ minHeight: 0 }} />
-    </Box>
+      <Toolbar sx={{ minHeight: 60 }} />
+
+      {/* ✅ Fixed Arrow */}
+      <motion.div
+        style={{
+          position: "fixed",
+          right: 0,
+          top: arrowY,
+          zIndex: 1500,
+          touchAction: "none",
+          cursor: "pointer",
+        }}
+      >
+        <div
+          style={{
+            borderTopLeftRadius: "80%",
+            borderBottomLeftRadius: "80%",
+            width: 30,
+            height: 30,
+            background: "white",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <motion.div
+            animate={{ rotate: sidebarOpen ? 180 : 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <Button
+              onClick={() => setSidebarOpen((s) => !s)}
+                disableRipple
+                sx={{
+                  color: "primary.main",
+                  fontSize: "1rem",
+                  minWidth: "auto",
+                  p: 0,
+                  bgcolor: "transparent",
+                  // ensure it never shows a blue/filled state when clicked/focused
+                  "&:hover": { bgcolor: "transparent", color: "primary.main" },
+                  "&:active": { bgcolor: "transparent", color: "primary.main" },
+                  "&:focus": { outline: "none", bgcolor: "transparent", color: "primary.main" },
+                  // MUI adds a class for keyboard focus - handle that too
+                  "&.Mui-focusVisible": { outline: "none", bgcolor: "transparent", color: "primary.main" },
+                }}
+            >
+              ⮜
+            </Button>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* ✅ Scrollable Sidebar (stops under top bar) */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            variants={sidebarVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            style={{
+              position: "fixed",
+              right: 46,
+              top: arrowY,
+              transform: "translateY(-50%)",
+              overflowY: "auto",
+              background: "white",
+              borderRadius: 40,
+              boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "10px 8px",
+              zIndex: 1200,
+              maxHeight: "calc(100vh - 80px)", // cap height so it won't overlap the AppBar
+            }}
+          >
+            {[
+              { icon: <HomeIcon />, path: "/" },
+              { icon: <MenuBookIcon />, path: "/menu" },
+              { icon: <ShoppingBagIcon />, path: "/order" },
+              { icon: <InfoIcon />, path: "/about" },
+              { icon: <ContactPhoneIcon />, path: "/contactus" },
+            ].map((item, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <Button
+                  disableRipple
+                  component={Link}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  sx={{
+                    color: "primary.main",
+                    borderRadius: "50%",
+                    width: 45,
+                    height: 45,
+                    bgcolor: "white",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    // keep appearance stable on hover/active/focus
+                    "&:hover": { bgcolor: "white", color: "primary.main" },
+                    "&:active": { bgcolor: "white", color: "primary.main" },
+                    "&:focus": { bgcolor: "white", color: "primary.main" },
+                    "&.Mui-focusVisible": { bgcolor: "white", color: "primary.main" },
+                    minWidth: "auto",
+                    mb: 1,
+                  }}
+                >
+                  {item.icon}
+                </Button>
+              </motion.div>
+            ))}
+
+            {/* divider removed as requested */}
+
+            {[
+              { icon: <PhoneIcon />, href: "tel:+123456789", color: "green" },
+              { icon: <FacebookIcon />, href: "https://facebook.com", color: "#1877f2" },
+              { icon: <InstagramIcon />, href: "https://instagram.com", color: "#E1306C" },
+              { icon: <WhatsAppIcon />, href: "https://wa.me/123456789", color: "#25D366" },
+            ].map((item, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <Button
+                  disableRipple
+                  component="a"
+                  href={item.href}
+                  target="_blank"
+                  sx={{
+                    color: item.color,
+                    borderRadius: "50%",
+                    width: 45,
+                    height: 45,
+                    bgcolor: "white",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    // keep appearance stable on hover/active/focus
+                    "&:hover": { bgcolor: "white", color: item.color },
+                    "&:active": { bgcolor: "white", color: item.color },
+                    "&:focus": { bgcolor: "white", color: item.color },
+                    "&.Mui-focusVisible": { bgcolor: "white", color: item.color },
+                    minWidth: "auto",
+                    mb: 1,
+                  }}
+                >
+                  {item.icon}
+                </Button>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
