@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -41,7 +41,7 @@ const navLinks: NavLink[] = [
   {
     label: "Special",
     dropdown: [
-      { label: "Today’s Special", path: "/special/today" },
+      { label: "Today’s Special", path: "/special" },
       { label: "Chef’s Choice", path: "/special/chef" },
     ],
   },
@@ -94,8 +94,31 @@ const Nav = () => {
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  const handleOpen = (label: string) => setOpenDropdown(label);
-  const handleClose = () => setOpenDropdown(null);
+  // allow a short delay before closing dropdowns so small pointer gaps don't close them
+  const closeTimeoutRef = useRef<number | null>(null);
+
+  const handleOpen = (label: string) => {
+    if (closeTimeoutRef.current) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpenDropdown(label);
+  };
+
+  // schedule a delayed close (used on mouse leave)
+  const scheduleClose = () => {
+    if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = window.setTimeout(() => setOpenDropdown(null), 150);
+  };
+
+  // close immediately (used on click/select)
+  const closeNow = () => {
+    if (closeTimeoutRef.current) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpenDropdown(null);
+  };
 
   /** ======= Desktop View ======= */
   if (!isMobileOrTablet) {
@@ -153,7 +176,7 @@ const Nav = () => {
                     key={link.label}
                     sx={{ position: "relative" }}
                     onMouseEnter={() => handleOpen(link.label)}
-                    onMouseLeave={handleClose}
+                    onMouseLeave={scheduleClose}
                   >
                     <Button
                       color="primary"
@@ -189,7 +212,7 @@ const Nav = () => {
                           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                           padding: "8px 0",
                           listStyle: "none",
-                          minWidth: 160,
+                          minWidth: 220, // wider for easier selection
                           zIndex: 2000,
                           textAlign: "center",
                         }}
@@ -205,11 +228,18 @@ const Nav = () => {
                                 textAlign: "center",
                                 textTransform: "none",
                                 color: "primary.main",
-                                px: 2,
-                                py: 1,
+                                px: 3, // larger horizontal padding
+                                py: 1.2, // slightly larger vertical padding
+                                minWidth: 220,
                                 "&:hover": { bgcolor: "grey.100" },
                               }}
-                              onClick={handleClose}
+                              onClick={closeNow}
+                              onMouseEnter={() => {
+                                if (closeTimeoutRef.current) {
+                                  window.clearTimeout(closeTimeoutRef.current);
+                                  closeTimeoutRef.current = null;
+                                }
+                              }}
                             >
                               {item.label}
                             </Button>
@@ -367,7 +397,7 @@ const Nav = () => {
           >
             {[
               { icon: <HomeIcon />, path: "/" },
-              { icon: <MenuBookIcon />, path: "/menu" },
+              { icon: <MenuBookIcon />, path: "/special" },
               { icon: <ShoppingBagIcon />, path: "/order" },
               { icon: <InfoIcon />, path: "/about" },
               { icon: <ContactPhoneIcon />, path: "/contactus" },
