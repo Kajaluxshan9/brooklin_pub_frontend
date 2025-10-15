@@ -11,8 +11,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
-
-// Icons
 import HomeIcon from "@mui/icons-material/Home";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
@@ -94,7 +92,7 @@ const Nav = () => {
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  // allow a short delay before closing dropdowns so small pointer gaps don't close them
+  // delayed close helpers to make dropdowns easier to select
   const closeTimeoutRef = useRef<number | null>(null);
 
   const handleOpen = (label: string) => {
@@ -105,13 +103,12 @@ const Nav = () => {
     setOpenDropdown(label);
   };
 
-  // schedule a delayed close (used on mouse leave)
   const scheduleClose = () => {
     if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
-    closeTimeoutRef.current = window.setTimeout(() => setOpenDropdown(null), 150);
+    // short delay so small pointer gaps don't immediately close the dropdown
+    closeTimeoutRef.current = window.setTimeout(() => setOpenDropdown(null), 180);
   };
 
-  // close immediately (used on click/select)
   const closeNow = () => {
     if (closeTimeoutRef.current) {
       window.clearTimeout(closeTimeoutRef.current);
@@ -212,7 +209,7 @@ const Nav = () => {
                           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                           padding: "8px 0",
                           listStyle: "none",
-                          minWidth: 220, // wider for easier selection
+                          minWidth: 220,
                           zIndex: 2000,
                           textAlign: "center",
                         }}
@@ -228,8 +225,8 @@ const Nav = () => {
                                 textAlign: "center",
                                 textTransform: "none",
                                 color: "primary.main",
-                                px: 3, // larger horizontal padding
-                                py: 1.2, // slightly larger vertical padding
+                                px: 3,
+                                py: 1.2,
                                 minWidth: 220,
                                 "&:hover": { bgcolor: "grey.100" },
                               }}
