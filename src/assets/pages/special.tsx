@@ -3,6 +3,7 @@ import Nav from '../components/nav';
 import Special from "../components/special";
 import Footer from '../components/footer';
 import Menu from '../components/menulist';
+import About from '../components/about';
 
 const about = () => {
   return (
@@ -10,7 +11,8 @@ const about = () => {
       {/* <Nav /> */}
         {/* <Special /> */}
         {/* <Footer /> */}
-        <Menu />
+        {/* <Menu /> */}
+        <About/>
     </div>
   )
 }
