@@ -1,211 +1,325 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import type { Variants } from "framer-motion";
-import Lottie from "lottie-react";
-import confettiJson from "../Animation/Confetti - Animation 01.json";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Nav from "../components/nav";
 
-export default function Special() {
-  const [showConfetti, setShowConfetti] = useState(true);
+const cards = [
+  {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg: "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+  },
+  {
+    title: "Soups & Salad",
+    desc: "Fresh and warm flavors for every taste.",
+    bg: "/images/soups-bg.jpg",
+    popupImg: "/images/soups-menu.png",
+  },
+  {
+    title: "Desserts",
+    desc: "Sweet endings with our finest treats.",
+    bg: "/images/desserts-bg.jpg",
+    popupImg: "/images/desserts-menu.png",
+  },
+  {
+    title: "Drinks",
+    desc: "Refreshing beverages to complement your meal.",
+    bg: "/images/drinks-bg.jpg",
+    popupImg: "/images/drinks-menu.png",
+  },
+  {
+    title: "Chef Specials",
+    desc: "Exclusive dishes crafted with passion.",
+    bg: "/images/chef-special-bg.jpg",
+    popupImg: "/images/chef-special-menu.png",
+  },
+  {
+    title: "Family Combos",
+    desc: "Perfect meals for sharing.",
+    bg: "/images/family-bg.jpg",
+    popupImg: "/images/family-menu.png",
+  },
+  {
+    title: "Vegetarian",
+    desc: "Healthy and hearty options for all.",
+    bg: "/images/veg-bg.jpg",
+    popupImg: "/images/veg-menu.png",
+  },
+  {
+    title: "Seafood",
+    desc: "Ocean-fresh specialties you’ll love.",
+    bg: "/images/seafood-bg.jpg",
+    popupImg: "/images/seafood-menu.png",
+  },
+  {
+    title: "Kids Menu",
+    desc: "Tasty meals for little foodies.",
+    bg: "/images/kids-bg.jpg",
+    popupImg: "/images/kids-menu.png",
+  },
+  {
+    title: "Dessert Drinks",
+    desc: "End your meal with a sweet sip.",
+    bg: "/images/dessert-drinks-bg.jpg",
+    popupImg: "/images/dessert-drinks-menu.png",
+  },
+];
 
-  // Hide confetti after 3 seconds
+export default function CylinderMenuPopup() {
+  const [angle, setAngle] = useState(0);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [lastX, setLastX] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(true);
+
+  const containerRef = useRef(null);
+  const cardWidth = 300;
+  const cardHeight = 300;
+  const radius = 480;
+  const total = cards.length;
+  const anglePerCard = 360 / total;
+
+  // Detect mobile / tablet
   useEffect(() => {
-    const timer = setTimeout(() => setShowConfetti(false), 3000);
-    return () => clearTimeout(timer);
+    const checkMobile = () =>
+      /Android|iPhone|iPad|iPod|Tablet|Mobile/i.test(navigator.userAgent);
+    setIsMobile(checkMobile());
+  }, []);
+
+  // Auto rotate
+  useEffect(() => {
+    if (!autoRotate) return;
+    const interval = setInterval(() => {
+      setAngle((prev) => (prev + 0.4) % 360);
+    }, 30);
+    return () => clearInterval(interval);
+  }, [autoRotate]);
+
+  // Mouse & Touch Controls
+  const handleMouseMove = (e) => {
+    if (!isMobile && isInteracting && lastX !== null) {
+      const deltaX = e.clientX - lastX;
+      setAngle((prev) => (prev + deltaX * 0.3) % 360);
+    }
+    setLastX(e.clientX);
+  };
+  const handleMouseDown = (e) => {
+    if (!isMobile && containerRef.current?.contains(e.target)) {
+      setIsInteracting(true);
+      setAutoRotate(false);
+      setLastX(e.clientX);
+    }
+  };
+  const handleMouseUp = () => {
+    if (!isMobile) {
+      setIsInteracting(false);
+      setLastX(null);
+    }
+  };
+  const handleTouchStart = (e) => {
+    if (isMobile && e.touches.length === 1) {
+      setIsInteracting(true);
+      setAutoRotate(false);
+      setLastX(e.touches[0].clientX);
+    }
+  };
+  const handleTouchMove = (e) => {
+    if (isMobile && isInteracting && lastX !== null && e.touches.length === 1) {
+      const touchX = e.touches[0].clientX;
+      const deltaX = touchX - lastX;
+      setAngle((prev) => (prev + deltaX * 0.3) % 360);
+      setLastX(touchX);
+    }
+  };
+  const handleTouchEnd = () => {
+    if (isMobile) {
+      setIsInteracting(false);
+      setLastX(null);
+    }
+  };
+
+  // Resume auto-scroll on outside click
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setAutoRotate(true);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
   }, []);
 
   return (
-    <div style={outerContainer}>
-      {/* 🎉 Confetti Animation */}
-      {showConfetti && (
-        <div style={lottieContainer}>
-          <Lottie
-            animationData={confettiJson}
-            loop={false}
-            autoplay
-            style={{ width: "100%", height: "100%" }}
-          />
-        </div>
-      )}
+    <div>
+      {!selectedCard && <Nav />}
 
-      {/* 🏷️ Full-width heading */}
-      <div style={headerContainer}>
-        <h2 style={title}>Our Special Menu</h2>
-      </div>
+      <div
+        style={{
+          width: "100vw",
+          height: "100vh",
+          // background:
+          //   "radial-gradient(circle at center, #ffffff 0%, #f2f2f2 60%, #e6e6e6 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          perspective: "1200px",
+          overflow: "hidden",
+          position: "relative",
+          touchAction: "none",
+          userSelect: "none",
+        background: "#DAA520",
 
-      {/* 🍽️ Centered Cards */}
-      <div style={centerContainer}>
-        <div style={cardWrapper}>
-          {menuItems.map(([name, image], i) => (
-            <Card i={i} name={name} image={image} key={name} />
-          ))}
-        </div>
+
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Cylinder */}
+        <motion.div
+          ref={containerRef}
+          style={{
+            rotateY: angle,
+            transformStyle: "preserve-3d",
+            width: `${cardWidth}px`,
+            height: `${cardHeight}px`,
+            position: "relative",
+            transition: "rotateY 0.1s linear",
+            marginTop:"60px"
+          }}
+        >
+          {cards.map((card, i) => {
+            const rotateY = (anglePerCard * i) % 360;
+            return (
+              <motion.div
+                key={i}
+                onClick={() => setSelectedCard(card)}
+                whileHover={!isMobile ? { filter: "brightness(1.1)" } : {}}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "18px",
+                  backgroundImage: `url(${card.bg})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  color: "#fff",
+                  padding: "1rem",
+                  textShadow: "0 2px 8px rgba(0,0,0,0.7)",
+                  transform: `rotateY(${rotateY}deg) translateZ(${radius}px)`,
+                  cursor: "pointer",
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: "1.1rem",
+                    fontWeight: "700",
+                    marginBottom: "0.2rem",
+                  }}
+                >
+                  {card.title}
+                </h2>
+                <p style={{ fontSize: "0.9rem", opacity: 0.9 }}>{card.desc}</p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {/* Popup */}
+        <AnimatePresence>
+          {selectedCard && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                background: "rgba(0,0,0,0.85)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 99999,
+              }}
+              onClick={() => setSelectedCard(null)}
+            >
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 120, damping: 15 }}
+                style={{
+                  position: "relative",
+                  width: "100vw",
+                  height: "100vh",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedCard(null)}
+                  style={{
+                    position: "absolute",
+                    top: "20px",
+                    right: "20px",
+                    background: "rgba(255,255,255,0.2)",
+                    border: "2px solid #fff",
+                    borderRadius: "50%",
+                    width: "40px",
+                    height: "40px",
+                    fontSize: "24px",
+                    color: "#fff",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "0.2s",
+                    zIndex: 100000,
+                  }}
+                >
+                  ×
+                </button>
+
+                <img
+                  src={selectedCard.popupImg}
+                  alt={selectedCard.title}
+                  style={{
+                    width: "100vw",
+                    height: "100vh",
+                    objectFit: "contain",
+                    borderRadius: "12px",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                  }}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 }
-
-interface CardProps {
-  name: string;
-  image: string;
-  i: number;
-}
-
-function Card({ name, image, i }: CardProps) {
-  return (
-    <motion.div
-      className={`card-container-${i}`}
-      style={cardContainer}
-      initial="offscreen"
-      whileInView="onscreen"
-      viewport={{ amount: 0.8 }}
-    >
-      <motion.div style={{ ...splash, background: "#8B4513" }} />
-      <motion.div style={card} variants={cardVariants}>
-        <img src={image} alt={name} style={imageStyle} />
-        <h3 style={foodName}>{name}</h3>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-/* ================= Motion Variants ================= */
-const cardVariants: Variants = {
-  offscreen: {
-    y: 200,
-    opacity: 0,
-  },
-  onscreen: {
-    y: 0,
-    rotate: -5,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      bounce: 0.4,
-      duration: 0.8,
-    },
-  },
-};
-
-/* ================= Styles ================= */
-
-const outerContainer: React.CSSProperties = {
-  minHeight: "100vh",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "flex-start",
-  background: "#fafafa",
-  textAlign: "center",
-  overflowX: "hidden",
-  width: "100vw",
-  position: "relative",
-};
-
-const headerContainer: React.CSSProperties = {
-  width: "100%",
-  background: "#222",
-  color: "#fff",
-  padding: "40px 0",
-  marginBottom: 40,
-  textAlign: "center",
-  height: "500px",
-};
-
-const title: React.CSSProperties = {
-  fontSize: "2.8rem",
-  fontWeight: 700,
-  letterSpacing: "1px",
-  margin: 200,
-};
-
-const centerContainer: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  width: "100%",
-  flexGrow: 1,
-};
-
-const cardWrapper: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 100,
-  width: "100%",
-  maxWidth: 600,
-};
-
-const cardContainer: React.CSSProperties = {
-  overflow: "hidden",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  position: "relative",
-  paddingTop: 20,
-  width: "100%",
-  height: 500,
-};
-
-const splash: React.CSSProperties = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  width: 500,
-  height: 450,
-  transform: "translate(-50%, -50%)",
-  clipPath: `path("M 0 303.5 C 0 292.454 8.995 285.101 20 283.5 L 460 219.5 C 470.085 218.033 480 228.454 480 239.5 L 500 430 C 500 441.046 491.046 450 480 450 L 20 450 C 8.954 450 0 441.046 0 430 Z")`,
-  zIndex: 1,
-  background: "#8B4513",
-};
-
-const card: React.CSSProperties = {
-  width: 320,
-  height: 440,
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center",
-  borderRadius: 20,
-  background: "#fff",
-  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-  transformOrigin: "10% 60%",
-  zIndex: 2,
-};
-
-const imageStyle: React.CSSProperties = {
-  width: 160,
-  height: 160,
-  objectFit: "cover",
-  borderRadius: "50%",
-  marginBottom: 20,
-  boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-};
-
-const foodName: React.CSSProperties = {
-  fontSize: "1.5rem",
-  fontWeight: 600,
-  color: "#333",
-};
-
-const lottieContainer: React.CSSProperties = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100vw",
-  height: "100vh",
-  pointerEvents: "none",
-  zIndex: 999,
-  overflow: "hidden",
-};
-
-/* ================= Menu Data ================= */
-
-const menuItems: [string, string][] = [
-  ["Margherita Pizza", "/images/pizza.jpg"],
-  ["Pasta Alfredo", "/images/pasta.jpg"],
-  ["Grilled Salmon", "/images/salmon.jpg"],
-  ["Cheeseburger", "/images/burger.jpg"],
-  ["Chocolate Lava Cake", "/images/dessert.jpg"],
-];
