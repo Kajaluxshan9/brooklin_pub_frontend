@@ -1,16 +1,22 @@
 import React from 'react';
 import Nav from '../components/nav';
+import Special from "../components/special";
 import Footer from '../components/footer';
-import About from '../components/aboutus';
-// import Menu from '../components/menulist'
+import Menu from '../components/menulist';
+import About from '../components/menu';
+import AboutUs from '../components/about-us';
+import Gallery from '../components/gallery';
 
 const about = () => {
   return (
     <div>
       <Nav />
-      <About />
-      {/* <Menu /> */}
-      <Footer />
+        {/* <Special /> */}
+        {/* <Menu /> */}
+        {/* <About/> */}
+        <AboutUs/>
+        <Gallery/>
+        <Footer />
     </div>
   )
 }
