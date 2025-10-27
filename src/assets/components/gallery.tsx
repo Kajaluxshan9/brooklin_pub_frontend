@@ -32,12 +32,13 @@ export default function Gallery() {
   return (
     <Box
       sx={{
+        width: "100vw",
         overflow: "hidden",
-        width: "100%",
         py: 4,
         display: "flex",
         flexDirection: "column",
         gap: 4,
+        backgroundColor: "white", // optional for contrast
       }}
     >
       {galleryRows.map((images, rowIndex) => {
@@ -46,14 +47,22 @@ export default function Gallery() {
         return (
           <motion.div
             key={rowIndex}
-            style={{ display: "flex", gap: 16 }}
+            style={{
+              display: "flex",
+              gap: 16,
+              width: "max-content",
+            }}
             animate={{
               x:
                 rowIndex % 2 === 0
-                  ? [0, -images.length * 316] // Left scroll
-                  : [0, images.length * 316], // Right scroll
+                  ? [0, -images.length * window.innerWidth] // scroll left
+                  : [0, images.length * window.innerWidth], // scroll right
             }}
-            transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+            transition={{
+              repeat: Infinity,
+              duration: 30,
+              ease: "linear",
+            }}
           >
             {loopImages.map((src, idx) => (
               <Box
@@ -63,8 +72,9 @@ export default function Gallery() {
                 alt={`Gallery ${idx}`}
                 onClick={() => setSelectedImage(src)}
                 sx={{
-                  width: 300,
-                  height: 200,
+                  flexShrink: 0,
+                  width: { xs: "90vw", sm: "50vw", md: "33vw" }, // responsive width
+                  height: { xs: 200, sm: 250, md: 300 },
                   objectFit: "cover",
                   borderRadius: 2,
                   cursor: "pointer",
@@ -88,11 +98,10 @@ export default function Gallery() {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: "rgba(0,0,0,0.8)",
+              backgroundColor: "rgba(0,0,0,0.85)",
             }}
           >
             <Box sx={{ position: "relative" }}>
-              {/* Close Button */}
               <IconButton
                 onClick={() => setSelectedImage(null)}
                 sx={{
@@ -100,7 +109,7 @@ export default function Gallery() {
                   top: -40,
                   right: -40,
                   color: "#fff",
-                  backgroundColor: "rgba(0,0,0,0.6)",
+                  backgroundColor: "rgba(0, 0, 0, 0.6)",
                   "&:hover": {
                     backgroundColor: "rgba(255,255,255,0.2)",
                   },
@@ -109,7 +118,6 @@ export default function Gallery() {
                 <CloseIcon fontSize="large" />
               </IconButton>
 
-              {/* Image Animation */}
               <motion.img
                 src={selectedImage}
                 alt="Selected"

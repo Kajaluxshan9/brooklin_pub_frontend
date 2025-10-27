@@ -1,5 +1,5 @@
 import Nav from '../components/nav';
-import Item from '../components/items';
+import Item from '../components/aboutus';
 import LandingPage from '../components/landingPage';
 import Footer from '../components/footer';
 
@@ -9,7 +9,7 @@ const Home = () => {
       <Nav />
       <LandingPage/>
         <Item /> 
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 };

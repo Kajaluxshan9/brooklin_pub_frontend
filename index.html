@@ -1,12 +1,47 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="overflow-x: hidden;">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>brooklin_pub_frontend</title>
+      <style>
+        /* Ultra-thin single-line scrollbar UI */
+        html, body {
+          margin: 0;
+          padding: 0;
+          /* Firefox: closest we can get to 1px is 'thin' */
+          scrollbar-width: thin;
+          /* thumb color, track transparent */
+          scrollbar-color:brown transparent;
+          /* try to avoid reserving gutter where supported */
+          scrollbar-gutter: none;
+          /* keep default auto scrolling behaviour */
+          overflow-y: auto;
+        }
+
+        /* WebKit browsers (Chrome, Edge, Safari): make the scrollbar 1px */
+        ::-webkit-scrollbar {
+          width: 1px;
+          height: 1px;
+          background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.45);
+          border-radius: 999px; /* fully rounded */
+          min-height: 20px; /* ensure draggable thumb on long pages */
+        }
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        /* If your app mounts into #root, make sure it fills viewport so scrollbar applies to body/page */
+        #root {
+          min-height: 100vh;
+        }
+      </style>
   </head>
-  <body>
+  <body style="overflow-x: hidden;">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
