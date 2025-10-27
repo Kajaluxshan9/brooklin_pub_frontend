@@ -108,15 +108,17 @@ export default function App() {
   const currentPage = pages[pageIndex];
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        width: "100vw",
-        overflow: "hidden",
-        position: "relative",
-        backgroundColor: currentPage.color,
-      }}
-    >
+<Box
+  sx={{
+    height: "100vh",
+    width: "100%",
+    overflow: "hidden",
+    overflowX: "hidden",
+    position: "relative",
+    backgroundColor: currentPage.color,
+  }}
+>
+
       {/* Pagination Dots */}
       <Box
         sx={{
@@ -147,29 +149,30 @@ export default function App() {
       </Box>
 
       <AnimatePresence mode="popLayout">
-        <motion.div
-          key={pageIndex}
-          variants={getVariants(direction)}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          transition={{ duration: 1, ease: [0.76, 0, 0.24, 1], when: "beforeChildren" }}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: currentPage.color,
-            display: "flex",
-            flexDirection: currentPage.id === 2 ? "row" : "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: currentPage.id === 2 ? "left" : "center",
-            padding: currentPage.id === 2 ? "0 5%" : "0 2%",
-            boxSizing: "border-box",
-          }}
-        >
+<motion.div
+  key={pageIndex}
+  variants={getVariants(direction)}
+  initial="initial"
+  animate="animate"
+  exit="exit"
+  transition={{ duration: 1, ease: [0.76, 0, 0.24, 1], when: "beforeChildren" }}
+  style={{
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",   // full viewport width
+    height: "100vh",  // full viewport height
+    backgroundColor: currentPage.color,
+    display: "flex",
+    flexDirection: currentPage.id === 2 ? "row" : "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: currentPage.id === 2 ? "left" : "center",
+    boxSizing: "border-box",
+    overflow: "hidden", // ensure no scrollbars appear
+  }}
+>
+
           {/* Text */}
           <motion.div
             initial={{ opacity: 0, x: -100 }}
@@ -221,16 +224,17 @@ export default function App() {
               transition={{ duration: 1 }}
               style={{ flex: 1, display: "flex", justifyContent: "center" }}
             >
-              <img
-                src={currentPage.image}
-                alt="story-image"
-                style={{
-                  width: "80%",
-                  maxWidth: 500,
-                  height: "auto",
-                  objectFit: "contain",
-                }}
-              />
+<img
+  src={currentPage.image}
+  alt="story-image"
+  style={{
+    width: "100%",
+    maxWidth: "600px",
+    height: "auto",
+    objectFit: "contain",
+  }}
+/>
+
             </motion.div>
           )}
 
