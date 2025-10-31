@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Nav from '../components/nav';
 import Footer from '../components/footer';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
+import InitialPage from '../components/initialPage';
 
 const Contactus = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,10 @@ const Contactus = () => {
   return (
     <div>
       <Nav />
+            <InitialPage
+        line1="Welcome to Brooklin Pub"
+        line2="Experience the finest dining and drinks in a cozy atmosphere."
+      />
       <Box sx={{ width: '100%', minHeight: '80vh', py: 5, px: { xs: 2, sm: 5, md: 10 } }}>
         <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, width: '100%', maxWidth: '100%' }}>
           <Typography variant="h4" gutterBottom align="center">

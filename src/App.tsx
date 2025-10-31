@@ -4,7 +4,9 @@ import About from '../src/assets/pages/about';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Contactus from '../src/assets/pages/contactus';
-import Special from '../src/assets/pages/special'
+import Special from '../src/assets/pages/special';
+import Menu from '../src/assets/pages/menu';
+import ChefSpecial from '../src/assets/pages/chefSpecial';
 
 const theme = createTheme({
   palette: {
@@ -38,7 +40,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/contactus" element={<Contactus />} />
-          <Route path="/special" element={<Special />} />
+          <Route path="/special/today" element={<Special />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/special/chef" element={<ChefSpecial />} />
+          
         </Routes>
       </Router>
     </ThemeProvider>

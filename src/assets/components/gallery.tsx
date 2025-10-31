@@ -38,7 +38,7 @@ export default function Gallery() {
         display: "flex",
         flexDirection: "column",
         gap: 4,
-        backgroundColor: "white", // optional for contrast
+        backgroundColor: "#F3E3CC", 
       }}
     >
       {galleryRows.map((images, rowIndex) => {
@@ -76,7 +76,7 @@ export default function Gallery() {
                   width: { xs: "90vw", sm: "50vw", md: "33vw" }, // responsive width
                   height: { xs: 200, sm: 250, md: 300 },
                   objectFit: "cover",
-                  borderRadius: 2,
+                  borderRadius: 0,
                   cursor: "pointer",
                   transition: "transform 0.3s",
                   "&:hover": { transform: "scale(1.05)" },
@@ -128,7 +128,7 @@ export default function Gallery() {
                 style={{
                   maxWidth: "90vw",
                   maxHeight: "80vh",
-                  borderRadius: "12px",
+                  // borderRadius: "12px",
                   objectFit: "contain",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
                 }}

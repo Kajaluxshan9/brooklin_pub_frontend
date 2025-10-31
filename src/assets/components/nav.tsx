@@ -28,18 +28,12 @@ type NavLink = { label: string; path?: string; dropdown?: DropdownItem[] };
 const navLinks: NavLink[] = [
   { label: "Home", path: "/" },
   { label: "About Us", path: "/about" },
-  {
-    label: "Menu",
-    dropdown: [
-      { label: "Drinks", path: "/menu/drinks" },
-      { label: "Food", path: "/menu/food" },
-      { label: "Desserts", path: "/menu/desserts" },
-    ],
-  },
+  { label: "Menu", path: "/menu" },
+
   {
     label: "Special",
     dropdown: [
-      { label: "Today’s Special", path: "/special" },
+      { label: "Today’s Special", path: "/special/today" },
       { label: "Chef’s Choice", path: "/special/chef" },
     ],
   },
@@ -50,13 +44,20 @@ const Nav = () => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [arrowY, setArrowY] = useState(100);
+  const [hasShadow, setHasShadow] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => setArrowY(Math.max(80, window.innerHeight * 0.1));
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const triggerPoint = window.innerHeight * 0.1;
+
+    const handleScroll = () => {
+      setHasShadow(window.scrollY > triggerPoint);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+
 
   const sidebarVariants: Variants = {
     hidden: {
@@ -123,18 +124,24 @@ const Nav = () => {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar
           position="fixed"
-          elevation={3}
+          elevation={hasShadow ? 4 : 0}
           sx={{
             top: 25,
             left: "50%",
             transform: "translateX(-50%)",
             width: { xs: "80%", sm: "95%", md: "85%" },
-            bgcolor: "background.paper",
+            // background: "var(--brown-gradient)",
+            background: hasShadow
+              ? "white" 
+              : "transparent",
+            backdropFilter: hasShadow ? "blur(12px)" : "none",
+            transition: "background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease",
             borderRadius: 50,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+            boxShadow: hasShadow ? "0 8px 32px rgba(0,0,0,0.15)" : "none",
             height: { xs: 70, sm: 90, md: 110 },
           }}
         >
+
           <Toolbar
             disableGutters
             sx={{
@@ -148,11 +155,11 @@ const Nav = () => {
           >
             <Box
               component="img"
-              src="./brooklinpub-logo.png"
+              src="/brooklinpub-logo.png"
               alt="Logo"
               sx={{
                 height: { xs: 40, sm: 55, md: 80 },
-                objectFit: "contain",
+                objectFit: "cont  ain",
                 cursor: "pointer",
               }}
             />
@@ -188,8 +195,20 @@ const Nav = () => {
                         fontWeight: 500,
                         textTransform: "none",
                         color: "primary.main",
-                        "&:hover": { color: "secondary.main" },
+                        position: "relative",
+                        "&::after": {
+                          content: '""',
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          width: openDropdown === link.label ? "100%" : "0%",
+                          height: "2px",
+                          backgroundColor: "currentColor",
+                          transition: "width 0.3s ease",
+                        },
+                        "&:hover::after": { width: "100%" },
                       }}
+
                     >
                       {link.label}
                     </Button>
@@ -254,18 +273,31 @@ const Nav = () => {
                       fontWeight: 500,
                       textTransform: "none",
                       color: "primary.main",
-                      "&:hover": { color: "secondary.main" },
+                      position: "relative",
+                      "&::after": {
+                        content: '""',
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        width: "0%",
+                        height: "2px",
+                        backgroundColor: "currentColor",
+                        transition: "width 0.3s ease",
+                      },
+                      "&:hover::after": {
+                        width: "100%",
+                      },
                     }}
                   >
                     {link.label}
                   </Button>
+
                 )
               )}
             </Box>
 
             <Button
               variant="contained"
-              color="secondary"
               sx={{
                 ml: 2,
                 px: 3,
@@ -294,13 +326,15 @@ const Nav = () => {
           top: 0,
           bgcolor: "white",
           color: "black",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           height: 60,
           display: "flex",
           justifyContent: "center",
           zIndex: 1300,
+          boxShadow: hasShadow ? "0 2px 6px rgba(0,0,0,0.1)" : "none",
+          transition: "box-shadow 0.3s ease",
         }}
       >
+
         <Toolbar sx={{ display: "flex", alignItems: "center", px: 2, gap: 1 }}>
           <Box
             component="img"
@@ -346,20 +380,20 @@ const Nav = () => {
           >
             <Button
               onClick={() => setSidebarOpen((s) => !s)}
-                disableRipple
-                sx={{
-                  color: "primary.main",
-                  fontSize: "1rem",
-                  minWidth: "auto",
-                  p: 0,
-                  bgcolor: "transparent",
-                  // ensure it never shows a blue/filled state when clicked/focused
-                  "&:hover": { bgcolor: "transparent", color: "primary.main" },
-                  "&:active": { bgcolor: "transparent", color: "primary.main" },
-                  "&:focus": { outline: "none", bgcolor: "transparent", color: "primary.main" },
-                  // MUI adds a class for keyboard focus - handle that too
-                  "&.Mui-focusVisible": { outline: "none", bgcolor: "transparent", color: "primary.main" },
-                }}
+              disableRipple
+              sx={{
+                color: "primary.main",
+                fontSize: "1rem",
+                minWidth: "auto",
+                p: 0,
+                bgcolor: "transparent",
+                // ensure it never shows a blue/filled state when clicked/focused
+                "&:hover": { bgcolor: "transparent", color: "primary.main" },
+                "&:active": { bgcolor: "transparent", color: "primary.main" },
+                "&:focus": { outline: "none", bgcolor: "transparent", color: "primary.main" },
+                // MUI adds a class for keyboard focus - handle that too
+                "&.Mui-focusVisible": { outline: "none", bgcolor: "transparent", color: "primary.main" },
+              }}
             >
               ⮜
             </Button>
