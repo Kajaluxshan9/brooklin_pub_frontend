@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 const pages = [
   {
     id: 1,
-    color: "#084C4F",
+    color: "#D9A756",
     title: "MAKE YOURSELF HOME!",
     subtitle: "Different ambiances, different moods.",
     images: [
@@ -21,7 +21,7 @@ links: ["/christmas", "/orange", "/cat", "/shoe-flower"]
   },
   {
     id: 2,
-    color: "#F9F8F5",
+    color: "#F3E3CC",
     layout: "story",
     title: "Our Story",
     subtitle: `Nestled in the heart of Whitby at 15 Baldwin Street...`,
@@ -30,19 +30,19 @@ links: ["/christmas", "/orange", "/cat", "/shoe-flower"]
   
   {
     id: 5,
-    color: "#1B4965",
+    color: "#7C8B48",
     title: "FRESHLY BREWED MOMENTS",
     subtitle: "Enjoy every sip, every bite, every vibe.",
   },
   {
     id: 3,
-    color: "#5FA8D3",
+    color: "#8A2A2A",
     title: "COZY SPACES",
     subtitle: "Designed for comfort, inspired by warmth.",
   },
   {
     id: 4,
-    color: "#CAE9FF",
+    color: "#c08a6aff",
     title: "VISIT US TODAY",
     subtitle: "Where great coffee meets great company.",
   },

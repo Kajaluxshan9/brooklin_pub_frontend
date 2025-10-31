@@ -2,23 +2,20 @@ import React from 'react';
 import Nav from '../components/nav';
 import Special from "../components/special";
 import Footer from '../components/footer';
-import Menu from '../components/menulist';
-import About from '../components/menu';
-import AboutUs from '../components/about-us';
-import Gallery from '../components/gallery';
+import InitialPage from '../components/initialPage';
 
-const about = () => {
+const About = () => {
   return (
     <div>
       <Nav />
-        <Special />
-        {/* <Menu /> */}
-        {/* <About/> */}
-        {/* <AboutUs/> */}
-        {/* <Gallery/> */}
-        {/* <Footer /> */}
+      <InitialPage
+        line1="Welcome to Brooklin Pub"
+        line2="Experience the finest dining and drinks in a cozy atmosphere."
+      />
+      <Special />
+      <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default about
+export default About;
