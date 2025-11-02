@@ -146,7 +146,7 @@ const LandingPage = () => {
         perspective: "1500px",
         width: "100%",
         height: "100vh",
-        background: "#DAA520",
+        background: "var(--brown-gradient)",
         overflow: "hidden",
         position: "relative",
       }}
@@ -191,7 +191,7 @@ const LandingPage = () => {
           left: 0,
           width: "100%",
           height: "100%",
-          background: "rgba(0, 0, 0, 0.6)",
+          background: "rgba(92, 50, 50, 0.6)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -204,7 +204,7 @@ const LandingPage = () => {
         <h1
           style={{ fontSize: "2.5rem", fontWeight: "bold", lineHeight: "1.2" }}
         >
-          Welcome to My Landing Page
+         Step in to the Brooklin Pub
         </h1>
       </div>
 
