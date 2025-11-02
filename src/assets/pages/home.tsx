@@ -2,18 +2,58 @@ import Nav from '../components/nav';
 import Item from '../components/aboutus';
 import LandingPage from '../components/landingPage';
 import Footer from '../components/footer';
-import InitialPage from '../components/initialPage';
+import { Box, Typography } from "@mui/material";
+import BgImage from '../components/image-2.jpg';
+import Callicon from '../components/calIcon';
+import SocialMedia from '../components/SocialFloatingMenu'
 
 const Home = () => {
   return (
     <div>
       <Nav />
-      <InitialPage
-        line1="Welcome to Brooklin Pub"
-        line2="Experience the finest dining and drinks in a cozy atmosphere."
-      />
-      <LandingPage/>
-        <Item /> 
+      <LandingPage />
+    <SocialMedia />
+      <Callicon />
+
+      <Box
+        sx={{
+          minHeight: { xs: "60vh", sm: "70vh", md: "80vh" }, // responsive height
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          px: { xs: 2, sm: 4 },
+          backgroundImage: `url(${BgImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <Typography
+          variant="h3"
+          fontWeight={700}
+          sx={{
+            fontSize: { xs: "1.8rem", sm: "2.5rem", md: "3rem" }, // responsive title
+          }}
+          gutterBottom
+        >
+          Your Title Text Here
+        </Typography>
+
+        <Typography
+          variant="body1"
+          sx={{
+            maxWidth: "700px",
+            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" }, // responsive paragraph
+          }}
+        >
+          Your description paragraph or message goes here. This text will resize
+          smoothly across mobile, tablet, and desktop screens.
+        </Typography>
+      </Box>
+
+      <Item />
       <Footer />
     </div>
   );

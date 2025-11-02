@@ -11,15 +11,19 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
-import HomeIcon from "@mui/icons-material/Home";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import InfoIcon from "@mui/icons-material/Info";
-import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
-import PhoneIcon from "@mui/icons-material/Phone";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHouse,
+  faBookOpen,
+  faBagShopping,
+  faCircleInfo,
+  faPhone,
+  faChevronDown,
+  faChevronUp
+} from "@fortawesome/free-solid-svg-icons";
+
+import { useLocation } from "react-router-dom";
+
 
 /** ========= Nav Data ========= */
 type DropdownItem = { label: string; path: string };
@@ -57,6 +61,8 @@ const Nav = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+const location = useLocation();
+const isHome = location.pathname === "/";
 
 
   const sidebarVariants: Variants = {
@@ -122,25 +128,23 @@ const Nav = () => {
   if (!isMobileOrTablet) {
     return (
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar
-          position="fixed"
-          elevation={hasShadow ? 4 : 0}
-          sx={{
-            top: 25,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: { xs: "80%", sm: "95%", md: "85%" },
-            // background: "var(--brown-gradient)",
-            background: hasShadow
-              ? "white" 
-              : "transparent",
-            backdropFilter: hasShadow ? "blur(12px)" : "none",
-            transition: "background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease",
-            borderRadius: 50,
-            boxShadow: hasShadow ? "0 8px 32px rgba(0,0,0,0.15)" : "none",
-            height: { xs: 70, sm: 90, md: 110 },
-          }}
-        >
+<AppBar
+  position="fixed"
+  elevation={hasShadow ? 4 : 0}
+  sx={{
+    top: 25,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: { xs: "80%", sm: "95%", md: "85%" },
+    background: isHome ? "white" : (hasShadow ? "white" : "transparent"),
+    backdropFilter: hasShadow ? "blur(12px)" : "none",
+    transition: "background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease",
+    borderRadius: 50,
+    boxShadow: hasShadow ? "0 8px 32px rgba(0,0,0,0.15)" : "none",
+    height: { xs: 70, sm: 90, md: 110 },
+  }}
+>
+
 
           <Toolbar
             disableGutters
@@ -153,6 +157,7 @@ const Nav = () => {
               px: 4,
             }}
           >
+
             <Box
               component="img"
               src="/brooklinpub-logo.png"
@@ -184,13 +189,13 @@ const Nav = () => {
                   >
                     <Button
                       color="primary"
-                      endIcon={
-                        openDropdown === link.label ? (
-                          <KeyboardArrowUpIcon sx={{ fontSize: 20 }} />
-                        ) : (
-                          <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />
-                        )
-                      }
+endIcon={
+  <FontAwesomeIcon
+    icon={openDropdown === link.label ? faChevronUp : faChevronDown}
+    style={{ fontSize: 16 }}
+  />
+}
+
                       sx={{
                         fontWeight: 500,
                         textTransform: "none",
@@ -316,189 +321,97 @@ const Nav = () => {
     );
   }
 
-  /** ======= Mobile / Tablet View ======= */
-  return (
-    <>
-      {/* Top bar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          top: 0,
-          bgcolor: "white",
-          color: "black",
-          height: 60,
-          display: "flex",
-          justifyContent: "center",
-          zIndex: 1300,
-          boxShadow: hasShadow ? "0 2px 6px rgba(0,0,0,0.1)" : "none",
-          transition: "box-shadow 0.3s ease",
-        }}
-      >
+ /** ======= Mobile / Tablet View (Instagram Style) ======= */
+return (
+  <>
+    {/* Top Compact Header */}
+<AppBar
+  position="fixed"
+  sx={{
+    top: 0,
+    bgcolor: "white",
+    color: "black",
+    height: 60,
+    display: "flex",
+    justifyContent: "center",
+    zIndex: 1300,
+    boxShadow: hasShadow ? "0 2px 6px rgba(0,0,0,0.1)" : "none",
+    transition: "box-shadow 0.3s ease",
+  }}
+>
+  <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 2 }}>
+    <Box
+      component="img"
+      src="/brooklinpub-logo.png"
+      alt="Logo"
+      sx={{ height: 35, objectFit: "contain" }}
+    />
 
-        <Toolbar sx={{ display: "flex", alignItems: "center", px: 2, gap: 1 }}>
-          <Box
-            component="img"
-            src="./brooklinpub-logo.png"
-            alt="Logo"
-            sx={{ height: 35, objectFit: "contain" }}
-          />
-          <Box component="span" sx={{ fontWeight: 600, fontSize: "1rem" }}>
-            Brooklin Pub
-          </Box>
-        </Toolbar>
-      </AppBar>
+    {/* Call Icon */}
+    <Button
+      href="tel:+94779123456"
+      sx={{ minWidth: "auto", color: "primary.main" }}
+    >
+      <FontAwesomeIcon icon={faPhone} style={{ fontSize: 20 }} />
+    </Button>
+  </Toolbar>
+</AppBar>
 
-      <Toolbar sx={{ minHeight: 60 }} />
+    <Toolbar sx={{ minHeight: 60 }} />
 
-      {/* ✅ Fixed Arrow */}
-      <motion.div
-        style={{
-          position: "fixed",
-          right: 0,
-          top: arrowY,
-          zIndex: 1500,
-          touchAction: "none",
-          cursor: "pointer",
-        }}
-      >
-        <div
-          style={{
-            borderTopLeftRadius: "80%",
-            borderBottomLeftRadius: "80%",
-            width: 30,
-            height: 30,
-            background: "white",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <motion.div
-            animate={{ rotate: sidebarOpen ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <Button
-              onClick={() => setSidebarOpen((s) => !s)}
-              disableRipple
-              sx={{
-                color: "primary.main",
-                fontSize: "1rem",
-                minWidth: "auto",
-                p: 0,
-                bgcolor: "transparent",
-                // ensure it never shows a blue/filled state when clicked/focused
-                "&:hover": { bgcolor: "transparent", color: "primary.main" },
-                "&:active": { bgcolor: "transparent", color: "primary.main" },
-                "&:focus": { outline: "none", bgcolor: "transparent", color: "primary.main" },
-                // MUI adds a class for keyboard focus - handle that too
-                "&.Mui-focusVisible": { outline: "none", bgcolor: "transparent", color: "primary.main" },
-              }}
-            >
-              ⮜
-            </Button>
-          </motion.div>
-        </div>
-      </motion.div>
+    {/* FIXED BOTTOM NAV — INSTAGRAM STYLE */}
+    <Box
+      sx={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+        bgcolor: "white",
+        boxShadow: "0 -2px 12px rgba(0,0,0,0.08)",
+        display: "flex",
+        justifyContent: "space-around",
+        alignItems: "center",
+        height: 65,
+        zIndex: 1300,
+        borderTop: "1px solid rgba(0,0,0,0.08)",
+      }}
+    >
+      {[
+{ icon: faHouse, path: "/" },
+{ icon: faBookOpen, path: "/menu" },
+{ icon: faBagShopping, path: "/order" },
+{ icon: faCircleInfo, path: "/about" },
+{ icon: faPhone, path: "/contactus" },
 
-      {/* ✅ Scrollable Sidebar (stops under top bar) */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            variants={sidebarVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            style={{
-              position: "fixed",
-              right: 46,
-              top: arrowY,
-              transform: "translateY(-50%)",
-              overflowY: "auto",
-              background: "white",
-              borderRadius: 40,
-              boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
+      ].map((item) => {
+        const isActive = location.pathname === item.path;
+        return (
+          <Button
+            key={item.path}
+            disableRipple
+            component={Link}
+            to={item.path}
+            sx={{
+              minWidth: "auto",
+              color: isActive ? "primary.main" : "black",
+              transition: "0.2s",
+              "&:hover": { color: "primary.main" },
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
-              padding: "10px 8px",
-              zIndex: 1200,
-              maxHeight: "calc(100vh - 80px)", // cap height so it won't overlap the AppBar
             }}
           >
-            {[
-              { icon: <HomeIcon />, path: "/" },
-              { icon: <MenuBookIcon />, path: "/special" },
-              { icon: <ShoppingBagIcon />, path: "/order" },
-              { icon: <InfoIcon />, path: "/about" },
-              { icon: <ContactPhoneIcon />, path: "/contactus" },
-            ].map((item, i) => (
-              <motion.div key={i} variants={itemVariants}>
-                <Button
-                  disableRipple
-                  component={Link}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  sx={{
-                    color: "primary.main",
-                    borderRadius: "50%",
-                    width: 45,
-                    height: 45,
-                    bgcolor: "white",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    // keep appearance stable on hover/active/focus
-                    "&:hover": { bgcolor: "white", color: "primary.main" },
-                    "&:active": { bgcolor: "white", color: "primary.main" },
-                    "&:focus": { bgcolor: "white", color: "primary.main" },
-                    "&.Mui-focusVisible": { bgcolor: "white", color: "primary.main" },
-                    minWidth: "auto",
-                    mb: 1,
-                  }}
-                >
-                  {item.icon}
-                </Button>
-              </motion.div>
-            ))}
+<Box sx={{ fontSize: 24 }}>
+  <FontAwesomeIcon icon={item.icon} />
+</Box>
+          </Button>
+        );
+      })}
+    </Box>
 
-            {/* divider removed as requested */}
-
-            {[
-              { icon: <PhoneIcon />, href: "tel:+123456789", color: "green" },
-              { icon: <FacebookIcon />, href: "https://facebook.com", color: "#1877f2" },
-              { icon: <InstagramIcon />, href: "https://instagram.com", color: "#E1306C" },
-              { icon: <WhatsAppIcon />, href: "https://wa.me/123456789", color: "#25D366" },
-            ].map((item, i) => (
-              <motion.div key={i} variants={itemVariants}>
-                <Button
-                  disableRipple
-                  component="a"
-                  href={item.href}
-                  target="_blank"
-                  sx={{
-                    color: item.color,
-                    borderRadius: "50%",
-                    width: 45,
-                    height: 45,
-                    bgcolor: "white",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    // keep appearance stable on hover/active/focus
-                    "&:hover": { bgcolor: "white", color: item.color },
-                    "&:active": { bgcolor: "white", color: item.color },
-                    "&:focus": { bgcolor: "white", color: item.color },
-                    "&.Mui-focusVisible": { bgcolor: "white", color: item.color },
-                    minWidth: "auto",
-                    mb: 1,
-                  }}
-                >
-                  {item.icon}
-                </Button>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
+    {/* Bottom Spacer to avoid content hidden behind nav */}
+    <Toolbar sx={{ minHeight: 65 }} />
+  </>
+);
 };
 
 export default Nav;
