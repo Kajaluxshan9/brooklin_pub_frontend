@@ -379,7 +379,7 @@ return (
       {[
 { icon: faHouse, path: "/" },
 { icon: faBookOpen, path: "/menu" },
-{ icon: faBagShopping, path: "/order" },
+{ icon: faBagShopping, path: "/special/today" },
 { icon: faCircleInfo, path: "/about" },
 { icon: faPhone, path: "/contactus" },
 
