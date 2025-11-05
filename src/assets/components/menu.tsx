@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { DrawTextSVG } from "../components/svgNames";
 
 export default function LongScrollMenu() {
-  const ref = useRef(null);
-  const pathRef = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const pathRef = useRef<SVGPathElement | null>(null);
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
   const containerHeight = 4000;
   const padding = 36; // safe padding from edges
@@ -32,13 +33,15 @@ export default function LongScrollMenu() {
   `;
 
   const menuData = [
-    {
+       {
       mainImage:
         "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
       images: [
         "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
         "https://i.pinimg.com/736x/ab/b1/29/abb12910f1d49d7c67cfe3a94c1612b5.jpg",
       ],
+      name:"Classic Burger",
+          namePath:`M10 60 Q 80 10, 160 60 T 310 60`,
       menuItems: [
         { name: "Classic Burger", desc: "Beef, lettuce, cheese", price: "12€" },
         { name: "Cheese Deluxe", desc: "Double cheese & bacon", price: "14€" },
@@ -51,6 +54,8 @@ export default function LongScrollMenu() {
         "https://i.pinimg.com/736x/dc/f3/a0/dcf3a052cda09a8f8081c21fa28e1c91.jpg",
         "https://i.pinimg.com/736x/ae/34/0f/ae340f9a2de1e445e2e53b79b276b8c3.jpg",
       ],
+      name:"Classic Burger",
+
       menuItems: [
         { name: "Chicken Ranch", desc: "Grilled chicken & ranch", price: "13€" },
         { name: "Hot BBQ", desc: "Smoky BBQ beef", price: "15€" },
@@ -63,6 +68,8 @@ export default function LongScrollMenu() {
         "https://i.pinimg.com/736x/59/a3/d4/59a3d40a498cd09a8e4231e8c49b8a89.jpg",
         "https://i.pinimg.com/736x/a9/bc/1a/a9bc1ae2d5c9b74eb21cb1f4f69d29a1.jpg",
       ],
+      name:"Classic Burger",
+
       menuItems: [
         { name: "Veggie Delight", desc: "Avocado & veggie patty", price: "11€" },
         { name: "Green Garden", desc: "Grilled tofu & greens", price: "10€" },
@@ -75,6 +82,8 @@ export default function LongScrollMenu() {
         "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
         "https://i.pinimg.com/736x/ab/b1/29/abb12910f1d49d7c67cfe3a94c1612b5.jpg",
       ],
+      name:"Classic Burger",
+
       menuItems: [
         { name: "Classic Burger", desc: "Beef, lettuce, cheese", price: "12€" },
         { name: "Cheese Deluxe", desc: "Double cheese & bacon", price: "14€" },
@@ -87,54 +96,48 @@ export default function LongScrollMenu() {
         "https://i.pinimg.com/736x/dc/f3/a0/dcf3a052cda09a8f8081c21fa28e1c91.jpg",
         "https://i.pinimg.com/736x/ae/34/0f/ae340f9a2de1e445e2e53b79b276b8c3.jpg",
       ],
+      name:"Classic Burger",
+
       menuItems: [
         { name: "Chicken Ranch", desc: "Grilled chicken & ranch", price: "13€" },
         { name: "Hot BBQ", desc: "Smoky BBQ beef", price: "15€" },
       ],
     },
-    {
+     {
       mainImage:
         "https://i.pinimg.com/736x/59/a3/d4/59a3d40a498cd09a8e4231e8c49b8a89.jpg",
       images: [
         "https://i.pinimg.com/736x/59/a3/d4/59a3d40a498cd09a8e4231e8c49b8a89.jpg",
         "https://i.pinimg.com/736x/a9/bc/1a/a9bc1ae2d5c9b74eb21cb1f4f69d29a1.jpg",
       ],
+      name:"Classic Burger",
+
       menuItems: [
         { name: "Veggie Delight", desc: "Avocado & veggie patty", price: "11€" },
         { name: "Green Garden", desc: "Grilled tofu & greens", price: "10€" },
       ],
-    },
-        {
-      mainImage:
-        "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-      images: [
-        "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-        "https://i.pinimg.com/736x/ab/b1/29/abb12910f1d49d7c67cfe3a94c1612b5.jpg",
-      ],
-      menuItems: [
-        { name: "Classic Burger", desc: "Beef, lettuce, cheese", price: "12€" },
-        { name: "Cheese Deluxe", desc: "Double cheese & bacon", price: "14€" },
-      ],
-    },
-    {
-      mainImage:
-        "https://i.pinimg.com/736x/dc/f3/a0/dcf3a052cda09a8f8081c21fa28e1c91.jpg",
-      images: [
-        "https://i.pinimg.com/736x/dc/f3/a0/dcf3a052cda09a8f8081c21fa28e1c91.jpg",
-        "https://i.pinimg.com/736x/ae/34/0f/ae340f9a2de1e445e2e53b79b276b8c3.jpg",
-      ],
-      menuItems: [
-        { name: "Chicken Ranch", desc: "Grilled chicken & ranch", price: "13€" },
-        { name: "Hot BBQ", desc: "Smoky BBQ beef", price: "15€" },
-      ],
-    },
-    {
+    },     {
       mainImage:
         "https://i.pinimg.com/736x/59/a3/d4/59a3d40a498cd09a8e4231e8c49b8a89.jpg",
       images: [
         "https://i.pinimg.com/736x/59/a3/d4/59a3d40a498cd09a8e4231e8c49b8a89.jpg",
         "https://i.pinimg.com/736x/a9/bc/1a/a9bc1ae2d5c9b74eb21cb1f4f69d29a1.jpg",
       ],
+      name:"Classic Burger",
+
+      menuItems: [
+        { name: "Veggie Delight", desc: "Avocado & veggie patty", price: "11€" },
+        { name: "Green Garden", desc: "Grilled tofu & greens", price: "10€" },
+      ],
+    },     {
+      mainImage:
+        "https://i.pinimg.com/736x/59/a3/d4/59a3d40a498cd09a8e4231e8c49b8a89.jpg",
+      images: [
+        "https://i.pinimg.com/736x/59/a3/d4/59a3d40a498cd09a8e4231e8c49b8a89.jpg",
+        "https://i.pinimg.com/736x/a9/bc/1a/a9bc1ae2d5c9b74eb21cb1f4f69d29a1.jpg",
+      ],
+      name:"Classic Burger",
+
       menuItems: [
         { name: "Veggie Delight", desc: "Avocado & veggie patty", price: "11€" },
         { name: "Green Garden", desc: "Grilled tofu & greens", price: "10€" },
@@ -142,8 +145,8 @@ export default function LongScrollMenu() {
     },
   ];
 
-  const [points, setPoints] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [points, setPoints] = useState<{ x: number; y: number; size: number }[]>([]);
+  const [selectedImage, setSelectedImage] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // helper clamp
@@ -153,55 +156,112 @@ export default function LongScrollMenu() {
   useEffect(() => {
     const generatePoints = () => {
       if (!pathRef.current) return;
-      const pathElement = pathRef.current;
+  const pathElement = pathRef.current as SVGPathElement;
       const length = pathElement.getTotalLength();
       if (!length) return;
 
       const numPoints = menuData.length;
-      const newPoints = [];
+      // recompute width here so resize is handled correctly
+      const sw = window.innerWidth || screenWidth;
+      const newPoints: { x: number; y: number; size: number }[] = [];
 
-      // size adjusts on mobile
-      const isMobile = window.innerWidth < 768;
-      const baseSize = isMobile ? 160 : 280;
-
-      // horizontal zones (left/center/right) expressed as percentage positions
-      const zones = [
-        screenWidth * 0.18, // left (~18% of width)
-        screenWidth * 0.5,  // center
-        screenWidth * 0.82  // right (~82% of width)
-      ];
-
-      for (let i = 0; i < numPoints; i++) {
-        const t = (length / (numPoints - 1 || 1)) * i; // evenly spaced along path
-        const point = pathElement.getPointAtLength(t);
-
-        // alternate zone index but ensure first item uses zone 0 (left) in bounds
-        const zoneIndex = i % 3;
-        const desiredX = zones[zoneIndex];
-
-        const size = baseSize;
-
-        // compute raw x,y centered at point
-        let rawX = desiredX;
-        let rawY = point.y;
-
-        // clamp so the *entire* image stays in view
-        const minX = padding + size / 2;
-        const maxX = screenWidth - padding - size / 2;
-        const minY = padding + size / 2;
-        const maxY = containerHeight - padding - size / 2;
-
-        const finalX = clamp(rawX, minX, maxX);
-        const finalY = clamp(rawY, minY, maxY);
-
-        newPoints.push({
-          x: finalX, // we'll center using transform: translate(-50%, -50%)
-          y: finalY,
-          size,
-        });
+      // If there's only one item, make it cover the entire container (with padding)
+      if (numPoints === 1) {
+        const swCenter = sw / 2;
+        const availWidth = sw - padding * 2;
+        const availHeight = containerHeight - padding * 2;
+        // size should be the smaller of available width/height so it fits fully
+        const fullSize = Math.max(100, Math.min(availWidth, availHeight));
+        const finalX = clamp(swCenter, padding + fullSize / 2, sw - padding - fullSize / 2);
+        const finalY = clamp(containerHeight / 2, padding + fullSize / 2, containerHeight - padding - fullSize / 2);
+        newPoints.push({ x: finalX, y: finalY, size: fullSize });
+        setPoints(newPoints);
+        return;
       }
 
-      setPoints(newPoints);
+      // compute sizing based on number of items so everything fits the full path
+      const isMobileLocal = sw < 768;
+      const maxSizeDesktop = 260;
+      const maxSizeMobile = 160;
+
+      // derive ideal spacing along the path (use numPoints+1 to add margins at ends)
+      const idealSpacingAlongPath = Math.max(1, length / Math.max(1, numPoints + 1));
+
+      // starting base size estimated from path spacing, bounded
+      let baseSize = Math.round(
+        Math.max(40, Math.min(isMobileLocal ? maxSizeMobile : maxSizeDesktop, idealSpacingAlongPath * 0.7))
+      );
+
+      const minSize = 36;
+      const zones = [sw * 0.18, sw * 0.5, sw * 0.82];
+
+const buildPointsForSize = (size: number, jitterAlong = 0) => {
+  const pts: { x: number; y: number; size: number }[] = [];
+  for (let i = 0; i < numPoints; i++) {
+
+    let t = ((i + 1) / (numPoints + 1)) * length;
+    if (jitterAlong) {
+      const dir = i % 2 === 0 ? -1 : 1;
+      t = clamp(t + dir * jitterAlong, 0, length);
+    }
+
+    const point = pathElement.getPointAtLength(t);
+
+    // ✅ Spread full width
+    const desiredX = padding + (i + 1) * ((sw - padding * 2) / (numPoints + 1));
+    const finalX = clamp(desiredX, padding + size / 2, sw - padding - size / 2);
+
+    const finalY = clamp(point.y, padding + size / 2, containerHeight - padding - size / 2);
+
+    pts.push({ x: finalX, y: finalY, size });
+  }
+  return pts;
+};
+
+
+      const hasCollision = (pts: { x: number; y: number; size: number }[]) => {
+        // consider border and a small safety margin when checking collisions
+        const border = 4; // px border from CSS
+        const safety = 8; // extra buffer
+        for (let i = 0; i < pts.length; i++) {
+          for (let j = i + 1; j < pts.length; j++) {
+            const dx = pts[i].x - pts[j].x;
+            const dy = pts[i].y - pts[j].y;
+            const dist = Math.hypot(dx, dy);
+            // required minimum center distance is sum of radii plus border+buffer
+            const minAllowed = (pts[i].size + pts[j].size) / 2 + border + safety;
+            if (dist < minAllowed) return true;
+          }
+        }
+        return false;
+      };
+
+      // Build initial evenly spaced points and iteratively shrink size until no collisions
+      let pts = buildPointsForSize(baseSize, 0);
+      let attempts = 0;
+      // progressively shrink more aggressively to resolve tight collisions
+      while (hasCollision(pts) && baseSize > minSize && attempts < 20) {
+        baseSize = Math.max(minSize, Math.floor(baseSize * 0.85));
+        pts = buildPointsForSize(baseSize, 0);
+        attempts++;
+      }
+
+      // If collisions still exist, try a small along-path jitter to separate overlapping clusters
+      if (hasCollision(pts)) {
+        // increase jitter to a larger proportion of the ideal spacing for stronger separation
+        let jitterStep = Math.max(8, Math.floor(idealSpacingAlongPath * 0.12));
+        for (let pass = 1; pass <= 10 && hasCollision(pts); pass++) {
+          pts = buildPointsForSize(baseSize, jitterStep * pass);
+        }
+      }
+
+      // Final fallback: if still collisions, reduce to minimal size and evenly place
+      if (hasCollision(pts)) {
+        baseSize = minSize;
+        pts = buildPointsForSize(baseSize, 0);
+      }
+
+      setPoints(pts);
     };
 
     // small timeout to allow SVG to render & measure
@@ -211,7 +271,7 @@ export default function LongScrollMenu() {
       clearTimeout(timer);
       window.removeEventListener("resize", generatePoints);
     };
-  }, [curvedPath, menuData.length, screenWidth]);
+  }, [curvedPath, menuData.length]);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -226,7 +286,7 @@ export default function LongScrollMenu() {
       ref={ref}
       style={{
         height: containerHeight,
-        background: "#0e3b4e",
+        background: "var(--wine-red)",
         position: "relative",
         overflow: "visible",
       }}
@@ -274,7 +334,7 @@ export default function LongScrollMenu() {
     transform: "translate(-50%, -50%)",
     transformOrigin: "center center",
     borderRadius: "50%",
-    overflow: "hidden",
+    overflow: "visible",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -283,43 +343,30 @@ export default function LongScrollMenu() {
     cursor: "pointer",
     zIndex: 10,
     boxShadow: "0 12px 30px rgba(0,0,0,0.7)",
-    willChange: "transform, filter", // 🔒 prevents layout shift
   }}
   whileHover={{
-    // ✅ No scale, no position shift — only visual glow
     boxShadow: "0 20px 50px rgba(0,0,0,0.9)",
     filter: "brightness(1.15)",
   }}
-  transition={{
-    type: "spring",
-    stiffness: 200,
-    damping: 18,
-  }}
+  transition={{ type: "spring", stiffness: 200, damping: 18 }}
 >
   <motion.img
     src={menuData[idx].mainImage}
     alt=""
     style={{
-      maxWidth: "100%",
-      maxHeight: "100%",
       width: "100%",
       height: "100%",
-      objectFit: "contain",
-      display: "block",
-      pointerEvents: "none",
-      background: "#000",
+      objectFit: "cover",
       borderRadius: "50%",
-      willChange: "filter",
     }}
-    whileHover={{
-      // subtle brightness only — no transform
-      filter: "brightness(1.2) contrast(1.1)",
-    }}
-    transition={{
-      duration: 0.3,
-    }}
+    whileHover={{ filter: "brightness(1.2) contrast(1.1)" }}
+    transition={{ duration: 0.3 }}
   />
+
+<DrawTextSVG path={menuData[idx].namePath} width={isMobile ? 120 : 180} stroke="white" />
+
 </motion.div>
+
 
   );
 })}
@@ -377,7 +424,7 @@ export default function LongScrollMenu() {
 }
 
 /* ===== Image Carousel ===== */
-function ImageCarousel({ images, currentIndex, setCurrentIndex }) {
+function ImageCarousel({ images, currentIndex, setCurrentIndex }: { images: string[]; currentIndex: number; setCurrentIndex: (n: number) => void }) {
   return (
     <div
       style={{
@@ -434,7 +481,7 @@ function ImageCarousel({ images, currentIndex, setCurrentIndex }) {
 }
 
 /* ===== Menu Panel ===== */
-function MenuPanel({ onClose, highlightIndex, setCurrentIndex, menuItems }) {
+function MenuPanel({ onClose, highlightIndex, setCurrentIndex, menuItems }: { onClose: () => void; highlightIndex: number; setCurrentIndex: (n: number) => void; menuItems: { name: string; desc: string; price: string }[] }) {
   return (
     <div
       style={{

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { Box, Backdrop, IconButton } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import CloseIcon from "@mui/icons-material/Close";
@@ -38,105 +38,124 @@ export default function Gallery() {
         display: "flex",
         flexDirection: "column",
         gap: 4,
-        backgroundColor: "#F3E3CC", 
+        backgroundColor: "#F3E3CC",
       }}
     >
       {galleryRows.map((images, rowIndex) => {
-        const loopImages = [...images, ...images];
+        // duplicate more than twice to eliminate any blank edge
+        const loopImages = [...images, ...images, ...images, ...images];
+        const rowRef = useRef(null);
+        const [width, setWidth] = useState(0);
+
+        useLayoutEffect(() => {
+          const measure = () => {
+            if (rowRef.current) {
+              setWidth(rowRef.current.scrollWidth / 4);
+            }
+          };
+          measure();
+          const resizeObserver = new ResizeObserver(measure);
+          resizeObserver.observe(rowRef.current);
+          return () => resizeObserver.disconnect();
+        }, []);
 
         return (
-          <motion.div
+          <Box
             key={rowIndex}
-            style={{
-              display: "flex",
-              gap: 16,
-              width: "max-content",
-            }}
-            animate={{
-              x:
-                rowIndex % 2 === 0
-                  ? [0, -images.length * window.innerWidth] // scroll left
-                  : [0, images.length * window.innerWidth], // scroll right
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 30,
-              ease: "linear",
+            sx={{
+              position: "relative",
+              overflow: "hidden",
+              width: "100vw",
             }}
           >
-            {loopImages.map((src, idx) => (
-              <Box
-                key={idx + rowIndex * loopImages.length}
-                component="img"
-                src={src}
-                alt={`Gallery ${idx}`}
-                onClick={() => setSelectedImage(src)}
-                sx={{
-                  flexShrink: 0,
-                  width: { xs: "90vw", sm: "50vw", md: "33vw" }, // responsive width
-                  height: { xs: 200, sm: 250, md: 300 },
-                  objectFit: "cover",
-                  borderRadius: 0,
-                  cursor: "pointer",
-                  transition: "transform 0.3s",
-                  "&:hover": { transform: "scale(1.05)" },
-                }}
-              />
-            ))}
-          </motion.div>
+            <motion.div
+              ref={rowRef}
+              style={{
+                display: "flex",
+                gap: 16,
+                width: "max-content",
+              }}
+              animate={{
+                x: rowIndex % 2 === 0 ? [-width, 0] : [0, -width],
+              }}
+              transition={{
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 35,
+                ease: "linear",
+              }}
+            >
+              {loopImages.map((src, idx) => (
+                <Box
+                  key={idx}
+                  component="img"
+                  src={src}
+                  alt={`Gallery-${idx}`}
+                  onClick={() => setSelectedImage(src)}
+                  sx={{
+                    flexShrink: 0,
+                    width: { xs: "85vw", sm: "45vw", md: "28vw", lg: "22vw" },
+                    height: { xs: 180, sm: 230, md: 260, lg: 300 },
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    transition: "transform 0.3s",
+                    "&:hover": { transform: "scale(1.05)" },
+                  }}
+                />
+              ))}
+            </motion.div>
+          </Box>
         );
       })}
+<AnimatePresence>
+  {selectedImage && (
+    <Backdrop
+      open={true}
+      sx={{
+        backgroundColor: "rgba(0,0,0,0.9)",
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        p: 2,
+      }}
+    >
+      <Box sx={{ position: "relative", maxWidth: "100vw", maxHeight: "100vh" }}>
+        <IconButton
+          onClick={() => setSelectedImage(null)}
+          sx={{
+            position: "absolute",
+            top: { xs: -10, sm: -40 },
+            right: { xs: -10, sm: -40 },
+            color: "#fff",
+            background: "rgba(0,0,0,0.4)",
+            "&:hover": { background: "rgba(0,0,0,0.6)" },
+          }}
+        >
+          <CloseIcon fontSize="large" />
+        </IconButton>
 
-      {/* Popup Modal */}
-      <AnimatePresence>
-        {selectedImage && (
-          <Backdrop
-            open={!!selectedImage}
-            sx={{
-              color: "#fff",
-              zIndex: (theme) => theme.zIndex.drawer + 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0,0,0,0.85)",
-            }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <IconButton
-                onClick={() => setSelectedImage(null)}
-                sx={{
-                  position: "absolute",
-                  top: -40,
-                  right: -40,
-                  color: "#fff",
-                  backgroundColor: "rgba(0, 0, 0, 0.6)",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.2)",
-                  },
-                }}
-              >
-                <CloseIcon fontSize="large" />
-              </IconButton>
+        <motion.img
+          src={selectedImage}
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.7, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            width: "100%",
+            height: "auto",
+            maxWidth: "90vw",
+            maxHeight: "85vh",
+            objectFit: "contain",
+            borderRadius: "8px",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.6)",
+          }}
+        />
+      </Box>
+    </Backdrop>
+  )}
+</AnimatePresence>
 
-              <motion.img
-                src={selectedImage}
-                alt="Selected"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  maxWidth: "90vw",
-                  maxHeight: "80vh",
-                  // borderRadius: "12px",
-                  objectFit: "contain",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-                }}
-              />
-            </Box>
-          </Backdrop>
-        )}
-      </AnimatePresence>
     </Box>
   );
 }

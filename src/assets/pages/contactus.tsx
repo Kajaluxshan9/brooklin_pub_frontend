@@ -3,6 +3,9 @@ import Nav from '../components/nav';
 import Footer from '../components/footer';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 import InitialPage from '../components/initialPage';
+import Callicon from '../components/calIcon';
+import SocialMedia from '../components/SocialFloatingMenu';
+
 
 const Contactus = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +29,8 @@ const Contactus = () => {
   return (
     <div>
       <Nav />
+          <SocialMedia />
+      <Callicon />
             <InitialPage
         line1="Welcome to Brooklin Pub"
         line2="Experience the finest dining and drinks in a cozy atmosphere."
