@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Nav from "../components/nav";
+import { createPortal } from "react-dom";
+
 
 const cards = [
   {
@@ -75,14 +77,18 @@ export default function CylinderMenuPopup() {
   const [autoRotate, setAutoRotate] = useState(true);
 
   const containerRef = useRef(null);
-  const baseSize = typeof window !== "undefined" ? window.innerWidth : 1200;
+const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
 
-  // Card becomes responsive
-  const cardWidth = Math.max(140, Math.min(260, baseSize * 0.22));
-  const cardHeight = cardWidth;
+// Derived value for card sizing
+const mobile = screenWidth < 768;
 
-  // Cylinder radius scales too
-  const radius = cardWidth * 1.6;
+const cardWidth = mobile
+  ? Math.max(120, Math.min(screenWidth * 0.6, 320)) // mobile
+  : Math.max(180, Math.min(screenWidth * 0.3, 300)); // desktop
+const cardHeight = cardWidth * 1.05;
+const radius = cardWidth * 1.7;
+
+
 
   const total = cards.length;
   const anglePerCard = 360 / total;
@@ -166,36 +172,33 @@ export default function CylinderMenuPopup() {
     <div>
       {!selectedCard && <Nav />}
 
-      <div
-        style={{
-          width: "100vw",
-          height: "100vh",
-          // background:
-          //   "radial-gradient(circle at center, #ffffff 0%, #f2f2f2 60%, #e6e6e6 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          perspective: "1200px",
-          overflow: "hidden",
-          position: "relative",
-          touchAction: "none",
-          userSelect: "none",
-          background: "var(--wine-red)",
+<div
+  style={{
+    width: "100vw",
+    height: mobile ? "clamp(350px, 70vh, 900px)" : "clamp(600px, 100vh, 1200px)", // bigger for desktop
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    perspective: "1200px",
+    overflow: "hidden",
+    position: "relative",
+    touchAction: "none",
+    userSelect: "none",
+    background: "var(--wine-red)",
+  }}
+  onMouseDown={handleMouseDown}
+  onMouseMove={handleMouseMove}
+  onMouseUp={handleMouseUp}
+  onMouseLeave={handleMouseUp}
+  onTouchStart={handleTouchStart}
+  onTouchMove={handleTouchMove}
+  onTouchEnd={handleTouchEnd}
+  onWheel={(e) => {
+    setAutoRotate(false);
+    setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
+  }}
+>
 
-
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onWheel={(e) => {
-          setAutoRotate(false);
-          setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
-        }}
-      >
         {/* Cylinder */}
         <motion.div
           ref={containerRef}
@@ -206,7 +209,8 @@ export default function CylinderMenuPopup() {
             height: `${cardHeight}px`,
             position: "relative",
             transition: "rotateY 0.1s linear",
-            marginTop: "60px"
+            marginTop: "60px",
+            padding: isMobile ? "0 20px" : "0",
           }}
         >
           {cards.map((card, i) => {
@@ -253,83 +257,82 @@ export default function CylinderMenuPopup() {
           })}
         </motion.div>
 
-        {/* Popup */}
-        <AnimatePresence>
-          {selectedCard && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100vw",
-                height: "100vh",
-                background: "rgba(0,0,0,0.85)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 99999,
-              }}
-              onClick={() => setSelectedCard(null)}
-            >
-              <motion.div
-                onClick={(e) => e.stopPropagation()}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 120, damping: 15 }}
-                style={{
-                  position: "relative",
-                  width: "100vw",
-                  height: "100vh",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {/* Close Button */}
-                <button
-                  onClick={() => setSelectedCard(null)}
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    right: "20px",
-                    background: "rgba(255,255,255,0.2)",
-                    border: "2px solid #fff",
-                    borderRadius: "50%",
-                    width: "40px",
-                    height: "40px",
-                    fontSize: "24px",
-                    color: "#fff",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "0.2s",
-                    zIndex: 100000,
-                  }}
-                >
-                  ×
-                </button>
+{/* Popup */}
+{selectedCard &&
+  createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0,0,0,0.9)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 999999999,
+        }}
+        onClick={() => setSelectedCard(null)}
+      >
+        <motion.div
+          onClick={(e) => e.stopPropagation()}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 120, damping: 15 }}
+          style={{
+            position: "relative",
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setSelectedCard(null)}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              background: "rgba(255,255,255,0.2)",
+              border: "2px solid #fff",
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              fontSize: "24px",
+              color: "#fff",
+              cursor: "pointer",
+              zIndex: 1000000000,
+            }}
+          >
+            ×
+          </button>
 
-                <img
-                  src={selectedCard.popupImg}
-                  alt={selectedCard.title}
-                  style={{
-                    width: "100vw",
-                    height: "100vh",
-                    objectFit: "contain",
-                    borderRadius: "12px",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
-                  }}
-                />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <img
+            src={selectedCard.popupImg}
+            alt={selectedCard.title}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              borderRadius: "12px",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+            }}
+          />
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body
+  )}
+
       </div>
     </div>
   );

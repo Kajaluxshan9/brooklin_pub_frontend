@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-
 
 const pages = [
   {
@@ -16,18 +15,24 @@ const pages = [
       "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/beside-and-next-to/next-to-and-beside/clip-art-cat.png",
       "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/interpret-bar-graphs/clip-art-shoe-flower.png",
     ],
-links: ["/christmas", "/orange", "/cat", "/shoe-flower"]
-
+    links: ["/christmas", "/orange", "/cat", "/shoe-flower"],
   },
   {
     id: 2,
     color: "#F3E3CC",
     layout: "story",
     title: "Our Story",
-    subtitle: `Nestled in the heart of Whitby at 15 Baldwin Street...`,
+    subtitle: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa.
+Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.
+In hac habitasse platea dictumst. Etiam faucibus cursus urna.
+Suspendisse potenti. Sed dignissim odio a lorem malesuada.
+`,
     image: "./brooklinpub-logo.png",
   },
-  
   {
     id: 5,
     color: "#7C8B48",
@@ -52,6 +57,7 @@ export default function App() {
   const [pageIndex, setPageIndex] = useState(0);
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [direction, setDirection] = useState("left");
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const randomDirection = () => {
     const dirs = ["left", "right", "top", "bottom"];
@@ -108,22 +114,20 @@ export default function App() {
   const currentPage = pages[pageIndex];
 
   return (
-<Box
-  sx={{
-    height: "100vh",
-    width: "100%",
-    overflow: "hidden",
-    overflowX: "hidden",
-    position: "relative",
-    backgroundColor: currentPage.color,
-  }}
->
-
-      {/* Pagination Dots */}
+    <Box
+      sx={{
+        height: "100vh",
+        width: "100%",
+        overflow: "hidden",
+        position: "relative",
+        backgroundColor: currentPage.color,
+      }}
+    >
+      {/* Pagination dots */}
       <Box
         sx={{
           position: "absolute",
-          right: 20,
+          right: isMobile ? 10 : 20,
           top: "50%",
           transform: "translateY(-50%)",
           display: "flex",
@@ -137,8 +141,8 @@ export default function App() {
             key={idx}
             onClick={() => setPageIndex(idx)}
             sx={{
-              width: 12,
-              height: 12,
+              width: isMobile ? 8 : 12,
+              height: isMobile ? 8 : 12,
               borderRadius: "50%",
               backgroundColor: idx === pageIndex ? "white" : "rgba(255,255,255,0.5)",
               cursor: "pointer",
@@ -149,30 +153,26 @@ export default function App() {
       </Box>
 
       <AnimatePresence mode="popLayout">
-<motion.div
-  key={pageIndex}
-  variants={getVariants(direction)}
-  initial="initial"
-  animate="animate"
-  exit="exit"
-  transition={{ duration: 1, ease: [0.76, 0, 0.24, 1], when: "beforeChildren" }}
-  style={{
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",   // full viewport width
-    height: "100vh",  // full viewport height
-    backgroundColor: currentPage.color,
-    display: "flex",
-    flexDirection: currentPage.id === 2 ? "row" : "column",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: currentPage.id === 2 ? "left" : "center",
-    boxSizing: "border-box",
-    overflow: "hidden", // ensure no scrollbars appear
-  }}
->
-
+        <motion.div
+          key={pageIndex}
+          variants={getVariants(direction)}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 1 }}
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            backgroundColor: currentPage.color,
+            display: "flex",
+            flexDirection: currentPage.id === 2 ? (isMobile ? "column" : "row") : "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: isMobile ? "center" : currentPage.id === 2 ? "left" : "center",
+            padding: isMobile ? "20px" : "60px",
+          }}
+        >
           {/* Text */}
           <motion.div
             initial={{ opacity: 0, x: -100 }}
@@ -180,42 +180,35 @@ export default function App() {
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 1 }}
             style={{
-              flex: currentPage.id === 2 ? 1 : "unset",
-              mr: currentPage.id === 2 ? 4 : 0,
-              textAlign: currentPage.id === 2 ? "left" : "center",
-              color: currentPage.id === 2 ? "brown" : undefined,
+              flex: currentPage.id === 2 ? 1 : undefined,
+              marginRight: currentPage.id === 2 && !isMobile ? "40px" : 0,
             }}
           >
             <Typography
-              variant="h3"
               sx={{
                 fontWeight: 300,
                 letterSpacing: "0.25em",
-                mb: 4,
+                mb: 3,
                 fontFamily: "Montserrat, sans-serif",
                 textTransform: "uppercase",
-                color: currentPage.id === 2 ? "brown" : undefined,
-                wordWrap: "break-word",
-                fontSize: "clamp(1.5rem, 5vw, 3rem)", // Responsive heading
+                fontSize: "clamp(1.4rem, 4vw, 3rem)",
+                color: currentPage.id === 2 ? "brown" : "white",
               }}
             >
               {currentPage.title}
             </Typography>
-
             <Typography
-              variant="body2"
               sx={{
-                letterSpacing: "0.05em",
                 fontFamily: "Roboto, sans-serif",
-                color: currentPage.id === 2 ? "brown" : "rgba(255,255,255,0.8)",
-                fontSize: "clamp(0.9rem, 2.5vw, 1.2rem)", // Responsive subtitle
+                fontSize: "clamp(0.9rem, 2.5vw, 1.2rem)",
+                color: currentPage.id === 2 ? "brown" : "rgba(255,255,255,0.85)",
               }}
             >
               {currentPage.subtitle}
             </Typography>
           </motion.div>
 
-          {/* Image for Page 2 */}
+          {/* Page 2 Image */}
           {currentPage.id === 2 && currentPage.image && (
             <motion.div
               initial={{ opacity: 0, x: 100 }}
@@ -224,74 +217,56 @@ export default function App() {
               transition={{ duration: 1 }}
               style={{ flex: 1, display: "flex", justifyContent: "center" }}
             >
-<img
-  src={currentPage.image}
-  alt="story-image"
-  style={{
-    width: "100%",
-    maxWidth: "600px",
-    height: "auto",
-    objectFit: "contain",
-  }}
-/>
-
+              <img
+                src={currentPage.image}
+                alt="story-img"
+                style={{
+                  width: isMobile ? "80%" : "100%",
+                  maxWidth: "500px",
+                  objectFit: "contain",
+                }}
+              />
             </motion.div>
           )}
 
-{/* Multiple images */}
-{currentPage.images && currentPage.id !== 2 && (
-  <Box
-    sx={{
-      width: "100%",
-      maxWidth: "1200px", // Fixed container width
-      display: "flex",
-      flexWrap: "wrap",
-      justifyContent: "center",
-      alignItems: "center",
-      margin: "0 auto",
-      gap: 2,
-      padding: 2,
-    }}
-  >
-{currentPage.images.map((src, idx) => {
-  const isClickable = currentPage.id === 1 && currentPage.links?.[idx];
+          {/* Multiple images */}
+          {currentPage.images && currentPage.id !== 2 && (
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: "1200px",
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: { xs: 1.5, sm: 2, md: 3 },
+                mt: isMobile ? 3 : 5,
+              }}
+            >
+              {currentPage.images.map((src, idx) => {
+                const isClickable = currentPage.id === 1 && currentPage.links?.[idx];
 
-  // Calculate size based on number of images
-  const imgSize = Math.min(200, Math.max(80, 1200 / currentPage.images.length - 16));
-
-  const img = (
-    <motion.img
-      key={idx}
-      src={src}
-      alt={`item-${idx}`}
-      custom={idx}
-      variants={imageVariants}
-      initial="hidden"
-      animate="visible"
-      style={{
-        width: imgSize,
-        height: imgSize,
-        objectFit: "contain",
-        pointerEvents: isClickable ? "auto" : "none",
-        cursor: isClickable ? "pointer" : "default",
-      }}
-      whileHover={{
-        scale: 1.1,
-        transition: { duration: 0.3 },
-      }}
-    />
-  );
-
-  return isClickable ? (
-    <Link key={idx} to={currentPage.links[idx]} style={{ textDecoration: "none" }}>
-      {img}
-    </Link>
-  ) : (
-    img
-  );
-})}
-  </Box>
-)}
+                return (
+                  <Link key={idx} to={isClickable ? currentPage.links[idx] : "#"}>
+                    <motion.img
+                      src={src}
+                      custom={idx}
+                      variants={imageVariants}
+                      initial="hidden"
+                      animate="visible"
+                      whileHover={{ scale: 1.08 }}
+                      style={{
+                        width: "clamp(70px, 22vw, 180px)",
+                        height: "clamp(70px, 22vw, 180px)",
+                        objectFit: "contain",
+                        cursor: isClickable ? "pointer" : "default",
+                      }}
+                    />
+                  </Link>
+                );
+              })}
+            </Box>
+          )}
         </motion.div>
       </AnimatePresence>
     </Box>
