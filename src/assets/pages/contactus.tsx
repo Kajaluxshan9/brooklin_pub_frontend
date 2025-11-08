@@ -29,8 +29,8 @@ const Contactus = () => {
   return (
     <div>
       <Nav />
-          <SocialMedia />
       <Callicon />
+          <SocialMedia />
             <InitialPage
         line1="Welcome to Brooklin Pub"
         line2="Experience the finest dining and drinks in a cozy atmosphere."

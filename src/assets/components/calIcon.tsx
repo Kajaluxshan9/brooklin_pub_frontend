@@ -26,6 +26,7 @@ const CallButton = () => {
           alignItems: "center",
           justifyContent: "center",
           boxShadow: "0 8px 20px rgba(0,0,0,0.30)",
+          bottom: 80,
         }}
       >
         <FontAwesomeIcon icon={faPhone} style={{ fontSize: 22 }} />

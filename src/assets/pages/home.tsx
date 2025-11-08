@@ -12,8 +12,8 @@ const Home = () => {
     <div>
       <Nav />
       <LandingPage />
-    <SocialMedia />
       <Callicon />
+    <SocialMedia />
 
       <Box
         sx={{
