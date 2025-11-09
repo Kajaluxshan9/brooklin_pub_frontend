@@ -2,16 +2,16 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
 const images = [
-  "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
-  "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+  "https://i.pinimg.com/736x/8b/b4/c5/8bb4c59a46590ce36065bf3b60c8b3e1.jpg",
+  "https://i.pinimg.com/736x/6d/31/89/6d3189d24742473a6b3187fc48dffdd6.jpg",
+  "https://i.pinimg.com/736x/52/1a/01/521a01d28f8bc09a8042ee20a0f6451c.jpg",
+  "https://i.pinimg.com/736x/57/58/8b/57588b32c55b721df9710bfe1093fe1f.jpg",
+  "https://i.pinimg.com/736x/85/c3/de/85c3dec46e77529ddc41c788d23193ef.jpg",
+  "https://i.pinimg.com/736x/26/a7/0e/26a70e2ddd9a68f19c12f2dbce11d0dc.jpg",
+  "https://i.pinimg.com/736x/5c/7a/43/5c7a43138d9740941d0326a156551135.jpg",
+  "https://i.pinimg.com/736x/fd/62/8f/fd628f20363bdb533e548ece109407f3.jpg",
+  "https://i.pinimg.com/736x/c3/8c/c2/c38cc2d23a8b71091a6f72dd01f35294.jpg",
+  "https://i.pinimg.com/736x/5f/66/39/5f66391ae599dfeb0b9338bef8e81897.jpg",
 ];
 
 const LandingPage = () => {
