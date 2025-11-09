@@ -204,6 +204,7 @@ export default function CylinderMenuPopup() {
               <motion.div
                 key={i}
                 onClick={() => setSelectedCard(card)}
+                initial={{ filter: "brightness(1)" }}
                 whileHover={!isMobile ? { filter: "brightness(1.1)" } : {}}
                 style={{
                   position: "absolute",
@@ -225,6 +226,7 @@ export default function CylinderMenuPopup() {
                   textShadow: "0 2px 8px rgba(0,0,0,0.7)",
                   transform: `rotateY(${rotateY}deg) translateZ(${radius}px)`,
                   cursor: "pointer",
+                  filter: "brightness(1)",
                 }}
               >
                 <h2

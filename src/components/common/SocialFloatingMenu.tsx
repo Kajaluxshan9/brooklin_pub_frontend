@@ -1,11 +1,14 @@
 "use client";
 import { Box, Button, useMediaQuery } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// removed solid arrow import since scroll arrow button is removed
 import { faInstagram, faFacebook, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
 const SocialFloatingMenu = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const iconSize = isMobile ? "lg" : "xl";
+
+  // removed internal scroll-to-top arrow per request
 
   return (
     <>
@@ -54,6 +57,8 @@ const SocialFloatingMenu = () => {
           </Button>
         ))}
       </Box>
+
+      {/* Scroll-to-top arrow removed; global ScrollTopFab handles this */}
     </>
   );
 };

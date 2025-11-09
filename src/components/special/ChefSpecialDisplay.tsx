@@ -1,16 +1,23 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Nav from "../components/nav";
+import Nav from "../common/Nav";
 import { createPortal } from "react-dom";
 
+interface Card {
+  title: string;
+  desc: string;
+  bg: string;
+  popupImg: string;
+}
 
-const cards = [
+const cards: Card[] = [
   {
     title: "Appetizers",
     desc: "Start your meal with crispy seafood bites.",
     bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg: "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
   },
   {
     title: "Soups & Salad",
@@ -70,25 +77,23 @@ const cards = [
 
 export default function CylinderMenuPopup() {
   const [angle, setAngle] = useState(0);
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [isInteracting, setIsInteracting] = useState(false);
-  const [lastX, setLastX] = useState(null);
+  const [lastX, setLastX] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
 
-  const containerRef = useRef(null);
-const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
 
-// Derived value for card sizing
-const mobile = screenWidth < 768;
+  // Derived value for card sizing
+  const mobile = screenWidth < 768;
 
-const cardWidth = mobile
-  ? Math.max(120, Math.min(screenWidth * 0.6, 320)) // mobile
-  : Math.max(180, Math.min(screenWidth * 0.3, 300)); // desktop
-const cardHeight = cardWidth * 1.05;
-const radius = cardWidth * 1.7;
-
-
+  const cardWidth = mobile
+    ? Math.max(120, Math.min(screenWidth * 0.6, 320)) // mobile
+    : Math.max(180, Math.min(screenWidth * 0.3, 300)); // desktop
+  const cardHeight = cardWidth * 1.05;
+  const radius = cardWidth * 1.7;
 
   const total = cards.length;
   const anglePerCard = 360 / total;
@@ -110,15 +115,15 @@ const radius = cardWidth * 1.7;
   }, [autoRotate]);
 
   // Mouse & Touch Controls
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isMobile && isInteracting && lastX !== null) {
       const deltaX = e.clientX - lastX;
       setAngle((prev) => (prev + deltaX * 0.3) % 360);
     }
     setLastX(e.clientX);
   };
-  const handleMouseDown = (e) => {
-    if (!isMobile && containerRef.current?.contains(e.target)) {
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isMobile && containerRef.current?.contains(e.target as Node)) {
       setIsInteracting(true);
       setAutoRotate(false);
       setLastX(e.clientX);
@@ -130,14 +135,14 @@ const radius = cardWidth * 1.7;
       setLastX(null);
     }
   };
-  const handleTouchStart = (e) => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (isMobile && e.touches.length === 1) {
       setIsInteracting(true);
       setAutoRotate(false);
       setLastX(e.touches[0].clientX);
     }
   };
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (isMobile && isInteracting && lastX !== null && e.touches.length === 1) {
       const touchX = e.touches[0].clientX;
       const deltaX = touchX - lastX;
@@ -155,8 +160,11 @@ const radius = cardWidth * 1.7;
 
   // Resume auto-scroll on outside click
   useEffect(() => {
-    const handleOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setAutoRotate(true);
       }
     };
@@ -172,33 +180,34 @@ const radius = cardWidth * 1.7;
     <div>
       {!selectedCard && <Nav />}
 
-<div
-  style={{
-    width: "100vw",
-    height: mobile ? "clamp(350px, 70vh, 900px)" : "clamp(600px, 100vh, 1200px)", // bigger for desktop
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    perspective: "1200px",
-    overflow: "hidden",
-    position: "relative",
-    touchAction: "none",
-    userSelect: "none",
-    background: "var(--wine-red)",
-  }}
-  onMouseDown={handleMouseDown}
-  onMouseMove={handleMouseMove}
-  onMouseUp={handleMouseUp}
-  onMouseLeave={handleMouseUp}
-  onTouchStart={handleTouchStart}
-  onTouchMove={handleTouchMove}
-  onTouchEnd={handleTouchEnd}
-  onWheel={(e) => {
-    setAutoRotate(false);
-    setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
-  }}
->
-
+      <div
+        style={{
+          width: "100vw",
+          height: mobile
+            ? "clamp(350px, 70vh, 900px)"
+            : "clamp(600px, 100vh, 1200px)", // bigger for desktop
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          perspective: "1200px",
+          overflow: "hidden",
+          position: "relative",
+          touchAction: "none",
+          userSelect: "none",
+          background: "var(--wine-red)",
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onWheel={(e) => {
+          setAutoRotate(false);
+          setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
+        }}
+      >
         {/* Cylinder */}
         <motion.div
           ref={containerRef}
@@ -259,82 +268,81 @@ const radius = cardWidth * 1.7;
           })}
         </motion.div>
 
-{/* Popup */}
-{selectedCard &&
-  createPortal(
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          background: "rgba(0,0,0,0.9)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 999999999,
-        }}
-        onClick={() => setSelectedCard(null)}
-      >
-        <motion.div
-          onClick={(e) => e.stopPropagation()}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 120, damping: 15 }}
-          style={{
-            position: "relative",
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {/* Close Button */}
-          <button
-            onClick={() => setSelectedCard(null)}
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "20px",
-              background: "rgba(255,255,255,0.2)",
-              border: "2px solid #fff",
-              borderRadius: "50%",
-              width: "40px",
-              height: "40px",
-              fontSize: "24px",
-              color: "#fff",
-              cursor: "pointer",
-              zIndex: 1000000000,
-            }}
-          >
-            ×
-          </button>
+        {/* Popup */}
+        {selectedCard &&
+          createPortal(
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100vw",
+                  height: "100vh",
+                  background: "rgba(0,0,0,0.9)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 999999999,
+                }}
+                onClick={() => setSelectedCard(null)}
+              >
+                <motion.div
+                  onClick={(e) => e.stopPropagation()}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 120, damping: 15 }}
+                  style={{
+                    position: "relative",
+                    width: "100vw",
+                    height: "100vh",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setSelectedCard(null)}
+                    style={{
+                      position: "absolute",
+                      top: "20px",
+                      right: "20px",
+                      background: "rgba(255,255,255,0.2)",
+                      border: "2px solid #fff",
+                      borderRadius: "50%",
+                      width: "40px",
+                      height: "40px",
+                      fontSize: "24px",
+                      color: "#fff",
+                      cursor: "pointer",
+                      zIndex: 1000000000,
+                    }}
+                  >
+                    ×
+                  </button>
 
-          <img
-            src={selectedCard.popupImg}
-            alt={selectedCard.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              borderRadius: "12px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
-            }}
-          />
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>,
-    document.body
-  )}
-
+                  <img
+                    src={selectedCard.popupImg}
+                    alt={selectedCard.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                    }}
+                  />
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>,
+            document.body
+          )}
       </div>
     </div>
   );

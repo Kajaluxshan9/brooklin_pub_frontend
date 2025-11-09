@@ -1,12 +1,19 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from '../src/assets/pages/home';
-import About from '../src/assets/pages/about';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Contactus from '../src/assets/pages/contactus';
-import Special from '../src/assets/pages/special';
-import Menu from '../src/assets/pages/menu';
-import ChefSpecial from '../src/assets/pages/chefSpecial';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+import { useEffect } from "react";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import ContactUs from "./pages/ContactUs";
+import Special from "./pages/Special";
+import Menu from "./pages/Menu";
+import ChefSpecial from "./pages/ChefSpecial";
+import ScrollTopFab from "./components/common/ScrollTopFab";
 
 const theme = createTheme({
   palette: {
@@ -21,9 +28,9 @@ const theme = createTheme({
     MuiToolbar: {
       styleOverrides: {
         root: {
-          minHeight: '0 !important',
-          '@media (min-width:600px)': {
-            minHeight: '0 !important',
+          minHeight: "0 !important",
+          "@media (min-width:600px)": {
+            minHeight: "0 !important",
           },
         },
       },
@@ -36,18 +43,28 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contactus" element={<Contactus />} />
+          <Route path="/contactus" element={<ContactUs />} />
           <Route path="/special/today" element={<Special />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/special/chef" element={<ChefSpecial />} />
-          
         </Routes>
+        <ScrollTopFab />
       </Router>
     </ThemeProvider>
   );
 }
 
 export default App;
+
+/** ScrollToTop component ensures each route change starts at page top */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+  return null;
+}
