@@ -77,6 +77,7 @@ const SocialFloatingMenu = () => {
           justifyContent: "center",
           alignItems: "center",
           zIndex: 4000,
+          bottom: "100px",
           transition: "all 0.3s ease",
           "&:hover": { transform: "scale(1.1)" },
         }}
