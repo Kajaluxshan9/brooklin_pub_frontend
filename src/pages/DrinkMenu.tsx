@@ -1,11 +1,11 @@
 import Nav from "../components/common/Nav";
+import MainMenu from "../components/menu/DrinkMenu";
 import Footer from "../components/common/Footer";
-import MenuView from "../components/menu/MainMenu";
 import InitialPage from "../components/home/InitialPage";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 
-const Menu = () => {
+const Special = () => {
   return (
     <div>
       <Nav />
@@ -15,10 +15,10 @@ const Menu = () => {
         line1="Welcome to Brooklin Pub"
         line2="Experience the finest dining and drinks in a cozy atmosphere."
       />
-      <MenuView />
+      <MainMenu />
       <Footer />
     </div>
   );
 };
 
-export default Menu;
+export default Special;

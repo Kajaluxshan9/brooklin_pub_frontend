@@ -1,5 +1,5 @@
 import Nav from "../components/common/Nav";
-import Item from "../components/about/AboutUs";
+import AdditionalSpecial from "../components/special/additionalSpecial";
 import LandingPage from "../components/home/LandingPage";
 import Footer from "../components/common/Footer";
 import { Box, Typography } from "@mui/material";
@@ -53,7 +53,7 @@ const Home = () => {
         </Typography>
       </Box>
 
-      <Item />
+      <AdditionalSpecial />
       <Footer />
     </div>
   );

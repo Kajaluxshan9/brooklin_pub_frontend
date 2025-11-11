@@ -14,6 +14,8 @@ import Special from "./pages/Special";
 import Menu from "./pages/Menu";
 import ChefSpecial from "./pages/ChefSpecial";
 import ScrollTopFab from "./components/common/ScrollTopFab";
+import MainMenu from "./pages/mainmenu";
+import DrinksMenu from "./pages/DrinkMenu";
 
 const theme = createTheme({
   palette: {
@@ -48,9 +50,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/contactus" element={<ContactUs />} />
-          <Route path="/special/today" element={<Special />} />
+          <Route path="/special/daily" element={<Special />} />
           <Route path="/menu" element={<Menu />} />
-          <Route path="/special/chef" element={<ChefSpecial />} />
+          <Route path="/special/night" element={<ChefSpecial />} />
+          <Route path="/menu/main-menu" element={<MainMenu />} />
+          <Route path="/menu/drink-menu" element={<DrinksMenu />} />
         </Routes>
         <ScrollTopFab />
       </Router>

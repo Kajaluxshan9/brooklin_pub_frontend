@@ -19,60 +19,7 @@ const cards: Card[] = [
     popupImg:
       "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
   },
-  {
-    title: "Soups & Salad",
-    desc: "Fresh and warm flavors for every taste.",
-    bg: "/images/soups-bg.jpg",
-    popupImg: "/images/soups-menu.png",
-  },
-  {
-    title: "Desserts",
-    desc: "Sweet endings with our finest treats.",
-    bg: "/images/desserts-bg.jpg",
-    popupImg: "/images/desserts-menu.png",
-  },
-  {
-    title: "Drinks",
-    desc: "Refreshing beverages to complement your meal.",
-    bg: "/images/drinks-bg.jpg",
-    popupImg: "/images/drinks-menu.png",
-  },
-  {
-    title: "Chef Specials",
-    desc: "Exclusive dishes crafted with passion.",
-    bg: "/images/chef-special-bg.jpg",
-    popupImg: "/images/chef-special-menu.png",
-  },
-  {
-    title: "Family Combos",
-    desc: "Perfect meals for sharing.",
-    bg: "/images/family-bg.jpg",
-    popupImg: "/images/family-menu.png",
-  },
-  {
-    title: "Vegetarian",
-    desc: "Healthy and hearty options for all.",
-    bg: "/images/veg-bg.jpg",
-    popupImg: "/images/veg-menu.png",
-  },
-  {
-    title: "Seafood",
-    desc: "Ocean-fresh specialties you’ll love.",
-    bg: "/images/seafood-bg.jpg",
-    popupImg: "/images/seafood-menu.png",
-  },
-  {
-    title: "Kids Menu",
-    desc: "Tasty meals for little foodies.",
-    bg: "/images/kids-bg.jpg",
-    popupImg: "/images/kids-menu.png",
-  },
-  {
-    title: "Dessert Drinks",
-    desc: "End your meal with a sweet sip.",
-    bg: "/images/dessert-drinks-bg.jpg",
-    popupImg: "/images/dessert-drinks-menu.png",
-  },
+ 
 ];
 
 export default function CylinderMenuPopup() {
@@ -307,25 +254,61 @@ export default function CylinderMenuPopup() {
                   }}
                 >
                   {/* Close Button */}
-                  <button
-                    onClick={() => setSelectedCard(null)}
-                    style={{
-                      position: "absolute",
-                      top: "20px",
-                      right: "20px",
-                      background: "rgba(255,255,255,0.2)",
-                      border: "2px solid #fff",
-                      borderRadius: "50%",
-                      width: "40px",
-                      height: "40px",
-                      fontSize: "24px",
-                      color: "#fff",
-                      cursor: "pointer",
-                      zIndex: 1000000000,
-                    }}
-                  >
-                    ×
-                  </button>
+ <button
+  onClick={() => setSelectedCard(null)}
+  style={{
+    position: "absolute",
+    top: "28px",
+    right: "28px",
+    width: "50px",
+    height: "50px",
+    borderRadius: "50%",
+    backdropFilter: "blur(14px)",
+    background: "rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.3)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    boxShadow: "0 0 0 rgba(255,255,255,0.4)",
+    transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
+  }}
+  onMouseEnter={(e) => {
+    (e.currentTarget as HTMLElement).style.boxShadow =
+      "0 0 22px rgba(255,255,255,0.45)";
+    (e.currentTarget as HTMLElement).style.background =
+      "rgba(255,255,255,0.16)";
+  }}
+  onMouseLeave={(e) => {
+    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 rgba(255,255,255,0.4)";
+    (e.currentTarget as HTMLElement).style.background =
+      "rgba(255,255,255,0.08)";
+  }}
+>
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{
+      transition: "0.35s",
+    }}
+    onMouseEnter={(e) => {
+      (e.currentTarget as SVGElement).style.transform = "rotate(90deg)";
+    }}
+    onMouseLeave={(e) => {
+      (e.currentTarget as SVGElement).style.transform = "rotate(0deg)";
+    }}
+  >
+    <path d="M18 6L6 18" />
+    <path d="M6 6l12 12" />
+  </svg>
+</button>
+
 
                   <img
                     src={selectedCard.popupImg}

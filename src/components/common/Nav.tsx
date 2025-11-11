@@ -14,42 +14,53 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faChevronUp,
+  faChevronRight
+} from "@fortawesome/free-solid-svg-icons";
 
 import { useLocation } from "react-router-dom";
 
 /** ========= Nav Data ========= */
-type DropdownItem = { label: string; path: string };
-type NavLink = { label: string; path?: string; dropdown?: DropdownItem[] };
+/** Unified node type so dropdowns can nest arbitrarily */
+type NavNode = { label: string; path?: string; dropdown?: NavNode[] };
 
-const navLinks: NavLink[] = [
+const navLinks: NavNode[] = [
   { label: "Home", path: "/" },
   { label: "About Us", path: "/about" },
-  { label: "Menu", path: "/menu" },
+
+  {
+    label: "Menu",
+    dropdown: [
+      { label: "Main Menu", path: "/menu/main-menu" },
+      { label: "Drinks Menu", path: "/menu/drink-menu" },
+    ],
+  },
 
   {
     label: "Special",
     dropdown: [
-      { label: "Today’s Special", path: "/special/today" },
-      { label: "Chef’s Choice", path: "/special/chef" },
+      { label: "Daily Special", path: "/special/daily" },
+      { label: "Night Special", path: "/special/night" },
     ],
   },
+
   { label: "Contact Us", path: "/contactus" },
 ];
 
-// Removed legacy SVG icon components (HouseIcon, AboutIcon, SpecialIcon, MenuIcon, ContactIcon) after migrating to MUI icons.
-
 const Nav = () => {
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  // which top-level parent is open
+  const [openParent, setOpenParent] = useState<string | null>(null);
+  // which second-level child is open (inside the parent)
+
   const [hasShadow, setHasShadow] = useState(false);
 
   useEffect(() => {
     const triggerPoint = window.innerHeight * 0.1;
-
     const handleScroll = () => {
       setHasShadow(window.scrollY > triggerPoint);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -60,32 +71,34 @@ const Nav = () => {
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  // delayed close helpers to make dropdowns easier to select
-  const closeTimeoutRef = useRef<number | null>(null);
+  // separate timeout refs so parent/child closing don't conflict
+  const parentCloseTimeout = useRef<number | null>(null);
 
-  const handleOpen = (label: string) => {
-    if (closeTimeoutRef.current) {
-      window.clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
+  // Parent-level handlers
+  const openParentNow = (label: string) => {
+    // cancel any pending parent close
+    if (parentCloseTimeout.current) {
+      window.clearTimeout(parentCloseTimeout.current);
+      parentCloseTimeout.current = null;
     }
-    setOpenDropdown(label);
+    setOpenParent(label);
   };
 
-  const scheduleClose = () => {
-    if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
-    // short delay so small pointer gaps don't immediately close the dropdown
-    closeTimeoutRef.current = window.setTimeout(
-      () => setOpenDropdown(null),
-      180
-    );
+  const scheduleCloseParent = () => {
+    if (parentCloseTimeout.current) window.clearTimeout(parentCloseTimeout.current);
+    parentCloseTimeout.current = window.setTimeout(() => {
+      setOpenParent(null);
+      // also clear child when parent closes
+      parentCloseTimeout.current = null;
+    }, 200); // small delay for pointer movement
   };
 
-  const closeNow = () => {
-    if (closeTimeoutRef.current) {
-      window.clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
+  const closeParentNow = () => {
+    if (parentCloseTimeout.current) {
+      window.clearTimeout(parentCloseTimeout.current);
+      parentCloseTimeout.current = null;
     }
-    setOpenDropdown(null);
+    setOpenParent(null);
   };
 
   /** ======= Desktop View ======= */
@@ -93,20 +106,19 @@ const Nav = () => {
     return (
       <Box sx={{ flexGrow: 1 }}>
         <AppBar
-          position="fixed"
-          elevation={hasShadow ? 4 : 0}
+          elevation={0}
           sx={{
-            top: 25,
+            position: "fixed",
+            top: 12,
             left: "50%",
             transform: "translateX(-50%)",
-            width: { xs: "80%", sm: "95%", md: "85%" },
-            background: isHome ? "white" : hasShadow ? "white" : "transparent",
-            backdropFilter: hasShadow ? "blur(12px)" : "none",
-            transition:
-              "background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease",
-            borderRadius: 50,
-            boxShadow: hasShadow ? "0 8px 32px rgba(0,0,0,0.15)" : "none",
-            height: { xs: 70, sm: 90, md: 110 },
+            width: "85%",
+            borderRadius: "50px",
+            background: "rgba(255, 255, 255, 0.69)",
+            backdropFilter: "blur(18px)",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.20)",
+            border: "1px solid rgba(255,255,255,0.35)",
+            zIndex: 9999,
           }}
         >
           <Toolbar
@@ -126,7 +138,8 @@ const Nav = () => {
               alt="Logo"
               sx={{
                 height: { xs: 40, sm: 55, md: 80 },
-                objectFit: "cont  ain",
+                padding: "8px 0",
+                objectFit: "contain",
                 cursor: "pointer",
               }}
             />
@@ -141,139 +154,147 @@ const Nav = () => {
                 position: "relative",
               }}
             >
-              {navLinks.map((link) => {
-                const isActive = link.path && location.pathname === link.path;
-                return link.dropdown ? (
-                  <Box
-                    key={link.label}
-                    sx={{ position: "relative" }}
-                    onMouseEnter={() => handleOpen(link.label)}
-                    onMouseLeave={scheduleClose}
-                  >
-                    <Button
-                      color="primary"
-                      endIcon={
-                        <FontAwesomeIcon
-                          icon={
-                            openDropdown === link.label
-                              ? faChevronUp
-                              : faChevronDown
-                          }
-                          style={{ fontSize: 16 }}
-                        />
-                      }
-                      sx={{
-                        fontWeight: 500,
-                        textTransform: "none",
-                        color: "primary.main",
-                        position: "relative",
-                        "&::after": {
-                          content: '""',
-                          position: "absolute",
-                          bottom: 0,
-                          left: 0,
-                          width: openDropdown === link.label ? "100%" : "0%",
-                          height: "2px",
-                          backgroundColor: "currentColor",
-                          transition: "width 0.3s ease",
-                        },
-                        "&:hover::after": { width: "100%" },
-                      }}
-                    >
-                      {link.label}
-                    </Button>
+          {navLinks.map((link) => {
+  // If the link has children, check if any child's path matches current location
+  const isParentActive = link.dropdown
+    ? link.dropdown.some(
+        (item) =>
+          item.path &&
+          (item.path === "/"
+            ? location.pathname === "/"
+            : location.pathname.startsWith(item.path))
+      )
+    : false;
 
-                    {openDropdown === link.label && (
-                      <motion.ul
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                        style={{
-                          position: "absolute",
-                          top: "100%",
-                          left: 0,
-                          background: "white",
-                          borderRadius: 8,
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                          padding: "8px 0",
-                          listStyle: "none",
-                          minWidth: 220,
-                          zIndex: 2000,
-                          textAlign: "center",
-                        }}
-                      >
-                        {link.dropdown.map((item) => (
-                          <li key={item.path}>
-                            <Button
-                              component={Link}
-                              to={item.path}
-                              sx={{
-                                width: "100%",
-                                justifyContent: "center",
-                                textAlign: "center",
-                                textTransform: "none",
-                                color: "primary.main",
-                                px: 3,
-                                py: 1.2,
-                                minWidth: 220,
-                                "&:hover": { bgcolor: "grey.100" },
-                              }}
-                              onClick={closeNow}
-                              onMouseEnter={() => {
-                                if (closeTimeoutRef.current) {
-                                  window.clearTimeout(closeTimeoutRef.current);
-                                  closeTimeoutRef.current = null;
-                                }
-                              }}
-                            >
-                              {item.label}
-                            </Button>
-                          </li>
-                        ))}
-                      </motion.ul>
-                    )}
-                  </Box>
-                ) : (
-                  <Box key={link.path} sx={{ position: "relative" }}>
-                    <Button
-                      component={Link}
-                      to={link.path!}
-                      sx={{
-                        fontWeight: 500,
-                        textTransform: "none",
-                        color: "primary.main",
-                        position: "relative",
-                        px: 0.5,
-                        "&:hover": { color: "primary.dark" },
-                      }}
-                    >
-                      {link.label}
-                    </Button>
-                    {isActive && (
-                      <motion.div
-                        layoutId="nav-underline"
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          bottom: 0,
-                          height: 2,
-                          width: "100%",
-                          background: "#7A4A22",
-                          borderRadius: 2,
-                        }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 500,
-                          damping: 30,
-                        }}
-                      />
-                    )}
-                  </Box>
-                );
-              })}
+  const isActive = link.path
+    ? link.path === "/"
+      ? location.pathname === "/"
+      : location.pathname.startsWith(link.path)
+    : isParentActive;
+
+  return link.dropdown ? (
+    <Box
+      key={link.label}
+      sx={{ position: "relative" }}
+      onMouseEnter={() => openParentNow(link.label)}
+      onMouseLeave={scheduleCloseParent}
+    >
+      {/* Parent Button (underline stays when dropdown item page is active) */}
+      <Button
+        color="primary"
+        sx={{
+          fontWeight: 500,
+          textTransform: "none",
+          color: isActive ? "#7A4A22" : "primary.main",
+          position: "relative",
+          px: 0.5,
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: isActive ? "100%" : "0%",
+            height: "2px",
+            backgroundColor: "#7A4A22",
+            transition: "width 0.25s ease",
+            borderRadius: 2,
+          },
+          "&:hover::after": { width: "100%" },
+        }}
+      >
+        {link.label}
+      </Button>
+
+      {/* Dropdown stays same */}
+      {openParent === link.label && (
+        <motion.ul
+          onMouseEnter={() => {
+            if (parentCloseTimeout.current) {
+              window.clearTimeout(parentCloseTimeout.current);
+              parentCloseTimeout.current = null;
+            }
+          }}
+          onMouseLeave={scheduleCloseParent}
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18 }}
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            background: "rgba(255, 255, 255, 1)",
+            borderRadius: 8,
+            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+            padding: "6px 0",
+            listStyle: "none",
+            minWidth: 220,
+            zIndex: 2000,
+            textAlign: "center",
+          }}
+        >
+          {link.dropdown!.map((item) => (
+            <li key={item.label}>
+              <Button
+                component={Link}
+                to={item.path}
+                sx={{
+                  width: "100%",
+                  justifyContent: "center",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1.1,
+                  minWidth: 220,
+                  color: location.pathname.startsWith(item.path || "")
+                    ? "#7A4A22"
+                    : "primary.main",
+                  "&:hover": { bgcolor: "grey.100" },
+                  fontSize: "0.92rem",
+                }}
+                onClick={closeParentNow}
+              >
+                {item.label}
+              </Button>
+            </li>
+          ))}
+        </motion.ul>
+      )}
+    </Box>
+  ) : (
+    // Non dropdown links unchanged
+    <Box key={link.path} sx={{ position: "relative" }}>
+      <Button
+        component={Link}
+        to={link.path!}
+        sx={{
+          fontWeight: 500,
+          textTransform: "none",
+          color: isActive ? "#7A4A22" : "primary.main",
+          position: "relative",
+          "&:hover": { color: "primary.dark" },
+        }}
+      >
+        {link.label}
+      </Button>
+      {isActive && (
+        <motion.div
+          layoutId="nav-underline"
+          style={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            height: 2,
+            width: "100%",
+            background: "#7A4A22",
+            borderRadius: 2,
+          }}
+        />
+      )}
+    </Box>
+  );
+})}
+
             </Box>
-
             <Button
               variant="contained"
               sx={{
@@ -284,6 +305,7 @@ const Nav = () => {
                 textTransform: "none",
                 fontWeight: 600,
               }}
+              onClick={() => {}}
             >
               Order Online
             </Button>
@@ -294,83 +316,116 @@ const Nav = () => {
     );
   }
 
+  // ---------- MOBILE LAYOUT (unchanged) ----------
   return (
     <>
       {/* Floating mobile header (logo + title text + CTA) */}
-      <AppBar position="fixed" elevation={0} sx={{ top: 0, bgcolor: "transparent", zIndex: 1300 }}>
-        <Toolbar sx={{ py: 1.2 }}>
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          top: 0,
+          bgcolor: "transparent",
+          zIndex: 1300,
+        }}
+      >
+        <Toolbar sx={{ py: 0.8 }}>
           <Box
             sx={{
-              bgcolor: "white",
-              color: "black",
-              width: "100%",
-              mx: "auto",
-              borderRadius: 999,
-              height: 54,
+              position: "fixed",
+              top: 12, // lifts the bar down a bit (floating look)
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "90%", // not full width → floating bar look
+              borderRadius: "50px",
+              backdropFilter: "blur(18px)",
+              background: "rgba(255, 255, 255, 0.69)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.20)", // elegant shadow
+              border: "1px solid rgba(255,255,255,0.35)", // glass highlight edge
+              transition: "0.25s ease-in-out",
+              zIndex: 9999,
               display: "flex",
-              alignItems: "center",
               justifyContent: "space-between",
-              px: 2,
-              boxShadow: hasShadow ? "0 8px 24px rgba(0,0,0,0.12)" : "0 4px 12px rgba(0,0,0,0.08)",
-              backdropFilter: "saturate(120%) blur(12px)",
-              border: "1px solid rgba(0,0,0,0.06)",
+              padding: "8px 16px",
             }}
           >
-            <Box component={Link} to="/" sx={{ display: "flex", alignItems: "center", gap: 1.2, textDecoration: "none" }}>
-              <Box component="img" src="/brooklinpub-logo.png" alt="Logo" sx={{ height: 34, objectFit: "contain", cursor: "pointer" }} />
+            {/* LOGO + NAME */}
+            <Box
+              component={Link}
+              to="/"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                textDecoration: "none",
+              }}
+            >
+              <Box
+                component="img"
+                src="/brooklinpub-logo.png"
+                alt="Logo"
+                sx={{
+                  height: 32,
+                  objectFit: "contain",
+                  cursor: "pointer",
+                }}
+              />
               <Box
                 component="span"
                 sx={{
-                  fontFamily: '"Playfair Display", serif',
+                  fontFamily: '"Moon Dance", serif',
                   fontWeight: 700,
-                  fontSize: "1.05rem",
-                  lineHeight: 1,
+                  fontSize: "1.3rem",
                   color: "primary.main",
-                  letterSpacing: 0.2,
                   display: { xs: "block", md: "none" },
+                  lineHeight: 1,
                 }}
               >
                 The Brooklin Pub
               </Box>
             </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Button
-                variant="contained"
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  px: 2,
-                  py: "4px",
-                  fontSize: "0.85rem",
-                  bgcolor: "#7A4A22",
-                  "&:hover": { bgcolor: "#653a1c" },
-                }}
-              >
-                Order Online
-              </Button>
-            </Box>
+
+            {/* ORDER BUTTON */}
+            <Button
+              variant="contained"
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                px: 2.2,
+                py: "6px",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                bgcolor: "#7A4A22",
+                "&:hover": { bgcolor: "#623819" },
+              }}
+            >
+              Order
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>
 
       <Toolbar sx={{ minHeight: 70 }} />
 
-      {/* FIXED BOTTOM NAV */}
+      {/* FIXED BOTTOM NAV (GLASS FLOATING STYLE) */}
       <Box
         sx={{
           position: "fixed",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          bgcolor: "white",
-          boxShadow: "0 -2px 12px rgba(0,0,0,0.08)",
+          bottom: 12,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "90%",
+          borderRadius: "50px",
+          background: "rgba(255, 255, 255, 0.69)",
+          backdropFilter: "blur(18px)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.20)",
+          border: "1px solid rgba(255,255,255,0.35)",
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
-          height: "75px",
-          paddingBottom: "env(safe-area-inset-bottom)", // ensures no clipping on iOS
-          borderTop: "1px solid rgba(0,0,0,0.08)",
-          zIndex: 1200,
+          height: "65px",
+          padding: "0 10px",
+          zIndex: 2000,
         }}
       >
         {[
@@ -381,7 +436,10 @@ const Nav = () => {
           { label: "Contact", path: "/contactus", icon: <ContactSupportRoundedIcon fontSize="medium" /> },
         ].map((item) => {
           const isActive =
-            item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
+            item.path === "/"
+              ? location.pathname === "/"
+              : location.pathname.startsWith(item.path);
+
           return (
             <Button
               key={item.path}
@@ -390,7 +448,7 @@ const Nav = () => {
               disableRipple
               sx={{
                 minWidth: 0,
-                color: isActive ? "#8B4513" : "#6d4c41",
+                color: isActive ? "#7A4A22" : "#5c4a3f",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -398,7 +456,6 @@ const Nav = () => {
                 p: 0,
                 fontSize: "0.65rem",
               }}
-              aria-label={item.label}
             >
               {item.icon}
             </Button>

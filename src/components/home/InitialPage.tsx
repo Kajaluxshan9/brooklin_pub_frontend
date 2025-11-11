@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 interface InitialPageProps {
   line1: string;
@@ -6,14 +7,19 @@ interface InitialPageProps {
 }
 
 const InitialPage = ({ line1, line2 }: InitialPageProps) => {
+  const { pathname } = useLocation();
+
+  // Show only on /contactus
+  if (pathname !== "/contactus") return null;
+
   return (
     <Box
       sx={{
         minHeight: {
-          xs: "40vh", // mobile
-          sm: "45vh", // small tablets
-          md: "50vh", // laptops
-          lg: "55vh", // big screens
+          xs: "40vh",
+          sm: "45vh",
+          md: "50vh",
+          lg: "55vh",
         },
         display: "flex",
         flexDirection: "column",
