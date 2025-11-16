@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Nav from "../common/Nav";
+import { addSpecial } from "../../lib/specials";
 import { createPortal } from "react-dom";
 
 interface Card {
@@ -9,6 +10,7 @@ interface Card {
   desc: string;
   bg: string;
   popupImg: string;
+  status?: string;
 }
 
 const cards: Card[] = [
@@ -18,7 +20,81 @@ const cards: Card[] = [
     bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
     popupImg:
       "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
   },
+    {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+  {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+    {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+  {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+    {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+  {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+    {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+  {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+    {
+    title: "Appetizers",
+    desc: "Start your meal with crispy seafood bites.",
+    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  },
+
  
 ];
 
@@ -43,6 +119,9 @@ export default function CylinderMenuPopup() {
   const radius = cardWidth * 1.7;
 
   const total = cards.length;
+  const isCylinder = total > 2;
+  const isTwo = total === 2;
+  const isSingle = total === 1;
   const anglePerCard = 360 / total;
 
   // Detect mobile / tablet
@@ -52,17 +131,42 @@ export default function CylinderMenuPopup() {
     setIsMobile(checkMobile());
   }, []);
 
+  // Register specials from this component into the shared specials list
+  useEffect(() => {
+    cards.forEach((c, idx) => {
+      try {
+        addSpecial({
+          id: `special-${idx}`,
+          title: c.title,
+          desc: c.desc,
+          bg: c.bg,
+          popupImg: c.popupImg,
+          status: "new",
+          category: "daily",
+        });
+      } catch (err) {
+        // swallow errors — this is just a simple registration
+      }
+    });
+  }, []);
+
   // Auto rotate
   useEffect(() => {
-    if (!autoRotate) return;
+    if (!autoRotate || !isCylinder) return;
     const interval = setInterval(() => {
       setAngle((prev) => (prev + 0.4) % 360);
     }, 30);
     return () => clearInterval(interval);
   }, [autoRotate]);
 
+  // if not a cylinder (1-2 cards) keep angle fixed at 0
+  useEffect(() => {
+    if (!isCylinder) setAngle(0);
+  }, [isCylinder]);
+
   // Mouse & Touch Controls
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isCylinder) return;
     if (!isMobile && isInteracting && lastX !== null) {
       const deltaX = e.clientX - lastX;
       setAngle((prev) => (prev + deltaX * 0.3) % 360);
@@ -70,6 +174,7 @@ export default function CylinderMenuPopup() {
     setLastX(e.clientX);
   };
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isCylinder) return;
     if (!isMobile && containerRef.current?.contains(e.target as Node)) {
       setIsInteracting(true);
       setAutoRotate(false);
@@ -77,12 +182,14 @@ export default function CylinderMenuPopup() {
     }
   };
   const handleMouseUp = () => {
+    if (!isCylinder) return;
     if (!isMobile) {
       setIsInteracting(false);
       setLastX(null);
     }
   };
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isCylinder) return;
     if (isMobile && e.touches.length === 1) {
       setIsInteracting(true);
       setAutoRotate(false);
@@ -90,6 +197,7 @@ export default function CylinderMenuPopup() {
     }
   };
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isCylinder) return;
     if (isMobile && isInteracting && lastX !== null && e.touches.length === 1) {
       const touchX = e.touches[0].clientX;
       const deltaX = touchX - lastX;
@@ -99,6 +207,7 @@ export default function CylinderMenuPopup() {
   };
 
   const handleTouchEnd = () => {
+    if (!isCylinder) return;
     if (isMobile) {
       setIsInteracting(false);
       setLastX(null);
@@ -151,22 +260,35 @@ export default function CylinderMenuPopup() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onWheel={(e) => {
-          setAutoRotate(false);
-          setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
-        }}
+            if (!isCylinder) return;
+            setAutoRotate(false);
+            setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
+          }}
       >
         {/* Cylinder */}
         <motion.div
           ref={containerRef}
           style={{
-            rotateY: angle,
-            transformStyle: "preserve-3d",
-            width: `${cardWidth}px`,
-            height: `${cardHeight}px`,
-            position: "relative",
-            transition: "rotateY 0.1s linear",
-            marginTop: "60px",
-            padding: isMobile ? "0 20px" : "0",
+              rotateY: isCylinder ? angle : 0,
+              transformStyle: isCylinder ? "preserve-3d" : "flat",
+              width: isCylinder
+                ? `${cardWidth}px`
+                : isTwo
+                ? isMobile
+                  ? "90%"
+                  : `${cardWidth * 2 + 16}px`
+                : "min(1100px, 92%)",
+              height: isCylinder ? `${cardHeight}px` : isTwo ? (isMobile ? "auto" : `${cardHeight}px`) : "auto",
+              position: "relative",
+              transition: isCylinder ? "rotateY 0.1s linear" : "none",
+              marginTop: "60px",
+              padding: isMobile ? "0 20px" : "0",
+              display: isCylinder ? undefined : "flex",
+                flexDirection: isTwo ? (isMobile ? "column" : "row") : "column",
+                flexWrap: isTwo ? "wrap" : undefined,
+              gap: isTwo ? "1rem" : undefined,
+              alignItems: "center",
+              justifyContent: "center",
           }}
         >
           {cards.map((card, i) => {
@@ -177,28 +299,54 @@ export default function CylinderMenuPopup() {
                 onClick={() => setSelectedCard(card)}
                 initial={{ filter: "brightness(1)" }}
                 whileHover={!isMobile ? { filter: "brightness(1.1)" } : {}}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "18px",
-                  backgroundImage: `url(${card.bg})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  color: "#fff",
-                  padding: "1rem",
-                  textShadow: "0 2px 8px rgba(0,0,0,0.7)",
-                  transform: `rotateY(${rotateY}deg) translateZ(${radius}px)`,
-                  cursor: "pointer",
-                  filter: "brightness(1)",
-                }}
+                  style={(() => {
+                    const base: React.CSSProperties = {
+                      borderRadius: "18px",
+                      backgroundImage: `url(${card.bg})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      color: "#fff",
+                      padding: "1rem",
+                      textShadow: "0 2px 8px rgba(0,0,0,0.7)",
+                      cursor: "pointer",
+                      filter: "brightness(1)",
+                    } as React.CSSProperties;
+                    if (isCylinder) {
+                      return {
+                        ...base,
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        transform: `rotateY(${rotateY}deg) translateZ(${radius}px)`,
+                      };
+                    }
+
+                    // two or single: layout in flow
+                    // Keep exact card dimensions on desktop for two cards (side-by-side).
+                    const flowWidth = isSingle
+                      ? isMobile
+                        ? "92%"
+                        : `${cardWidth}px`
+                      : isMobile
+                      ? "92%"
+                      : `${cardWidth}px`;
+                    const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
+                    return {
+                      ...base,
+                      position: "relative",
+                      width: flowWidth,
+                      height: flowHeight,
+                      minHeight: "140px",
+                      transform: "none",
+                    };
+                  })()}
               >
                 <h2
                   style={{

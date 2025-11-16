@@ -21,6 +21,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { useLocation } from "react-router-dom";
+import { hasNewSpecial } from "../../lib/specials";
 
 /** ========= Nav Data ========= */
 /** Unified node type so dropdowns can nest arbitrarily */
@@ -70,6 +71,22 @@ const Nav = () => {
 
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
+
+  const [showSpecialBadge, setShowSpecialBadge] = useState<boolean>(() =>
+    typeof window !== "undefined" ? hasNewSpecial() : false
+  );
+
+  useEffect(() => {
+    const onUpdate = () => setShowSpecialBadge(hasNewSpecial());
+    if (typeof window !== "undefined" && (window as any).addEventListener) {
+      window.addEventListener("specials-updated", onUpdate);
+    }
+    return () => {
+      if (typeof window !== "undefined" && (window as any).removeEventListener) {
+        window.removeEventListener("specials-updated", onUpdate);
+      }
+    };
+  }, []);
 
   // separate timeout refs so parent/child closing don't conflict
   const parentCloseTimeout = useRef<number | null>(null);
@@ -203,6 +220,20 @@ const Nav = () => {
         }}
       >
         {link.label}
+        {link.label === "Special" && showSpecialBadge && (
+          <span
+            style={{
+              display: "inline-block",
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#d9534f",
+              marginLeft: 8,
+              verticalAlign: "middle",
+            }}
+            aria-hidden
+          />
+        )}
       </Button>
 
       {/* Dropdown stays same */}
@@ -275,6 +306,20 @@ const Nav = () => {
         }}
       >
         {link.label}
+        {link.label === "Special" && showSpecialBadge && (
+          <span
+            style={{
+              display: "inline-block",
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#d9534f",
+              marginLeft: 8,
+              verticalAlign: "middle",
+            }}
+            aria-hidden
+          />
+        )}
       </Button>
       {isActive && (
         <motion.div
@@ -428,7 +473,7 @@ const Nav = () => {
           zIndex: 2000,
         }}
       >
-        {[
+          {[
           { label: "Home", path: "/", icon: <HomeRoundedIcon fontSize="medium" /> },
           { label: "About", path: "/about", icon: <InfoRoundedIcon fontSize="medium" /> },
           { label: "Menu", path: "/menu", icon: <RestaurantMenuRoundedIcon fontSize="medium" /> },
@@ -457,7 +502,22 @@ const Nav = () => {
                 fontSize: "0.65rem",
               }}
             >
-              {item.icon}
+              <span style={{ position: "relative", display: "inline-block" }}>
+                {item.icon}
+                {item.label === "Special" && showSpecialBadge && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: -6,
+                      right: -2,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: "#d9534f",
+                    }}
+                  />
+                )}
+              </span>
             </Button>
           );
         })}
