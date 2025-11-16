@@ -149,6 +149,7 @@ const LandingPage = () => {
         background: "var(--brown-gradient)",
         overflow: "hidden",
         position: "relative",
+        
       }}
     >
       {images.map((src, i) => (

@@ -24,7 +24,7 @@ const SocialFloatingMenu = () => {
       sx={{
         position: "fixed",
         top: "50%",
-        left: isMobile ? 20 : 30,
+        left: isMobile ? 3 : 30,
         transform: "translateY(-50%)",
         zIndex: 4000,
         display: "flex",

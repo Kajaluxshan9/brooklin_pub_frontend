@@ -1,6 +1,6 @@
 import Nav from "../components/common/Nav";
 import Footer from "../components/common/Footer";
-import MenuView from "../components/menu/MainMenu";
+import MenuView from "../components/menu/MainMenu"
 import InitialPage from "../components/home/InitialPage";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";

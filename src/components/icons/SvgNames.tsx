@@ -26,14 +26,15 @@ export function DrawTextSVG({
       width={finalWidth}
       viewBox="0 0 400 120"
       fill="none"
+      preserveAspectRatio="xMidYMid meet"
       style={{
-        position: "absolute",
-        // CLAMP prevents overlap: scales bottom distance based on screen size
-        bottom: `clamp(-75px, -10vw, -115px)`,
-        left: `clamp(120%, 120%, 120%)`,
+        // make the SVG inline and centered so its "in view" detection works
+        position: "relative",
+        left: "50%",
         transform: `translateX(-50%) scale(${finalScale})`,
         overflow: "visible",
         pointerEvents: "none",
+        display: "block",
       }}
     >
       <motion.path
@@ -44,8 +45,11 @@ export function DrawTextSVG({
         strokeLinecap="round"
         initial={{ pathLength: 0 }}
         whileInView={{ pathLength: 1 }}
-        transition={{ duration: 2, ease: "easeInOut" }}
+        // allow the animation to reverse when the element leaves the viewport
+        viewport={{ once: false, amount: 0.6 }}
+        transition={{ duration: 0.9, ease: "easeInOut" }}
       />
     </motion.svg>
   );
+
 }
