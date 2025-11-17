@@ -13,18 +13,9 @@ import { Link } from "react-router-dom";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronDown,
-  faChevronUp,
-  faChevronRight
-} from "@fortawesome/free-solid-svg-icons";
-
 import { useLocation } from "react-router-dom";
 import { hasNewSpecial } from "../../lib/specials";
 
-/** ========= Nav Data ========= */
-/** Unified node type so dropdowns can nest arbitrarily */
 type NavNode = { label: string; path?: string; dropdown?: NavNode[] };
 
 const navLinks: NavNode[] = [

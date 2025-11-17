@@ -2,106 +2,22 @@ import Nav from "../components/common/Nav";
 import AdditionalSpecial from "../components/special/additionalSpecial";
 import LandingPage from "../components/home/LandingPage";
 import Footer from "../components/common/Footer";
-import { Box, Typography, Alert, AlertTitle, IconButton } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import { Box, Typography } from "@mui/material";
 import BgImage from "../assets/components/image-2.jpg";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
-import { hasNewSpecial, getLatestSpecial, getNewSpecialsCount, getNewSpecialsCountByCategory, getLatestSpecialByCategory } from "../lib/specials";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 const Home = () => {
-  const [showNotif, setShowNotif] = useState(false);
-  const [latest, setLatest] = useState<any | null>(null);
-  const [count, setCount] = useState(0);
-  const [dailyCount, setDailyCount] = useState(0);
-  const [chefCount, setChefCount] = useState(0);
-  const [dailyLatest, setDailyLatest] = useState<any | null>(null);
-  const [chefLatest, setChefLatest] = useState<any | null>(null);
-
   useEffect(() => {
-    const has = hasNewSpecial();
-    setShowNotif(has);
-    if (has) {
-      setLatest(getLatestSpecial());
-      setCount(getNewSpecialsCount());
-      setDailyCount(getNewSpecialsCountByCategory('daily'));
-      setChefCount(getNewSpecialsCountByCategory('chef'));
-      setDailyLatest(getLatestSpecialByCategory('daily'));
-      setChefLatest(getLatestSpecialByCategory('chef'));
-    }
-  }, []);
-
-  useEffect(() => {
-    const onSpecialsUpdated = () => {
-      const has = hasNewSpecial();
-      setShowNotif(has);
-      if (has) {
-        setLatest(getLatestSpecial());
-        setCount(getNewSpecialsCount());
-        setDailyCount(getNewSpecialsCountByCategory('daily'));
-        setChefCount(getNewSpecialsCountByCategory('chef'));
-        setDailyLatest(getLatestSpecialByCategory('daily'));
-        setChefLatest(getLatestSpecialByCategory('chef'));
-      }
-    };
-
-    if (typeof window !== "undefined" && (window as any).addEventListener) {
-      window.addEventListener("specials-updated", onSpecialsUpdated);
-    }
-
-    return () => {
-      if (typeof window !== "undefined" && (window as any).removeEventListener) {
-        window.removeEventListener("specials-updated", onSpecialsUpdated);
-      }
-    };
+    // Home no longer handles global specials loading or notifications;
+    // that logic runs at the app level so the floating badge appears on every page.
   }, []);
 
   return (
     <div>
       <Nav />
-      {showNotif && (
-        <Box sx={{ px: 2, pt: 10, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {dailyLatest && dailyCount > 0 && (
-            <Alert
-              severity="info"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => setShowNotif(false)}
-                >
-                  <CloseIcon fontSize="inherit" />
-                </IconButton>
-              }
-              sx={{ alignItems: 'center' }}
-            >
-              <AlertTitle>Daily Specials ({dailyCount})</AlertTitle>
-              <strong>{dailyLatest.title}</strong> — {dailyLatest.desc}
-            </Alert>
-          )}
-          {chefLatest && chefCount > 0 && (
-            <Alert
-              severity="info"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => setShowNotif(false)}
-                >
-                  <CloseIcon fontSize="inherit" />
-                </IconButton>
-              }
-              sx={{ alignItems: 'center' }}
-            >
-              <AlertTitle>Chef Specials ({chefCount})</AlertTitle>
-              <strong>{chefLatest.title}</strong> — {chefLatest.desc}
-            </Alert>
-          )}
-        </Box>
-      )}
+      {/* Notifications are rendered globally by the app-level FloatingSpecials component. */}
 
       <LandingPage />
       <Callicon />

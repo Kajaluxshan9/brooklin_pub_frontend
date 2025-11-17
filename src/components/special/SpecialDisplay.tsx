@@ -86,17 +86,16 @@ const cards: Card[] = [
       "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
     status: "new",
   },
-    {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
+    
+
 
  
 ];
+
+// Export the cards array so the app can preload specials on initial entry
+// without requiring navigation to this page. This does not create any
+// additional files — it re-uses the existing component module as the source.
+export { cards as exportedDailySpecials };
 
 export default function CylinderMenuPopup() {
   const [angle, setAngle] = useState(0);

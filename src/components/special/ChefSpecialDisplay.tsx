@@ -98,6 +98,10 @@ const cards: Card[] = [
  
 ];
 
+// Export the cards array so the app can preload chef specials on initial entry
+// without creating new files. Loader will import this module and register items.
+export { cards as exportedChefSpecials };
+
 export default function CylinderMenuPopup() {
   const [angle, setAngle] = useState(0);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);

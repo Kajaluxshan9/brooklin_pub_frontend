@@ -11,28 +11,8 @@ export interface Special {
 }
 
 // Example specials list — in a real app this could come from an API or CMS
-// Pre-populate with initial specials so they show on page load
-const specials: Special[] = [
-  { id: 'special-0', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-1', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-2', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-3', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-4', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-5', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-6', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-7', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'special-8', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'daily' },
-  { id: 'chef-0', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-1', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-2', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-3', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-4', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-5', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-6', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-7', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-8', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-  { id: 'chef-9', title: 'Appetizers', desc: 'Start your meal with crispy seafood bites.', status: 'new', category: 'chef' },
-];
+// Start empty — specials are added when components mount and call addSpecial()
+const specials: Special[] = [];
 
 export function getLatestSpecial(): Special | null {
   if (specials.length === 0) return null;
@@ -86,6 +66,58 @@ export function addSpecial(s: Special) {
     } catch (err) {
       // ignore if dispatch fails
     }
+  }
+}
+
+// Load initial specials by importing the existing special component modules
+// which export their local `cards` arrays. This avoids creating any new files
+// and ensures Home can show notifications immediately on first visit.
+export async function loadInitialSpecials(): Promise<void> {
+  try {
+    let daily: any[] = [];
+    let chef: any[] = [];
+
+    // Try importing component modules that now export their `cards` arrays.
+    try {
+      const dailyComp = await import("../components/special/SpecialDisplay");
+      daily = dailyComp.exportedDailySpecials || [];
+    } catch (e) {
+      daily = [];
+    }
+
+    try {
+      const chefComp = await import("../components/special/ChefSpecialDisplay");
+      chef = chefComp.exportedChefSpecials || [];
+    } catch (e) {
+      chef = [];
+    }
+
+    // Register items with the same id pattern used in the component registration
+    daily.forEach((d: any, idx: number) => {
+      addSpecial({
+        id: d.id ?? `special-${idx}`,
+        title: d.title,
+        desc: d.desc,
+        bg: d.bg,
+        popupImg: d.popupImg,
+        status: d.status ?? "new",
+        category: "daily",
+      });
+    });
+
+    chef.forEach((c: any, idx: number) => {
+      addSpecial({
+        id: c.id ?? `chef-${idx}`,
+        title: c.title,
+        desc: c.desc,
+        bg: c.bg,
+        popupImg: c.popupImg,
+        status: c.status ?? "new",
+        category: "chef",
+      });
+    });
+  } catch (err) {
+    // ignore loader errors — registration is optional
   }
 }
 

@@ -4,7 +4,9 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { hasNewSpecial, getNewSpecialsCountByCategory, getLatestSpecialByCategory, loadInitialSpecials } from "./lib/specials";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -16,6 +18,7 @@ import ChefSpecial from "./pages/ChefSpecial";
 import ScrollTopFab from "./components/common/ScrollTopFab";
 import MainMenu from "./pages/mainmenu";
 import DrinksMenu from "./pages/DrinkMenu";
+import FloatingSpecials from "./components/special/flotingSpecial";
 
 const theme = createTheme({
   palette: {
@@ -46,6 +49,7 @@ function App() {
       <CssBaseline />
       <Router>
         <ScrollToTop />
+        <FloatingSpecials />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
