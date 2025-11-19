@@ -6,191 +6,698 @@ import {
   TextField,
   Button,
   Typography,
-  Paper,
-  Card,
-  CardContent,
-  CardActions,
-  Divider,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
-import InitialPage from "../components/home/InitialPage";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import LocalBarIcon from "@mui/icons-material/LocalBar";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
+import { motion } from "framer-motion";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
+    subject: "",
     message: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    severity: "success" as "success" | "error" | "info",
+    message: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name || formData.name.trim().length < 2)
+      newErrors.name = "Please enter your full name";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailRegex.test(formData.email))
+      newErrors.email = "Please enter a valid email address";
+    if (!formData.message || formData.message.trim().length < 10)
+      newErrors.message = "Message should be at least 10 characters";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
-    alert("Message sent!");
-    setFormData({ name: "", email: "", message: "" });
+    if (!validate()) return;
+    setLoading(true);
+    try {
+      const apiUrl = (import.meta as any).env.VITE_API_BASE_URL || "/api";
+      const resp = await fetch(`${apiUrl}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (resp.ok) {
+        setSnackbar({
+          open: true,
+          severity: "success",
+          message: "Message sent successfully! We'll be in touch soon.",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        const subject = encodeURIComponent(
+          formData.subject || "Contact from website"
+        );
+        const body = encodeURIComponent(
+          `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
+            formData.phone || "N/A"
+          }\n\n${formData.message}`
+        );
+        window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
+        setSnackbar({
+          open: true,
+          severity: "info",
+          message: "Opening email client...",
+        });
+      }
+    } catch (err) {
+      const subject = encodeURIComponent(
+        formData.subject || "Contact from website"
+      );
+      const body = encodeURIComponent(
+        `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
+          formData.phone || "N/A"
+        }\n\n${formData.message}`
+      );
+      window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
+      setSnackbar({
+        open: true,
+        severity: "info",
+        message: "Opening email client...",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "var(--brown-gradient)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       <Nav />
       <Callicon />
       <SocialMedia />
-      <InitialPage
-        line1="Get in touch"
-        line2="We'd love to hear from you — bookings, events, or feedback."
-      />
+
+      {/* Decorative Background Elements */}
       <Box
         sx={{
-          width: "100%",
-          py: { xs: 4, md: 8 },
-          px: { xs: 2, sm: 4, md: 8 },
-          bgcolor: "background.default",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.03,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <RestaurantIcon
+          sx={{
+            position: "absolute",
+            fontSize: 300,
+            top: "10%",
+            left: "5%",
+            transform: "rotate(-15deg)",
+          }}
+        />
+        <LocalBarIcon
+          sx={{
+            position: "absolute",
+            fontSize: 250,
+            bottom: "15%",
+            right: "8%",
+            transform: "rotate(25deg)",
+          }}
+        />
+      </Box>
+
+      {/* Hero Section */}
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          pt: { xs: 12, md: 16 },
+          pb: { xs: 6, md: 10 },
+          px: { xs: 3, sm: 4, md: 6 },
+          textAlign: "center",
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <Typography
+            variant="h1"
+            sx={{
+              fontFamily: '"Playfair Display", serif',
+              fontWeight: 800,
+              fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.5rem" },
+              color: "#3C1F0E",
+              mb: 2,
+              textShadow: "0 2px 8px rgba(106,58,30,0.15)",
+            }}
+          >
+            Let's Connect
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontSize: { xs: "1.1rem", sm: "1.3rem", md: "1.5rem" },
+              color: "#6A3A1E",
+              maxWidth: 700,
+              mx: "auto",
+              fontWeight: 400,
+              lineHeight: 1.6,
+            }}
+          >
+            Reservations, events, or just saying hello — we'd love to hear from
+            you
+          </Typography>
+        </motion.div>
+      </Box>
+
+      {/* Main Content Container */}
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 1400,
+          mx: "auto",
+          px: { xs: 2, sm: 3, md: 4 },
+          pb: { xs: 8, md: 12 },
         }}
       >
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "5fr 7fr" },
-            gap: 4,
-            alignItems: "stretch",
+            gridTemplateColumns: { xs: "1fr", lg: "1fr 1.2fr" },
+            gap: { xs: 4, md: 5 },
           }}
         >
-          {/* Contact Info */}
-          <Box>
-            <Card sx={{ height: "100%", borderRadius: 3 }} elevation={4}>
-              <CardContent>
-                <Typography variant="h4" sx={{ fontWeight: 700 }} gutterBottom>
-                  Contact Us
-                </Typography>
-                <Typography color="text.secondary" sx={{ mb: 2 }}>
-                  We usually respond within one business day.
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                <Box sx={{ display: "grid", gap: 1.5 }}>
-                  <Typography fontWeight={600}>Address</Typography>
-                  <Typography color="text.secondary">
-                    15 Baldwin St, Whitby, ON L1M 1A2
-                  </Typography>
-                  <Typography fontWeight={600} sx={{ mt: 2 }}>
-                    Phone
-                  </Typography>
-                  <Typography color="text.secondary">
-                    +1 905-425-3055
-                  </Typography>
-                  <Typography fontWeight={600} sx={{ mt: 2 }}>
-                    Email
-                  </Typography>
-                  <Typography color="text.secondary">
-                    brooklinpub@gmail.com
-                  </Typography>
-                </Box>
-              </CardContent>
-              <CardActions sx={{ px: 2, pb: 2 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  href="tel:+19054253055"
-                  sx={{ borderRadius: 2, py: 1.2, fontWeight: 700 }}
-                >
-                  Call us
-                </Button>
-              </CardActions>
-            </Card>
-          </Box>
-
-          {/* Contact Form */}
-          <Box>
-            <Paper
-              elevation={4}
-              sx={{ p: { xs: 2.5, md: 4 }, borderRadius: 3 }}
+          {/* Left Side - Contact Information Cards */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {/* Visit Us Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Typography variant="h5" fontWeight={700} gutterBottom>
-                Send us a message
-              </Typography>
-              <Typography color="text.secondary" sx={{ mb: 3 }}>
-                Fill out the form and we’ll get back to you shortly.
-              </Typography>
               <Box
-                component="form"
-                onSubmit={handleSubmit}
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                  gap: 2,
+                  bgcolor: "rgba(255,255,255,0.95)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: 4,
+                  p: { xs: 3, md: 4 },
+                  boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
+                  border: "2px solid rgba(217,167,86,0.3)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 12px 40px rgba(106,58,30,0.18)",
+                  },
                 }}
               >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2.5 }}>
+                  <Box
+                    sx={{
+                      bgcolor: "#D9A756",
+                      p: 1.5,
+                      borderRadius: 3,
+                      display: "flex",
+                      mr: 2,
+                    }}
+                  >
+                    <LocationOnIcon sx={{ fontSize: 32, color: "#fff" }} />
+                  </Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontFamily: '"Playfair Display", serif',
+                      fontWeight: 700,
+                      color: "#3C1F0E",
+                    }}
+                  >
+                    Visit Us
+                  </Typography>
+                </Box>
+                <Typography
+                  sx={{
+                    fontSize: "1.1rem",
+                    color: "#6A3A1E",
+                    lineHeight: 1.8,
+                    pl: { xs: 0, sm: 7 },
+                  }}
+                >
+                  <strong>15 Baldwin Street</strong>
+                  <br />
+                  Whitby, ON L1M 1A2
+                  <br />
+                  Canada
+                </Typography>
+              </Box>
+            </motion.div>
+
+            {/* Contact Details Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Box
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.95)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: 4,
+                  p: { xs: 3, md: 4 },
+                  boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
+                  border: "2px solid rgba(217,167,86,0.3)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 12px 40px rgba(106,58,30,0.18)",
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                  <Box
+                    sx={{
+                      bgcolor: "#D9A756",
+                      p: 1.5,
+                      borderRadius: 3,
+                      display: "flex",
+                      mr: 2,
+                    }}
+                  >
+                    <PhoneIcon sx={{ fontSize: 32, color: "#fff" }} />
+                  </Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontFamily: '"Playfair Display", serif',
+                      fontWeight: 700,
+                      color: "#3C1F0E",
+                    }}
+                  >
+                    Get in Touch
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <PhoneIcon sx={{ color: "#D9A756", fontSize: 24 }} />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#8A2A2A", fontWeight: 600, mb: 0.3 }}
+                      >
+                        Phone
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: "1.05rem",
+                          color: "#3C1F0E",
+                          fontWeight: 500,
+                        }}
+                      >
+                        (905) 655-3513
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <EmailIcon sx={{ color: "#D9A756", fontSize: 24 }} />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "#8A2A2A", fontWeight: 600, mb: 0.3 }}
+                      >
+                        Email
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: "1.05rem",
+                          color: "#3C1F0E",
+                          fontWeight: 500,
+                        }}
+                      >
+                        brooklinpub@gmail.com
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            </motion.div>
+
+            {/* Hours Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <Box
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.95)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: 4,
+                  p: { xs: 3, md: 4 },
+                  boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
+                  border: "2px solid rgba(217,167,86,0.3)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 12px 40px rgba(106,58,30,0.18)",
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2.5 }}>
+                  <Box
+                    sx={{
+                      bgcolor: "#D9A756",
+                      p: 1.5,
+                      borderRadius: 3,
+                      display: "flex",
+                      mr: 2,
+                    }}
+                  >
+                    <AccessTimeIcon sx={{ fontSize: 32, color: "#fff" }} />
+                  </Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontFamily: '"Playfair Display", serif',
+                      fontWeight: 700,
+                      color: "#3C1F0E",
+                    }}
+                  >
+                    Opening Hours
+                  </Typography>
+                </Box>
+                <Box sx={{ pl: { xs: 0, sm: 7 }, color: "#6A3A1E" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography fontWeight={600}>Mon - Thu</Typography>
+                    <Typography>11:00 AM - 11:00 PM</Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography fontWeight={600}>Fri - Sat</Typography>
+                    <Typography>11:00 AM - 2:00 AM</Typography>
+                  </Box>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography fontWeight={600}>Sunday</Typography>
+                    <Typography>11:00 AM - 11:00 PM</Typography>
+                  </Box>
+                </Box>
+              </Box>
+            </motion.div>
+          </Box>
+
+          {/* Right Side - Contact Form */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              sx={{
+                bgcolor: "rgba(255,255,255,0.98)",
+                backdropFilter: "blur(15px)",
+                borderRadius: 4,
+                p: { xs: 3, sm: 4, md: 5 },
+                boxShadow: "0 12px 48px rgba(106,58,30,0.15)",
+                border: "3px solid #D9A756",
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontFamily: '"Playfair Display", serif',
+                  fontWeight: 800,
+                  color: "#3C1F0E",
+                  mb: 1,
+                  textAlign: "center",
+                }}
+              >
+                Send us a Message
+              </Typography>
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  color: "#6A3A1E",
+                  mb: 4,
+                  fontSize: "0.95rem",
+                }}
+              >
+                Fill out the form below and we'll get back to you within 24
+                hours
+              </Typography>
+
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 <TextField
-                  label="Name"
+                  fullWidth
+                  label="Your Name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
+                  error={!!errors.name}
+                  helperText={errors.name}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      bgcolor: "rgba(243,227,204,0.3)",
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#D9A756" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#D9A756",
+                        borderWidth: 2,
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                  }}
                 />
+
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                    gap: 3,
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.email}
+                    helperText={errors.email}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        bgcolor: "rgba(243,227,204,0.3)",
+                        borderRadius: 2,
+                        "&:hover fieldset": { borderColor: "#D9A756" },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#D9A756",
+                          borderWidth: 2,
+                        },
+                      },
+                      "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        bgcolor: "rgba(243,227,204,0.3)",
+                        borderRadius: 2,
+                        "&:hover fieldset": { borderColor: "#D9A756" },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#D9A756",
+                          borderWidth: 2,
+                        },
+                      },
+                      "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                    }}
+                  />
+                </Box>
+
                 <TextField
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
+                  fullWidth
+                  label="Subject"
+                  name="subject"
+                  value={formData.subject}
                   onChange={handleChange}
-                  required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      bgcolor: "rgba(243,227,204,0.3)",
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#D9A756" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#D9A756",
+                        borderWidth: 2,
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                  }}
                 />
+
                 <TextField
-                  label="Message"
+                  fullWidth
+                  label="Your Message"
                   name="message"
-                  multiline
-                  rows={5}
                   value={formData.message}
                   onChange={handleChange}
                   required
-                  sx={{ gridColumn: { xs: "1 / -1", sm: "1 / -1" } }}
+                  multiline
+                  rows={5}
+                  error={!!errors.message}
+                  helperText={errors.message}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      bgcolor: "rgba(243,227,204,0.3)",
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#D9A756" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#D9A756",
+                        borderWidth: 2,
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                  }}
                 />
-                <Box sx={{ gridColumn: "1 / -1" }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ py: 1.2, borderRadius: 2 }}
-                  >
-                    Send Message
-                  </Button>
-                </Box>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  sx={{
+                    bgcolor: "#D9A756",
+                    color: "#fff",
+                    py: 1.5,
+                    fontSize: "1.1rem",
+                    fontWeight: 700,
+                    borderRadius: 2,
+                    textTransform: "none",
+                    boxShadow: "0 4px 16px rgba(217,167,86,0.4)",
+                    "&:hover": {
+                      bgcolor: "#c48a3a",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 24px rgba(217,167,86,0.5)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {loading ? (
+                    <CircularProgress size={24} sx={{ color: "#fff" }} />
+                  ) : (
+                    "Send Message"
+                  )}
+                </Button>
               </Box>
-            </Paper>
-          </Box>
+            </Box>
+          </motion.div>
         </Box>
 
-        {/* Map */}
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h5" fontWeight={700} gutterBottom>
-            Find us on the map
-          </Typography>
-          <Paper elevation={3} sx={{ borderRadius: 3, overflow: "hidden" }}>
-            <Box
-              component="iframe"
-              title="Brooklin Pub & Grill Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2872.160838886545!2d-78.95788752367431!3d43.95952413277433!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d51c5405c5e9a7%3A0x9d6a9df1fb4f5b1!2s15%20Baldwin%20St%2C%20Whitby%2C%20ON%20L1M%201A2%2C%20Canada!5e0!3m2!1sen!2s!4v1731139200000"
-              sx={{
-                border: 0,
-                width: "100%",
-                height: { xs: 300, sm: 380, md: 460 },
-                display: "block",
-              }}
-              loading="lazy"
+        {/* Map Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
+          <Box
+            sx={{
+              mt: { xs: 4, md: 6 },
+              borderRadius: 4,
+              overflow: "hidden",
+              boxShadow: "0 12px 48px rgba(106,58,30,0.15)",
+              border: "3px solid #D9A756",
+              height: { xs: 300, sm: 400, md: 500 },
+            }}
+          >
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2872.345!2d-78.9417!3d43.8765!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDUyJzM1LjQiTiA3OMKwNTYnMzAuMSJX!5e0!3m2!1sen!2sca!4v1234567890"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
               allowFullScreen
+              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
+              title="Brooklin Pub Location"
             />
-          </Paper>
-        </Box>
+          </Box>
+        </motion.div>
       </Box>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
       <Footer />
-    </div>
+    </Box>
   );
 };
 

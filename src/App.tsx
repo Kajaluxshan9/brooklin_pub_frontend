@@ -4,9 +4,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { hasNewSpecial, getNewSpecialsCountByCategory, getLatestSpecialByCategory, loadInitialSpecials } from "./lib/specials";
+import { useEffect } from "react";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import { ThemeProvider, createTheme } from "@mui/material/styles";

@@ -46,19 +46,7 @@ const Nav = () => {
   const [openParent, setOpenParent] = useState<string | null>(null);
   // which second-level child is open (inside the parent)
 
-  const [hasShadow, setHasShadow] = useState(false);
-
-  useEffect(() => {
-    const triggerPoint = window.innerHeight * 0.1;
-    const handleScroll = () => {
-      setHasShadow(window.scrollY > triggerPoint);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const location = useLocation();
-  const isHome = location.pathname === "/";
 
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -73,7 +61,10 @@ const Nav = () => {
       window.addEventListener("specials-updated", onUpdate);
     }
     return () => {
-      if (typeof window !== "undefined" && (window as any).removeEventListener) {
+      if (
+        typeof window !== "undefined" &&
+        (window as any).removeEventListener
+      ) {
         window.removeEventListener("specials-updated", onUpdate);
       }
     };
@@ -93,7 +84,8 @@ const Nav = () => {
   };
 
   const scheduleCloseParent = () => {
-    if (parentCloseTimeout.current) window.clearTimeout(parentCloseTimeout.current);
+    if (parentCloseTimeout.current)
+      window.clearTimeout(parentCloseTimeout.current);
     parentCloseTimeout.current = window.setTimeout(() => {
       setOpenParent(null);
       // also clear child when parent closes
@@ -162,174 +154,175 @@ const Nav = () => {
                 position: "relative",
               }}
             >
-          {navLinks.map((link) => {
-  // If the link has children, check if any child's path matches current location
-  const isParentActive = link.dropdown
-    ? link.dropdown.some(
-        (item) =>
-          item.path &&
-          (item.path === "/"
-            ? location.pathname === "/"
-            : location.pathname.startsWith(item.path))
-      )
-    : false;
+              {navLinks.map((link) => {
+                // If the link has children, check if any child's path matches current location
+                const isParentActive = link.dropdown
+                  ? link.dropdown.some(
+                      (item) =>
+                        item.path &&
+                        (item.path === "/"
+                          ? location.pathname === "/"
+                          : location.pathname.startsWith(item.path))
+                    )
+                  : false;
 
-  const isActive = link.path
-    ? link.path === "/"
-      ? location.pathname === "/"
-      : location.pathname.startsWith(link.path)
-    : isParentActive;
+                const isActive = link.path
+                  ? link.path === "/"
+                    ? location.pathname === "/"
+                    : location.pathname.startsWith(link.path)
+                  : isParentActive;
 
-  return link.dropdown ? (
-    <Box
-      key={link.label}
-      sx={{ position: "relative" }}
-      onMouseEnter={() => openParentNow(link.label)}
-      onMouseLeave={scheduleCloseParent}
-    >
-      {/* Parent Button (underline stays when dropdown item page is active) */}
-      <Button
-        color="primary"
-        sx={{
-          fontWeight: 500,
-          textTransform: "none",
-          color: isActive ? "#7A4A22" : "primary.main",
-          position: "relative",
-          px: 0.5,
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: isActive ? "100%" : "0%",
-            height: "2px",
-            backgroundColor: "#7A4A22",
-            transition: "width 0.25s ease",
-            borderRadius: 2,
-          },
-          "&:hover::after": { width: "100%" },
-        }}
-      >
-        {link.label}
-        {link.label === "Special" && showSpecialBadge && (
-          <span
-            style={{
-              display: "inline-block",
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#d9534f",
-              marginLeft: 8,
-              verticalAlign: "middle",
-            }}
-            aria-hidden
-          />
-        )}
-      </Button>
+                return link.dropdown ? (
+                  <Box
+                    key={link.label}
+                    sx={{ position: "relative" }}
+                    onMouseEnter={() => openParentNow(link.label)}
+                    onMouseLeave={scheduleCloseParent}
+                  >
+                    {/* Parent Button (underline stays when dropdown item page is active) */}
+                    <Button
+                      color="primary"
+                      sx={{
+                        fontWeight: 500,
+                        textTransform: "none",
+                        color: isActive ? "#7A4A22" : "primary.main",
+                        position: "relative",
+                        px: 0.5,
+                        "&::after": {
+                          content: '""',
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          width: isActive ? "100%" : "0%",
+                          height: "2px",
+                          backgroundColor: "#7A4A22",
+                          transition: "width 0.25s ease",
+                          borderRadius: 2,
+                        },
+                        "&:hover::after": { width: "100%" },
+                      }}
+                    >
+                      {link.label}
+                      {link.label === "Special" && showSpecialBadge && (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: "#d9534f",
+                            marginLeft: 8,
+                            verticalAlign: "middle",
+                          }}
+                          aria-hidden
+                        />
+                      )}
+                    </Button>
 
-      {/* Dropdown stays same */}
-      {openParent === link.label && (
-        <motion.ul
-          onMouseEnter={() => {
-            if (parentCloseTimeout.current) {
-              window.clearTimeout(parentCloseTimeout.current);
-              parentCloseTimeout.current = null;
-            }
-          }}
-          onMouseLeave={scheduleCloseParent}
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18 }}
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            background: "rgba(255, 255, 255, 1)",
-            borderRadius: 8,
-            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-            padding: "6px 0",
-            listStyle: "none",
-            minWidth: 220,
-            zIndex: 2000,
-            textAlign: "center",
-          }}
-        >
-          {link.dropdown!.map((item) => (
-            <li key={item.label}>
-              <Button
-                component={Link}
-                to={item.path}
-                sx={{
-                  width: "100%",
-                  justifyContent: "center",
-                  textTransform: "none",
-                  px: 3,
-                  py: 1.1,
-                  minWidth: 220,
-                  color: location.pathname.startsWith(item.path || "")
-                    ? "#7A4A22"
-                    : "primary.main",
-                  "&:hover": { bgcolor: "grey.100" },
-                  fontSize: "0.92rem",
-                }}
-                onClick={closeParentNow}
-              >
-                {item.label}
-              </Button>
-            </li>
-          ))}
-        </motion.ul>
-      )}
-    </Box>
-  ) : (
-    // Non dropdown links unchanged
-    <Box key={link.path} sx={{ position: "relative" }}>
-      <Button
-        component={Link}
-        to={link.path!}
-        sx={{
-          fontWeight: 500,
-          textTransform: "none",
-          color: isActive ? "#7A4A22" : "primary.main",
-          position: "relative",
-          "&:hover": { color: "primary.dark" },
-        }}
-      >
-        {link.label}
-        {link.label === "Special" && showSpecialBadge && (
-          <span
-            style={{
-              display: "inline-block",
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#d9534f",
-              marginLeft: 8,
-              verticalAlign: "middle",
-            }}
-            aria-hidden
-          />
-        )}
-      </Button>
-      {isActive && (
-        <motion.div
-          layoutId="nav-underline"
-          style={{
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-            height: 2,
-            width: "100%",
-            background: "#7A4A22",
-            borderRadius: 2,
-          }}
-        />
-      )}
-    </Box>
-  );
-})}
-
+                    {/* Dropdown stays same */}
+                    {openParent === link.label && (
+                      <motion.ul
+                        onMouseEnter={() => {
+                          if (parentCloseTimeout.current) {
+                            window.clearTimeout(parentCloseTimeout.current);
+                            parentCloseTimeout.current = null;
+                          }
+                        }}
+                        onMouseLeave={scheduleCloseParent}
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18 }}
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          background: "rgba(255, 255, 255, 1)",
+                          borderRadius: 8,
+                          boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+                          padding: "6px 0",
+                          listStyle: "none",
+                          minWidth: 220,
+                          zIndex: 2000,
+                          textAlign: "center",
+                        }}
+                      >
+                        {link.dropdown!.map((item) => (
+                          <li key={item.label}>
+                            <Button
+                              component={Link}
+                              to={item.path || "/"}
+                              sx={{
+                                width: "100%",
+                                justifyContent: "center",
+                                textTransform: "none",
+                                px: 3,
+                                py: 1.1,
+                                minWidth: 220,
+                                color: location.pathname.startsWith(
+                                  item.path || ""
+                                )
+                                  ? "#7A4A22"
+                                  : "primary.main",
+                                "&:hover": { bgcolor: "grey.100" },
+                                fontSize: "0.92rem",
+                              }}
+                              onClick={closeParentNow}
+                            >
+                              {item.label}
+                            </Button>
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </Box>
+                ) : (
+                  // Non dropdown links unchanged
+                  <Box key={link.path} sx={{ position: "relative" }}>
+                    <Button
+                      component={Link}
+                      to={link.path!}
+                      sx={{
+                        fontWeight: 500,
+                        textTransform: "none",
+                        color: isActive ? "#7A4A22" : "primary.main",
+                        position: "relative",
+                        "&:hover": { color: "primary.dark" },
+                      }}
+                    >
+                      {link.label}
+                      {link.label === "Special" && showSpecialBadge && (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: "#d9534f",
+                            marginLeft: 8,
+                            verticalAlign: "middle",
+                          }}
+                          aria-hidden
+                        />
+                      )}
+                    </Button>
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-underline"
+                        style={{
+                          position: "absolute",
+                          left: 0,
+                          bottom: 0,
+                          height: 2,
+                          width: "100%",
+                          background: "#7A4A22",
+                          borderRadius: 2,
+                        }}
+                      />
+                    )}
+                  </Box>
+                );
+              })}
             </Box>
             <Button
               variant="contained"

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Box, Typography, Grid } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
 
@@ -65,19 +65,31 @@ const MenuListRandomGrid = () => {
       </Typography>
 
       {/* Grid */}
-      <Grid
-        container
-        spacing={{ xs: 2, sm: 3, md: 4 }}
-        sx={{ width: "95%", maxWidth: 1200 }}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(2, 1fr)",
+            sm: "repeat(3, 1fr)",
+            md: "repeat(4, 1fr)",
+          },
+          gap: { xs: 2, sm: 3, md: 4 },
+          width: "95%",
+          maxWidth: 1200,
+        }}
       >
         {shuffledItems.map((item, index) => (
-          <Grid item xs={6} sm={4} md={3} key={index} sx={{ textAlign: "center" }}>
+          <Box key={index} sx={{ textAlign: "center" }}>
             <MotionImg
               src={item.image}
               alt={item.name}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5, ease: "easeOut" }}
+              transition={{
+                delay: index * 0.1,
+                duration: 0.5,
+                ease: "easeOut",
+              }}
               whileHover={{ scale: 1.1, rotate: 3 }}
             />
             <Typography
@@ -90,9 +102,9 @@ const MenuListRandomGrid = () => {
             >
               {item.name}
             </Typography>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };
