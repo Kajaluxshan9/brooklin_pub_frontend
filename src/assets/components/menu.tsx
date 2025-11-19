@@ -224,7 +224,7 @@ export default function LongScrollMenu() {
       >
         <motion.path
           ref={pathRef}
-          d={curvedPath}
+          d={curvedPath()}
           stroke="white"
           strokeWidth="6"
           fill="none"

@@ -164,7 +164,6 @@ const Home = () => {
           </AnimatePresence>,
           document.body
         )}
-      {/* Notifications are rendered globally by the app-level FloatingSpecials component. */}
 
       <LandingPage />
       <Callicon />

@@ -7,8 +7,10 @@ export default function LongScrollMenu() {
   const ref = useRef<HTMLDivElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
-  const containerHeight = 4000;
+  const defaultContainerHeight = 4000;
   const padding = 36; // safe padding from edges
+
+  const [containerHeight, setContainerHeight] = useState(defaultContainerHeight);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -20,7 +22,7 @@ export default function LongScrollMenu() {
   const right = screenWidth;
   const centerX = screenWidth / 2;
 
-  const curvedPath = `
+  const curvedPath = () => `
     M${left} 0
     C${right * 0.25} ${containerHeight * 0.1},
      ${right * 0.75} ${containerHeight * 0.2},
@@ -187,6 +189,23 @@ export default function LongScrollMenu() {
 
   // Generate points along curved path with non-overlap and full visibility
   useEffect(() => {
+    const computeHeight = () => {
+      const sw = window.innerWidth || screenWidth;
+      const isMobileLocal = sw < 768;
+      const perItem = isMobileLocal ? 220 : 360;
+      const computed = Math.max(
+        window.innerHeight || 700,
+        menuData.length * perItem + padding * 2
+      );
+      setContainerHeight(computed);
+    };
+
+    computeHeight();
+    window.addEventListener("resize", computeHeight);
+    return () => window.removeEventListener("resize", computeHeight);
+  }, [menuData.length]);
+
+  useEffect(() => {
     const generatePoints = () => {
       if (!pathRef.current) return;
       const pathElement = pathRef.current as SVGPathElement;
@@ -337,7 +356,7 @@ export default function LongScrollMenu() {
       clearTimeout(timer);
       window.removeEventListener("resize", generatePoints);
     };
-  }, [curvedPath, menuData.length]);
+  }, [containerHeight, menuData.length]);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -373,7 +392,7 @@ export default function LongScrollMenu() {
       >
         <motion.path
           ref={pathRef}
-          d={curvedPath}
+          d={curvedPath()}
           stroke="white"
           strokeWidth="6"
           fill="none"

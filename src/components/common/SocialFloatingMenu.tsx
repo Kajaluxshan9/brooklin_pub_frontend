@@ -1,7 +1,6 @@
 "use client";
 import { Box, Button, useMediaQuery } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPhone } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram, faFacebook } from "@fortawesome/free-brands-svg-icons";
 import { faTiktok } from "@fortawesome/free-brands-svg-icons";
 
@@ -16,25 +15,27 @@ const SocialFloatingMenu = () => {
     { icon: faFacebook, link: "https://facebook.com/" },
   ];
 
-  // On mobile: phone icon left, social icons on right.
+  // On mobile: show social icons on the left (remove call icon)
   if (isMobile) {
     return (
-      <>
-        <Box
-          sx={{
-            position: "fixed",
-            top: "50%",
-            left: 3,
-            transform: "translateY(-50%)",
-            zIndex: 4000,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
+      <Box
+        sx={{
+          position: "fixed",
+          top: "50%",
+          left: 3,
+          transform: "translateY(-50%)",
+          zIndex: 4000,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        {allIcons.map((item, idx) => (
           <Button
-            href={"tel:+94771234567"}
+            key={idx}
+            href={item.link}
+            target="_blank"
             sx={{
               width: 48,
               height: 48,
@@ -53,51 +54,10 @@ const SocialFloatingMenu = () => {
               },
             }}
           >
-            <FontAwesomeIcon icon={faPhone} size={iconSize} />
+            <FontAwesomeIcon icon={item.icon} size={iconSize} />
           </Button>
-        </Box>
-
-        <Box
-          sx={{
-            position: "fixed",
-            top: "50%",
-            right: 3,
-            transform: "translateY(-50%)",
-            zIndex: 4000,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          {allIcons.map((item, idx) => (
-            <Button
-              key={idx}
-              href={item.link}
-              target="_blank"
-              sx={{
-                width: 48,
-                height: 48,
-                minWidth: 48,
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.35)",
-                backdropFilter: "blur(10px)",
-                boxShadow: "0px 6px 14px rgba(0,0,0,0.3)",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "scale(1.15)",
-                  background: "rgba(255,255,255,0.55)",
-                },
-              }}
-            >
-              <FontAwesomeIcon icon={item.icon} size={iconSize} />
-            </Button>
-          ))}
-        </Box>
-      </>
+        ))}
+      </Box>
     );
   }
 
@@ -116,7 +76,7 @@ const SocialFloatingMenu = () => {
         gap: 1.2,
       }}
     >
-      {[{ icon: faPhone, link: "tel:+94771234567" }, ...allIcons].map((item, idx) => (
+      {allIcons.map((item, idx) => (
         <Button
           key={idx}
           href={item.link}
