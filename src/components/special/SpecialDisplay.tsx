@@ -104,8 +104,6 @@ export default function CylinderMenuPopup() {
   const [lastX, setLastX] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
-  const [showSlideshow, setShowSlideshow] = useState(false);
-  const [slideshowIndex, setSlideshowIndex] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
@@ -151,23 +149,7 @@ export default function CylinderMenuPopup() {
     });
   }, []);
 
-  // Show intro slideshow for any cards marked as "new"
-  const newCards = cards.filter((c) => c.status === "new");
-  useEffect(() => {
-    if (newCards.length > 0) {
-      setShowSlideshow(true);
-      setSlideshowIndex(0);
-    }
-  }, []);
-
-  // Auto-advance slideshow while visible
-  useEffect(() => {
-    if (!showSlideshow || newCards.length <= 1) return;
-    const interval = setInterval(() => {
-      setSlideshowIndex((prev) => (prev + 1) % newCards.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [showSlideshow, newCards.length]);
+  // intro slideshow removed
 
   // Auto rotate
   useEffect(() => {
@@ -382,132 +364,7 @@ export default function CylinderMenuPopup() {
           })}
         </motion.div>
 
-        {/* Intro Slideshow for new items */}
-        {showSlideshow && newCards.length > 0 &&
-          createPortal(
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  width: "100vw",
-                  height: "100vh",
-                  background: "rgba(0,0,0,0.9)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 999999999,
-                }}
-                onClick={() => setShowSlideshow(false)}
-              >
-                <motion.div
-                  onClick={(e) => e.stopPropagation()}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 110, damping: 14 }}
-                  style={{
-                    position: "relative",
-                    width: "min(1100px, 92vw)",
-                    height: "min(760px, 86vh)",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <button
-                    onClick={() => setShowSlideshow(false)}
-                    style={{
-                      position: "absolute",
-                      top: "20px",
-                      right: "20px",
-                      width: "48px",
-                      height: "48px",
-                      borderRadius: "50%",
-                      backdropFilter: "blur(10px)",
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                      <path d="M18 6L6 18" />
-                      <path d="M6 6l12 12" />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setSlideshowIndex((i) => (i - 1 + newCards.length) % newCards.length); }}
-                    style={{
-                      position: "absolute",
-                      left: "18px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: "56px",
-                      height: "56px",
-                      borderRadius: "8px",
-                      background: "rgba(0,0,0,0.35)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "white",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setSlideshowIndex((i) => (i + 1) % newCards.length); }}
-                    style={{
-                      position: "absolute",
-                      right: "18px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: "56px",
-                      height: "56px",
-                      borderRadius: "8px",
-                      background: "rgba(0,0,0,0.35)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "white",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                      <path d="M9 6l6 6-6 6" />
-                    </svg>
-                  </button>
-
-                  <img
-                    src={newCards[slideshowIndex].popupImg}
-                    alt={newCards[slideshowIndex].title}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      borderRadius: "12px",
-                      boxShadow: "0 18px 60px rgba(0,0,0,0.6)",
-                    }}
-                  />
-                </motion.div>
-              </motion.div>
-            </AnimatePresence>,
-            document.body
-          )}
+        {/* intro slideshow removed */}
 
         {/* Popup */}
         {selectedCard &&

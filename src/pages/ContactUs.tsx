@@ -9,6 +9,7 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  MenuItem,
 } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
@@ -19,6 +20,7 @@ import LocalBarIcon from "@mui/icons-material/LocalBar";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import { motion } from "framer-motion";
+import ContactBg from "../assets/components/image-2.jpg";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +28,7 @@ const ContactUs = () => {
     email: "",
     phone: "",
     subject: "",
+    reason: "",
     message: "",
   });
   const [loading, setLoading] = useState(false);
@@ -76,6 +79,7 @@ const ContactUs = () => {
           email: "",
           phone: "",
           subject: "",
+          reason: "",
           message: "",
         });
       } else {
@@ -119,8 +123,14 @@ const ContactUs = () => {
       sx={{
         minHeight: "100vh",
         background: "var(--brown-gradient)",
+        backgroundImage: `url(${ContactBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundBlendMode: "overlay",
         position: "relative",
         overflow: "hidden",
+        fontFamily: "'Roboto', sans-serif",
       }}
     >
       <Nav />
@@ -466,12 +476,24 @@ const ContactUs = () => {
               component="form"
               onSubmit={handleSubmit}
               sx={{
-                bgcolor: "rgba(255,255,255,0.98)",
-                backdropFilter: "blur(15px)",
-                borderRadius: 4,
-                p: { xs: 3, sm: 4, md: 5 },
-                boxShadow: "0 12px 48px rgba(106,58,30,0.15)",
-                border: "3px solid #D9A756",
+                    position: "relative",
+                    overflow: "hidden",
+                    bgcolor: "rgba(255,255,255,0.12)",
+                    backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
+                    backdropFilter: "blur(12px)",
+                    WebkitBackdropFilter: "blur(12px)",
+                    borderRadius: 4,
+                    p: { xs: 3, sm: 4, md: 5 },
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    // subtle inner highlight
+                    '&:before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0))',
+                      pointerEvents: 'none',
+                    },
               }}
             >
               <Typography
@@ -593,6 +615,34 @@ const ContactUs = () => {
                     "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
                   }}
                 />
+
+                <TextField
+                  select
+                  fullWidth
+                  label="Topic"
+                  name="reason"
+                  value={formData.reason}
+                  onChange={handleChange}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      bgcolor: "rgba(243,227,204,0.3)",
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#D9A756" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#D9A756",
+                        borderWidth: 2,
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                  }}
+                >
+                  <MenuItem value="">Select a topic</MenuItem>
+                  <MenuItem value="general">General Inquiry</MenuItem>
+                  <MenuItem value="reservation">Reservation</MenuItem>
+                  <MenuItem value="event">Event Inquiry</MenuItem>
+                  <MenuItem value="feedback">Feedback</MenuItem>
+                  <MenuItem value="jobs">Job Application</MenuItem>
+                </TextField>
 
                 <TextField
                   fullWidth

@@ -11,7 +11,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import ContactUs from "./pages/ContactUs";
 import Special from "./pages/Special";
-import Menu from "./pages/Menu";
+// import Menu from "./pages/Menu";
 import ChefSpecial from "./pages/ChefSpecial";
 import ScrollTopFab from "./components/common/ScrollTopFab";
 import MainMenu from "./pages/mainmenu";
@@ -53,7 +53,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/special/daily" element={<Special />} />
-          <Route path="/menu" element={<Menu />} />
+          {/* <Route path="/menu" element={<Menu />} /> */}
           <Route path="/special/night" element={<ChefSpecial />} />
           <Route path="/menu/main-menu" element={<MainMenu />} />
           <Route path="/menu/drink-menu" element={<DrinksMenu />} />

@@ -203,6 +203,7 @@ const LandingPage = () => {
         }}
       >
         <h1
+          className="landing-heading"
           style={{ fontSize: "2.5rem", fontWeight: "bold", lineHeight: "1.2" }}
         >
          Step in to the Brooklin Pub
@@ -214,6 +215,11 @@ const LandingPage = () => {
         @media (max-width: 1024px) { .spiral-card { max-width: 500px; } }
         @media (max-width: 768px) { .spiral-card { max-width: 400px; } }
         @media (max-width: 480px) { .spiral-card { max-width: 320px; } }
+
+        .landing-heading { padding: 0; box-sizing: border-box; }
+        @media (max-width: 480px) {
+          .landing-heading { padding: 150px; }
+        }
       `}</style>
     </div>
   );

@@ -76,6 +76,7 @@ const Home = () => {
                   alignItems: "center",
                 }}
               >
+                  <style>{`.slideshow-arrow { top: auto !important; bottom: 18px !important; transform: none !important; }`}</style>
                 <button
                   onClick={() => setShowSlideshow(false)}
                   style={{
@@ -118,6 +119,7 @@ const Home = () => {
                     alignItems: "center",
                     justifyContent: "center",
                   }}
+                  className="slideshow-arrow left"
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                     <path d="M15 18l-6-6 6-6" />
@@ -142,6 +144,7 @@ const Home = () => {
                     alignItems: "center",
                     justifyContent: "center",
                   }}
+                  className="slideshow-arrow right"
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                     <path d="M9 6l6 6-6 6" />
