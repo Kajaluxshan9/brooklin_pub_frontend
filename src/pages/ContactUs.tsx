@@ -10,6 +10,7 @@ import {
   Alert,
   CircularProgress,
   MenuItem,
+  Divider,
 } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
@@ -21,6 +22,8 @@ import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import { motion } from "framer-motion";
 import ContactBg from "../assets/components/image-2.jpg";
+import contactAnimation from "../pages/chef.json";
+import Lottie from "lottie-react";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -234,43 +237,39 @@ const ContactUs = () => {
             gap: { xs: 4, md: 5 },
           }}
         >
-          {/* Left Side - Contact Information Cards */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {/* Visit Us Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+          {/* Left Side - Combined Contact Information Container */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Box
+              sx={{
+                bgcolor: "rgba(255,255,255,0.95)",
+                backdropFilter: "blur(10px)",
+                borderRadius: 4,
+                p: { xs: 2.5, md: 3 },
+                boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
+                border: "2px solid rgba(217,167,86,0.3)",
+                transition: "all 0.3s ease",
+              }}
             >
-              <Box
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.95)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: 4,
-                  p: { xs: 3, md: 4 },
-                  boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
-                  border: "2px solid rgba(217,167,86,0.3)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 12px 40px rgba(106,58,30,0.18)",
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2.5 }}>
-                  <Box
-                    sx={{
-                      bgcolor: "#D9A756",
-                      p: 1.5,
-                      borderRadius: 3,
-                      display: "flex",
-                      mr: 2,
-                    }}
-                  >
-                    <LocationOnIcon sx={{ fontSize: 32, color: "#fff" }} />
-                  </Box>
+              {/* Visit Us */}
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2.5 }}>
+                <Box
+                  sx={{
+                    bgcolor: "#D9A756",
+                    p: 1.25,
+                    borderRadius: 3,
+                    display: "flex",
+                    mr: 2,
+                  }}
+                >
+                  <LocationOnIcon sx={{ fontSize: 28, color: "#fff" }} />
+                </Box>
+                <Box>
                   <Typography
-                    variant="h5"
+                    variant="h6"
                     sx={{
                       fontFamily: '"Playfair Display", serif',
                       fontWeight: 700,
@@ -279,59 +278,34 @@ const ContactUs = () => {
                   >
                     Visit Us
                   </Typography>
+                  <Typography sx={{ color: "#6A3A1E", fontSize: "0.98rem" }}>
+                    <strong>15 Baldwin Street</strong>
+                    <br />
+                    Whitby, ON L1M 1A2
+                    <br />
+                    Canada
+                  </Typography>
                 </Box>
-                <Typography
+              </Box>
+
+              {/* <Divider sx={{ my: 1.5, bgcolor: "rgba(0,0,0,0.06)" }} /> */}
+
+              {/* Get in Touch */}
+              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, py: 1.5 }}>
+                <Box
                   sx={{
-                    fontSize: "1.1rem",
-                    color: "#6A3A1E",
-                    lineHeight: 1.8,
-                    pl: { xs: 0, sm: 7 },
+                    bgcolor: "#D9A756",
+                    p: 1.25,
+                    borderRadius: 3,
+                    display: "flex",
+                    mt: 0.5,
                   }}
                 >
-                  <strong>15 Baldwin Street</strong>
-                  <br />
-                  Whitby, ON L1M 1A2
-                  <br />
-                  Canada
-                </Typography>
-              </Box>
-            </motion.div>
-
-            {/* Contact Details Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Box
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.95)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: 4,
-                  p: { xs: 3, md: 4 },
-                  boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
-                  border: "2px solid rgba(217,167,86,0.3)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 12px 40px rgba(106,58,30,0.18)",
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                  <Box
-                    sx={{
-                      bgcolor: "#D9A756",
-                      p: 1.5,
-                      borderRadius: 3,
-                      display: "flex",
-                      mr: 2,
-                    }}
-                  >
-                    <PhoneIcon sx={{ fontSize: 32, color: "#fff" }} />
-                  </Box>
+                  <PhoneIcon sx={{ fontSize: 26, color: "#fff" }} />
+                </Box>
+                <Box>
                   <Typography
-                    variant="h5"
+                    variant="h6"
                     sx={{
                       fontFamily: '"Playfair Display", serif',
                       fontWeight: 700,
@@ -340,91 +314,44 @@ const ContactUs = () => {
                   >
                     Get in Touch
                   </Typography>
-                </Box>
-
-                <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <PhoneIcon sx={{ color: "#D9A756", fontSize: 24 }} />
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "#8A2A2A", fontWeight: 600, mb: 0.3 }}
-                      >
-                        Phone
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: "1.05rem",
-                          color: "#3C1F0E",
-                          fontWeight: 500,
-                        }}
-                      >
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8, mt: 0.5 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <PhoneIcon sx={{ color: "#D9A756", fontSize: 20 }} />
+                      <Typography sx={{ fontSize: "0.98rem", color: "#3C1F0E", fontWeight: 500 }}>
                         (905) 655-3513
                       </Typography>
                     </Box>
-                  </Box>
-
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <EmailIcon sx={{ color: "#D9A756", fontSize: 24 }} />
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "#8A2A2A", fontWeight: 600, mb: 0.3 }}
-                      >
-                        Email
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: "1.05rem",
-                          color: "#3C1F0E",
-                          fontWeight: 500,
-                        }}
-                      >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <EmailIcon sx={{ color: "#D9A756", fontSize: 20 }} />
+                      <Typography sx={{ fontSize: "0.98rem", color: "#3C1F0E", fontWeight: 500 }}>
                         brooklinpub@gmail.com
                       </Typography>
                     </Box>
                   </Box>
                 </Box>
               </Box>
-            </motion.div>
 
-            {/* Hours Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Box
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.95)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: 4,
-                  p: { xs: 3, md: 4 },
-                  boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
-                  border: "2px solid rgba(217,167,86,0.3)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 12px 40px rgba(106,58,30,0.18)",
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2.5 }}>
-                  <Box
-                    sx={{
-                      bgcolor: "#D9A756",
-                      p: 1.5,
-                      borderRadius: 3,
-                      display: "flex",
-                      mr: 2,
-                    }}
-                  >
-                    <AccessTimeIcon sx={{ fontSize: 32, color: "#fff" }} />
-                  </Box>
+              {/* Lottie Animation Embed */}
+
+
+              {/* <Divider sx={{ my: 1.5, bgcolor: "rgba(0,0,0,0.06)" }} /> */}
+
+              {/* Opening Hours */}
+              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, py: 1.5 }}>
+                <Box
+                  sx={{
+                    bgcolor: "#D9A756",
+                    p: 1.25,
+                    borderRadius: 3,
+                    display: "flex",
+                    mt: 0.5,
+                  }}
+                >
+                  <AccessTimeIcon sx={{ fontSize: 26, color: "#fff" }} />
+                </Box>
+                <Box sx={{ color: "#6A3A1E" }}>
                   <Typography
-                    variant="h5"
+                    variant="h6"
                     sx={{
                       fontFamily: '"Playfair Display", serif',
                       fontWeight: 700,
@@ -433,38 +360,33 @@ const ContactUs = () => {
                   >
                     Opening Hours
                   </Typography>
-                </Box>
-                <Box sx={{ pl: { xs: 0, sm: 7 }, color: "#6A3A1E" }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography fontWeight={600}>Mon - Thu</Typography>
-                    <Typography>11:00 AM - 11:00 PM</Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography fontWeight={600}>Fri - Sat</Typography>
-                    <Typography>11:00 AM - 2:00 AM</Typography>
-                  </Box>
-                  <Box
-                    sx={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <Typography fontWeight={600}>Sunday</Typography>
-                    <Typography>11:00 AM - 11:00 PM</Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.6 }}>
+                      <Typography fontWeight={600}>Mon - Thu</Typography>
+                      <Typography>11:00 AM - 11:00 PM</Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.6 }}>
+                      <Typography fontWeight={600}>Fri - Sat</Typography>
+                      <Typography>11:00 AM - 2:00 AM</Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                      <Typography fontWeight={600}>Sunday</Typography>
+                      <Typography>11:00 AM - 11:00 PM</Typography>
+                    </Box>
                   </Box>
                 </Box>
               </Box>
-            </motion.div>
-          </Box>
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                      <Box sx={{ width: { xs: '100%', sm: 300, md: 340 }, height: { xs: 180, sm: 220, md: 240 } }}>
+                        <Lottie
+                          animationData={contactAnimation}
+                          loop
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      </Box>
+                    </Box>
+            </Box>
+          </motion.div>
 
           {/* Right Side - Contact Form */}
           <motion.div
