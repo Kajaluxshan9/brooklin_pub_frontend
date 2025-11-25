@@ -24,33 +24,54 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { hasNewSpecial } from "../../lib/specials";
+import { useApiWithCache } from "../../hooks/useApi";
+import { menuService } from "../../services/menu.service";
+import type { PrimaryCategory } from "../../types/api.types";
 
-type NavNode = { label: string; path?: string; dropdown?: NavNode[] };
-
-const navLinks: NavNode[] = [
-  { label: "Home", path: "/" },
-  { label: "About Us", path: "/about" },
-
-  {
-    label: "Menu",
-    dropdown: [
-      { label: "Main Menu", path: "/menu/main-menu" },
-      { label: "Drinks Menu", path: "/menu/drink-menu" },
-    ],
-  },
-
-  {
-    label: "Special",
-    dropdown: [
-      { label: "Daily Special", path: "/special/daily" },
-      { label: "Night Special", path: "/special/night" },
-    ],
-  },
-
-  { label: "Contact Us", path: "/contactus" },
-];
+type NavNode = {
+  label: string;
+  path?: string;
+  dropdown?: NavNode[];
+  id?: string;
+};
 
 const Nav = () => {
+  // Fetch primary categories from backend
+  const { data: primaryCategories } = useApiWithCache<PrimaryCategory[]>(
+    "primary-categories",
+    () => menuService.getPrimaryCategories()
+  );
+
+  // Build navigation links dynamically
+  const navLinks: NavNode[] = [
+    { label: "Home", path: "/" },
+    { label: "About Us", path: "/about" },
+    {
+      label: "Menu",
+      dropdown:
+        primaryCategories && primaryCategories.length > 0
+          ? primaryCategories
+              .filter((pc) => pc.isActive)
+              .sort((a, b) => a.sortOrder - b.sortOrder)
+              .map((pc) => ({
+                label: pc.name,
+                path: `/menu?category=${pc.id}`,
+                id: pc.id,
+              }))
+          : [
+              { label: "Main Menu", path: "/menu" },
+              { label: "Drinks Menu", path: "/menu" },
+            ],
+    },
+    {
+      label: "Special",
+      dropdown: [
+        { label: "Daily Special", path: "/special/daily" },
+        { label: "Night Special", path: "/special/night" },
+      ],
+    },
+    { label: "Contact Us", path: "/contactus" },
+  ];
   // which top-level parent is open
   const [openParent, setOpenParent] = useState<string | null>(null);
   const [mobileOpenParent, setMobileOpenParent] = useState<string | null>(null);
@@ -89,7 +110,8 @@ const Nav = () => {
       const target = e.target as Node | null;
       if (
         mobileDropdownRef.current &&
-        (mobileDropdownRef.current.contains(target) || mobileNavRef.current?.contains(target))
+        (mobileDropdownRef.current.contains(target) ||
+          mobileNavRef.current?.contains(target))
       ) {
         return;
       }
@@ -137,7 +159,9 @@ const Nav = () => {
       case "Drinks Menu":
         return <LocalBarRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
       case "Daily Special":
-        return <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+        return (
+          <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
+        );
       case "Night Special":
         return <NightlightRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
       default:
@@ -263,105 +287,112 @@ const Nav = () => {
                       )}
                     </Button>
 
-{openParent === link.label && (
-  <motion.ul
-    onMouseEnter={() => {
-      if (parentCloseTimeout.current) {
-        window.clearTimeout(parentCloseTimeout.current);
-        parentCloseTimeout.current = null;
-      }
-    }}
-    onMouseLeave={scheduleCloseParent}
-    initial={{ opacity: 0, y: -8, scale: 0.98 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    exit={{ opacity: 0, y: -8, scale: 0.98 }}
-    transition={{ duration: 0.22, ease: "easeOut" }}
-    style={{
-      position: "absolute",
-      top: "100%",
-      left: 0,
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.90))",
-      borderRadius: 14,
-      boxShadow:
-        "0 10px 30px rgba(0,0,0,0.12), 0 2px 10px rgba(0,0,0,0.06)",
-      padding: "10px 0",
-      listStyle: "none",
-      minWidth: 230,
-      zIndex: 2000,
-      overflow: "hidden",
-      backdropFilter: "blur(12px)",
-      border: "1px solid rgba(255,255,255,0.45)",
-    }}
-  >
-    {link.dropdown!.map((item, index) => {
-      const isChildActive = location.pathname.startsWith(item.path || "");
+                    {openParent === link.label && (
+                      <motion.ul
+                        onMouseEnter={() => {
+                          if (parentCloseTimeout.current) {
+                            window.clearTimeout(parentCloseTimeout.current);
+                            parentCloseTimeout.current = null;
+                          }
+                        }}
+                        onMouseLeave={scheduleCloseParent}
+                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          background:
+                            "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.90))",
+                          borderRadius: 14,
+                          boxShadow:
+                            "0 10px 30px rgba(0,0,0,0.12), 0 2px 10px rgba(0,0,0,0.06)",
+                          padding: "10px 0",
+                          listStyle: "none",
+                          minWidth: 230,
+                          zIndex: 2000,
+                          overflow: "hidden",
+                          backdropFilter: "blur(12px)",
+                          border: "1px solid rgba(255,255,255,0.45)",
+                        }}
+                      >
+                        {link.dropdown!.map((item, index) => {
+                          const isChildActive = location.pathname.startsWith(
+                            item.path || ""
+                          );
 
-      return (
-        <motion.li
-          key={item.label}
-          whileHover={{ x: 4 }}
-          transition={{ type: "spring", stiffness: 200, damping: 18 }}
-          style={{
-            position: "relative",
-          }}
-        >
-          <Button
-            component={Link}
-            to={item.path || "/"}
-            sx={{
-              width: "100%",
-              justifyContent: "flex-start",
-              textTransform: "none",
-              px: 3,
-              py: 1.2,
-              minWidth: 230,
-              color: isChildActive ? "#7A4A22" : "primary.main",
-              fontSize: "0.94rem",
-              borderRadius: 0,
-              position: "relative",
-              "&:hover": {
-                bgcolor: "rgba(245, 240, 235, 0.6)",
-              },
-            }}
-            onClick={closeParentNow}
-          >
-            {/* Highlight left bar when active */}
-            {isChildActive && (
-              <motion.span
-                layoutId="special-left-bar"
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  width: "4px",
-                  height: "100%",
-                  background: "#7A4A22",
-                  borderRadius: "0 6px 6px 0",
-                }}
-              />
-            )}
+                          return (
+                            <motion.li
+                              key={item.label}
+                              whileHover={{ x: 4 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 200,
+                                damping: 18,
+                              }}
+                              style={{
+                                position: "relative",
+                              }}
+                            >
+                              <Button
+                                component={Link}
+                                to={item.path || "/"}
+                                sx={{
+                                  width: "100%",
+                                  justifyContent: "flex-start",
+                                  textTransform: "none",
+                                  px: 3,
+                                  py: 1.2,
+                                  minWidth: 230,
+                                  color: isChildActive
+                                    ? "#7A4A22"
+                                    : "primary.main",
+                                  fontSize: "0.94rem",
+                                  borderRadius: 0,
+                                  position: "relative",
+                                  "&:hover": {
+                                    bgcolor: "rgba(245, 240, 235, 0.6)",
+                                  },
+                                }}
+                                onClick={closeParentNow}
+                              >
+                                {/* Highlight left bar when active */}
+                                {isChildActive && (
+                                  <motion.span
+                                    layoutId="special-left-bar"
+                                    style={{
+                                      position: "absolute",
+                                      left: 0,
+                                      top: 0,
+                                      width: "4px",
+                                      height: "100%",
+                                      background: "#7A4A22",
+                                      borderRadius: "0 6px 6px 0",
+                                    }}
+                                  />
+                                )}
 
-            {item.label}
-          </Button>
+                                {item.label}
+                              </Button>
 
-          {/* Add subtle divider except last */}
-          {index < link.dropdown!.length - 1 && (
-            <Box
-              sx={{
-                width: "85%",
-                height: "1px",
-                mx: "auto",
-                bgcolor: "rgba(0,0,0,0.06)",
-              }}
-            />
-          )}
-        </motion.li>
-      );
-    })}
-  </motion.ul>
-)}
-
+                              {/* Add subtle divider except last */}
+                              {index < link.dropdown!.length - 1 && (
+                                <Box
+                                  sx={{
+                                    width: "85%",
+                                    height: "1px",
+                                    mx: "auto",
+                                    bgcolor: "rgba(0,0,0,0.06)",
+                                  }}
+                                />
+                              )}
+                            </motion.li>
+                          );
+                        })}
+                      </motion.ul>
+                    )}
                   </Box>
                 ) : (
                   // Non dropdown links unchanged
@@ -437,21 +468,31 @@ const Nav = () => {
           maxWidth="xs"
           PaperProps={{ sx: { borderRadius: 2 } }}
         >
-          <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>{mobileOpenParent}</DialogTitle>
+          <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>
+            {mobileOpenParent}
+          </DialogTitle>
           <DialogContent>
             <List>
-              {mobileOpenParent && navLinks.find(n => n.label === mobileOpenParent)?.dropdown?.map((d) => (
-                <ListItemButton
-                  key={d.label}
-                  component={Link}
-                  to={d.path || "/"}
-                  onClick={() => setMobileOpenParent(null)}
-                  sx={{ justifyContent: "center", gap: 1, py: 1 }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36 }}>{getIconFor(d.label)}</ListItemIcon>
-                  <ListItemText primary={d.label} primaryTypographyProps={{ align: "center" }} />
-                </ListItemButton>
-              ))}
+              {mobileOpenParent &&
+                navLinks
+                  .find((n) => n.label === mobileOpenParent)
+                  ?.dropdown?.map((d) => (
+                    <ListItemButton
+                      key={d.label}
+                      component={Link}
+                      to={d.path || "/"}
+                      onClick={() => setMobileOpenParent(null)}
+                      sx={{ justifyContent: "center", gap: 1, py: 1 }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        {getIconFor(d.label)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={d.label}
+                        primaryTypographyProps={{ align: "center" }}
+                      />
+                    </ListItemButton>
+                  ))}
             </List>
           </DialogContent>
         </Dialog>
@@ -572,101 +613,123 @@ const Nav = () => {
         }}
         ref={mobileNavRef}
       >
-          {[
-            { label: "Home", path: "/", icon: <HomeRoundedIcon fontSize="medium" /> },
-            { label: "About", path: "/about", icon: <InfoRoundedIcon fontSize="medium" /> },
-            { label: "Menu", path: "/menu", icon: <RestaurantMenuRoundedIcon fontSize="medium" /> },
-            { label: "Special", path: "/special/today", icon: <LocalFireDepartmentRoundedIcon fontSize="medium" /> },
-            { label: "Contact", path: "/contactus", icon: <ContactSupportRoundedIcon fontSize="medium" /> },
-          ].map((item) => {
-            const isActive =
-              item.path === "/"
-                ? location.pathname === "/"
-                : location.pathname.startsWith(item.path || "");
+        {[
+          {
+            label: "Home",
+            path: "/",
+            icon: <HomeRoundedIcon fontSize="medium" />,
+          },
+          {
+            label: "About",
+            path: "/about",
+            icon: <InfoRoundedIcon fontSize="medium" />,
+          },
+          {
+            label: "Menu",
+            path: "/menu",
+            icon: <RestaurantMenuRoundedIcon fontSize="medium" />,
+          },
+          {
+            label: "Special",
+            path: "/special/today",
+            icon: <LocalFireDepartmentRoundedIcon fontSize="medium" />,
+          },
+          {
+            label: "Contact",
+            path: "/contactus",
+            icon: <ContactSupportRoundedIcon fontSize="medium" />,
+          },
+        ].map((item) => {
+          const isActive =
+            item.path === "/"
+              ? location.pathname === "/"
+              : location.pathname.startsWith(item.path || "");
 
-            // find the navLinks entry for dropdowns
-            const linkDef = navLinks.find((n) => n.label === item.label);
+          // find the navLinks entry for dropdowns
+          const linkDef = navLinks.find((n) => n.label === item.label);
 
-            if (linkDef && linkDef.dropdown) {
-              // parent with dropdown — render only the button here; centralized dropdown will be rendered once below
-              return (
-                <Box key={item.label} sx={{ position: "relative" }}>
-                  <Button
-                    disableRipple
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMobileOpenParent((p) => (p === item.label ? null : item.label));
-                    }}
-                    sx={{
-                      minWidth: 0,
-                      color: isActive ? "#7A4A22" : "#5c4a3f",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      p: 0,
-                      fontSize: "0.65rem",
-                    }}
-                  >
-                    <span style={{ position: "relative", display: "inline-block" }}>
-                      {item.icon}
-                      {item.label === "Special" && showSpecialBadge && (
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: -6,
-                            right: -2,
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            background: "#d9534f",
-                          }}
-                        />
-                      )}
-                    </span>
-                  </Button>
-                </Box>
-              );
-            }
-
+          if (linkDef && linkDef.dropdown) {
+            // parent with dropdown — render only the button here; centralized dropdown will be rendered once below
             return (
-              <Button
-                key={item.path}
-                component={Link}
-                to={item.path}
-                disableRipple
-                sx={{
-                  minWidth: 0,
-                  color: isActive ? "#7A4A22" : "#5c4a3f",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 0,
-                  fontSize: "0.65rem",
-                }}
-              >
-                <span style={{ position: "relative", display: "inline-block" }}>
-                  {item.icon}
-                  {item.label === "Special" && showSpecialBadge && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: -6,
-                        right: -2,
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        background: "#d9534f",
-                      }}
-                    />
-                  )}
-                </span>
-              </Button>
+              <Box key={item.label} sx={{ position: "relative" }}>
+                <Button
+                  disableRipple
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMobileOpenParent((p) =>
+                      p === item.label ? null : item.label
+                    );
+                  }}
+                  sx={{
+                    minWidth: 0,
+                    color: isActive ? "#7A4A22" : "#5c4a3f",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    p: 0,
+                    fontSize: "0.65rem",
+                  }}
+                >
+                  <span
+                    style={{ position: "relative", display: "inline-block" }}
+                  >
+                    {item.icon}
+                    {item.label === "Special" && showSpecialBadge && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: -6,
+                          right: -2,
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: "#d9534f",
+                        }}
+                      />
+                    )}
+                  </span>
+                </Button>
+              </Box>
             );
-          })}
+          }
 
-        
+          return (
+            <Button
+              key={item.path}
+              component={Link}
+              to={item.path}
+              disableRipple
+              sx={{
+                minWidth: 0,
+                color: isActive ? "#7A4A22" : "#5c4a3f",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                p: 0,
+                fontSize: "0.65rem",
+              }}
+            >
+              <span style={{ position: "relative", display: "inline-block" }}>
+                {item.icon}
+                {item.label === "Special" && showSpecialBadge && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: -6,
+                      right: -2,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: "#d9534f",
+                    }}
+                  />
+                )}
+              </span>
+            </Button>
+          );
+        })}
       </Box>
 
       {/* Popup dialog (used for Menu / Special) - mobile/bottom nav */}
@@ -677,21 +740,31 @@ const Nav = () => {
         maxWidth="xs"
         PaperProps={{ sx: { borderRadius: 2 } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>{mobileOpenParent}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>
+          {mobileOpenParent}
+        </DialogTitle>
         <DialogContent>
           <List>
-            {mobileOpenParent && navLinks.find(n => n.label === mobileOpenParent)?.dropdown?.map((d) => (
-              <ListItemButton
-                key={d.label}
-                component={Link}
-                to={d.path || "/"}
-                onClick={() => setMobileOpenParent(null)}
-                sx={{ justifyContent: "center", gap: 1, py: 1 }}
-              >
-                <ListItemIcon sx={{ minWidth: 36 }}>{getIconFor(d.label)}</ListItemIcon>
-                <ListItemText primary={d.label} primaryTypographyProps={{ align: "center" }} />
-              </ListItemButton>
-            ))}
+            {mobileOpenParent &&
+              navLinks
+                .find((n) => n.label === mobileOpenParent)
+                ?.dropdown?.map((d) => (
+                  <ListItemButton
+                    key={d.label}
+                    component={Link}
+                    to={d.path || "/"}
+                    onClick={() => setMobileOpenParent(null)}
+                    sx={{ justifyContent: "center", gap: 1, py: 1 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      {getIconFor(d.label)}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={d.label}
+                      primaryTypographyProps={{ align: "center" }}
+                    />
+                  </ListItemButton>
+                ))}
           </List>
         </DialogContent>
       </Dialog>

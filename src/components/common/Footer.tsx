@@ -1,296 +1,136 @@
-import {
-  Box,
-  Typography,
-  Link as MUILink,
-  IconButton,
-  Divider,
-} from "@mui/material";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import { Box, Typography, Link as MUILink, Container, Divider } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { keyframes } from "@mui/system";
-import Lottie from "lottie-react";
-import pubAnimation from "../common/Food.json"; 
+import { useApiWithCache } from "../../hooks/useApi";
+import { openingHoursService } from "../../services/opening-hours.service";
+import type { OpeningHours } from "../../types/api.types";
 
 const Footer = () => {
-  const socialIcons = [FacebookIcon, InstagramIcon, MusicNoteIcon];
   const quickLinks = [
     { label: "Home", to: "/" },
-    { label: "About Us", to: "/about" },
+    { label: "About", to: "/about" },
     { label: "Menu", to: "/menu" },
     { label: "Specials", to: "/special/today" },
     { label: "Contact", to: "/contactus" },
   ];
 
-  // Wave animation
-  const waveAnimation = keyframes`
-    0% { transform: translateX(0); }
-    50% { transform: translateX(-25px); }
-    100% { transform: translateX(0); }
-  `;
+  // Fetch opening hours from backend
+  const { data: openingHoursData } = useApiWithCache<OpeningHours[]>(
+    "opening-hours",
+    () => openingHoursService.getAllOpeningHours()
+  );
+
+  // Format opening hours for display
+  const formatOpeningHours = (hours: OpeningHours[] | null) => {
+    if (!hours || hours.length === 0) {
+      return ["Sun – Thu: 11 AM – 11 PM", "Fri – Sat: 11 AM – 1 AM"];
+    }
+
+    // Group by similar times
+    const daysMap = new Map<string, string[]>();
+    hours.forEach((h) => {
+      const timeStr = h.isClosed ? "Closed" : `${h.openTime} – ${h.closeTime}`;
+      const existing = daysMap.get(timeStr) || [];
+      existing.push(h.dayOfWeek.slice(0, 3)); // Mon -> Mon, Tuesday -> Tue
+      daysMap.set(timeStr, existing);
+    });
+
+    // Format grouped hours
+    const formatted: string[] = [];
+    daysMap.forEach((days, time) => {
+      if (days.length > 1) {
+        formatted.push(`${days[0]} – ${days[days.length - 1]}: ${time}`);
+      } else {
+        formatted.push(`${days[0]}: ${time}`);
+      }
+    });
+
+    return formatted;
+  };
+
+  const displayHours = formatOpeningHours(openingHoursData);
 
   return (
-    <Box
-      component="footer"
-      sx={{
-        position: "relative",
-        overflow: "hidden",
-        bgcolor: "rgba(255,250,245,0.9)",
-        backdropFilter: "blur(8px)",
-        color: "#2c1810",
-        px: { xs: 3, sm: 6, md: 8 },
-        pt: { xs: 6, sm: 8, md: 10 },
-        pb: { xs: 4, sm: 5 },
-        mt: 8,
-        backgroundImage:
-          "linear-gradient(180deg, rgba(255,247,235,0.9), rgba(243,227,204,0.7))",
-      }}
-    >
-      {/* --- Animated Top Wave --- */}
-      <Box
-        component="svg"
-        viewBox="0 0 1440 320"
-        preserveAspectRatio="none"
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "200%",
-          height: { xs: 80, sm: 120 },
-          zIndex: 1,
-          animation: `${waveAnimation} 8s ease-in-out infinite`,
-          transform: "translateY(-99%)", // makes the wave topmost (no straight line)
-        }}
-      >
-        <path
-          fill="#fffaf0"
-          fillOpacity="1"
-          d="M0,192L80,170.7C160,149,320,107,480,106.7C640,107,800,149,960,160C1120,171,1280,149,1360,138.7L1440,128L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
-        />
-      </Box>
+    <Box component="footer" sx={{ bgcolor: "#fff", color: "#2c2c2c", py: 8, borderTop: "1px solid #f0f0f0", mt: "auto" }}>
+      <Container maxWidth="lg">
+        <Box sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "center", md: "flex-start" },
+            justifyContent: "space-between",
+            textAlign: { xs: "center", md: "left" },
+            gap: 4
+        }}>
+            {/* Left: Contact */}
+            <Box sx={{ flex: 1, textAlign: { xs: "center", md: "right" }, order: { xs: 2, md: 1 } }}>
+                 <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 1, color: "#b87333" }}>Visit Us</Typography>
+                 <Typography variant="body2" sx={{ mt: 2, lineHeight: 1.8 }}>
+                    15 Baldwin St<br/>Whitby, ON L1M 1A2
+                 </Typography>
+                 <Typography variant="body2" sx={{ mt: 1 }}>
+                    <MUILink href="tel:+19054253055" color="inherit" underline="none" sx={{ '&:hover': { color: "#b87333" } }}>+1 905-425-3055</MUILink>
+                 </Typography>
+                 <Typography variant="body2">
+                    <MUILink href="mailto:brooklinpub@gmail.com" color="inherit" underline="none" sx={{ '&:hover': { color: "#b87333" } }}>brooklinpub@gmail.com</MUILink>
+                 </Typography>
+            </Box>
 
-      {/* --- Top CTA --- */}
-      <Box sx={{ textAlign: "center", mb: { xs: 6, md: 8 }, position: "relative", zIndex: 2 }}>
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 800,
-            fontFamily: '"Playfair Display", serif',
-            color: "#5a321a",
-            letterSpacing: 0.5,
-            mb: 1,
-            fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.5rem" },
-          }}
-        >
-          Ready to Dine in Style?
-        </Typography>
-        <Typography
-          sx={{
-            maxWidth: 580,
-            mx: "auto",
-            fontSize: { xs: "0.9rem", sm: "1rem" },
-            lineHeight: 1.6,
-            opacity: 0.85,
-          }}
-        >
-          Visit us at <strong>15 Baldwin St, Whitby</strong> or order online for
-          pickup & delivery. Enjoy the perfect mix of great taste and warm
-          atmosphere.
-        </Typography>
+            {/* Center: Logo */}
+            <Box sx={{ flex: 0.8, display: "flex", flexDirection: "column", alignItems: "center", order: { xs: 1, md: 2 } }}>
+                <Box component="img" src="/brooklinpub-logo.png" alt="Brooklin Pub" sx={{ width: 100, height: "auto", mb: 2 }} />
+                <Typography variant="h6" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, letterSpacing: 0.5 }}>
+                    BROOKLIN PUB
+                </Typography>
+                <Typography variant="caption" sx={{ color: "#888", letterSpacing: 2, textTransform: "uppercase", mt: 0.5 }}>
+                    Est. 2024
+                </Typography>
+            </Box>
 
-        <Box
-          component={RouterLink}
-          to="/menu"
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mt: 3,
-            px: 4,
-            py: 1.2,
-            borderRadius: "50px",
-            fontWeight: 700,
-            fontSize: { xs: "0.9rem", sm: "1rem" },
-            color: "#fff",
-            background:
-              "linear-gradient(135deg, #b87333 0%, #c48a3a 45%, #ffd700 100%)",
-            textDecoration: "none",
-            boxShadow: "0 5px 15px rgba(184,115,51,0.35)",
-            transition: "all 0.35s ease",
-            "&:hover": {
-              transform: "translateY(-3px)",
-              boxShadow: "0 10px 25px rgba(184,115,51,0.45)",
-            },
-          }}
-        >
-          Explore Menu
+            {/* Right: Hours */}
+            <Box sx={{ flex: 1, textAlign: { xs: "center", md: "left" }, order: { xs: 3, md: 3 } }}>
+                <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 1, color: "#b87333" }}>Opening Hours</Typography>
+                <Box sx={{ mt: 2 }}>
+                    {displayHours.map((line, i) => (
+                        <Typography key={i} variant="body2" sx={{ lineHeight: 1.8 }}>{line}</Typography>
+                    ))}
+                </Box>
+            </Box>
         </Box>
-      </Box>
 
-      {/* --- Bottom Grid Section --- */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "1.5fr 1fr 1fr 1fr",
-          },
-          gap: { xs: 4, sm: 5, md: 6 },
-          textAlign: { xs: "center", sm: "left" },
-          position: "relative",
-          zIndex: 2,
-        }}
-      >
-{/* --- Brand --- */}
-<Box>
-  <Box
-    component="img"
-    src="/brooklinpub-logo.png"
-    alt="Brooklin Logo"
-    sx={{
-      width: 75,
-      mb: 2,
-      mx: { xs: "auto", sm: 0 },
-      filter: "drop-shadow(0 4px 8px rgba(106,58,30,0.3))",
-    }}
-  />
-
-  {/* --- Lottie Animation Here --- */}
-  <Lottie
-    animationData={pubAnimation}
-    loop
-    style={{
-      width: 120,
-      margin: "10px auto",
-      filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.15))",
-    }}
-  />
-
-  <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
-    Brooklin Pub & Grill
-  </Typography>
-
-          <Typography
-            sx={{
-              fontSize: "0.9rem",
-              lineHeight: 1.6,
-              opacity: 0.85,
-              maxWidth: 300,
-              mx: { xs: "auto", sm: 0 },
-            }}
-          >
-            Great food. Vibrant vibes. Live music. Experience the best of Whitby
-            nightlife.
-          </Typography>
-
-          <Box sx={{ mt: 1.5 }}>
-            {socialIcons.map((Icon, i) => (
-              <IconButton
-                key={i}
-                sx={{
-                  color: "#8B4513",
-                  "&:hover": {
-                    color: "#c48a3a",
-                    transform: "scale(1.15)",
-                  },
-                  transition: "all 0.25s ease",
-                }}
-              >
-                <Icon />
-              </IconButton>
+        {/* Navigation Links - Horizontal */}
+        <Box sx={{ mt: 8, mb: 4, display: "flex", justifyContent: "center", gap: { xs: 3, md: 6 }, flexWrap: "wrap" }}>
+            {quickLinks.map(link => (
+                <MUILink
+                    key={link.to}
+                    component={RouterLink}
+                    to={link.to}
+                    color="text.primary"
+                    underline="none"
+                    sx={{
+                        fontSize: "0.9rem",
+                        fontWeight: 500,
+                        textTransform: "uppercase",
+                        letterSpacing: 1,
+                        transition: "color 0.2s",
+                        "&:hover": { color: "#b87333" }
+                    }}
+                >
+                    {link.label}
+                </MUILink>
             ))}
-          </Box>
         </Box>
 
-        {/* --- Contact Info --- */}
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.2 }}>
-            Contact
-          </Typography>
-          <Typography sx={{ fontSize: "0.9rem", opacity: 0.9 }}>
-            15 Baldwin St<br />
-            Whitby, ON L1M 1A2
-          </Typography>
-          <Typography sx={{ fontSize: "0.9rem", mt: 1 }}>
-            +1 905-425-3055
-          </Typography>
-          <Typography sx={{ fontSize: "0.9rem", mt: 0.5 }}>
-            brooklinpub@gmail.com
-          </Typography>
-        </Box>
+        <Divider sx={{ opacity: 0.5 }} />
 
-        {/* --- Opening Hours --- */}
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.2 }}>
-            Hours
-          </Typography>
-          <Typography sx={{ fontSize: "0.9rem", opacity: 0.9 }}>
-            Sun – Thu: 11 AM – 11 PM
-            <br />
-            Fri – Sat: 11 AM – 1 AM
-          </Typography>
+        {/* Copyright */}
+        <Box sx={{ mt: 4, textAlign: "center" }}>
+             <Typography variant="caption" color="text.secondary">
+                © {new Date().getFullYear()} Brooklin Pub & Grill. All rights reserved.
+             </Typography>
+             <Typography variant="caption" display="block" color="text.disabled" sx={{ mt: 0.5 }}>
+                Designed by <MUILink href="#" color="inherit" underline="hover">AK Vision Systems</MUILink>
+             </Typography>
         </Box>
-
-        {/* --- Quick Links --- */}
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.2 }}>
-            Quick Links
-          </Typography>
-          <Box sx={{ display: "grid", gap: 0.5 }}>
-            {quickLinks.map((l) => (
-              <MUILink
-                key={l.to}
-                component={RouterLink}
-                to={l.to}
-                underline="none"
-                color="inherit"
-                sx={{
-                  fontSize: "0.9rem",
-                  opacity: 0.8,
-                  position: "relative",
-                  transition: "color 0.3s, opacity 0.3s",
-                  "&:hover": {
-                    color: "#b87333",
-                    opacity: 1,
-                  },
-                }}
-              >
-                {l.label}
-              </MUILink>
-            ))}
-          </Box>
-        </Box>
-      </Box>
-
-      {/* --- Footer Bottom --- */}
-      <Box
-        sx={{
-          textAlign: "center",
-          mt: { xs: 5, sm: 7 },
-          pt: 3,
-          fontSize: "0.8rem",
-          color: "rgba(44,24,16,0.7)",
-          position: "relative",
-          zIndex: 2,
-        }}
-      >
-        <Divider sx={{ mb: 2, background: "rgba(44,24,16,0.2)" }} />
-        © {new Date().getFullYear()} BROOKLINPUB — All Rights Reserved
-        <br />
-        <MUILink
-          href="#"
-          underline="hover"
-          sx={{
-            color: "#b87333",
-            fontWeight: 600,
-            "&:hover": { color: "#d19c46" },
-          }}
-        >
-          AK Vision Systems
-        </MUILink>
-      </Box>
+      </Container>
     </Box>
   );
 };

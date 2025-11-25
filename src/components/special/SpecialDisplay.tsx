@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Nav from "../common/Nav";
 import { addSpecial } from "../../lib/specials";
 import { createPortal } from "react-dom";
+import { useApiWithCache } from "../../hooks/useApi";
+import { specialsService } from "../../services/specials.service";
+import type { Special } from "../../types/api.types";
 
 interface Card {
   title: string;
@@ -13,7 +16,8 @@ interface Card {
   status?: string;
 }
 
-const cards: Card[] = [
+// Fallback cards for when API fails
+const fallbackCards: Card[] = [
   {
     title: "Appetizers",
     desc: "Start your meal with crispy seafood bites.",
@@ -22,80 +26,26 @@ const cards: Card[] = [
       "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
     status: "new",
   },
-    {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-  {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-    {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-  {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-    {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-  {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-    {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-  {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-    
-
-
- 
 ];
 
-// Export the cards array so the app can preload specials on initial entry
-// without requiring navigation to this page. This does not create any
-// additional files — it re-uses the existing component module as the source.
-export { cards as exportedDailySpecials };
+// Transform backend Special entities to Card format
+function transformSpecialsToCards(specials: Special[]): Card[] {
+  return specials.map((special) => ({
+    title: special.title,
+    desc: special.description || "Delicious special of the day",
+    bg:
+      special.imageUrls?.[0] ||
+      "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    popupImg:
+      special.imageUrls?.[1] ||
+      special.imageUrls?.[0] ||
+      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+    status: "new",
+  }));
+}
+
+// Export for preloading - will be populated by the component
+export let exportedDailySpecials: Card[] = fallbackCards;
 
 export default function CylinderMenuPopup() {
   const [angle, setAngle] = useState(0);
@@ -104,6 +54,25 @@ export default function CylinderMenuPopup() {
   const [lastX, setLastX] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
+
+  // Fetch specials from backend
+  const { data: specialsData, loading } = useApiWithCache<Special[]>(
+    "active-specials",
+    () => specialsService.getActiveSpecials()
+  );
+
+  // Transform backend data to cards format, fallback to fallbackCards if no data
+  const cards =
+    specialsData && specialsData.length > 0
+      ? transformSpecialsToCards(specialsData)
+      : fallbackCards;
+
+  // Update exported specials for preloading
+  useEffect(() => {
+    if (cards.length > 0) {
+      exportedDailySpecials = cards;
+    }
+  }, [cards]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
@@ -237,39 +206,65 @@ export default function CylinderMenuPopup() {
     <div>
       {!selectedCard && <Nav />}
 
-      <div
-        style={{
-          width: "100vw",
-          height: mobile
-            ? "clamp(350px, 70vh, 900px)"
-            : "clamp(600px, 100vh, 1200px)", // bigger for desktop
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          perspective: "1200px",
-          overflow: "hidden",
-          position: "relative",
-          touchAction: "none",
-          userSelect: "none",
-          background: "var(--wine-red)",
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onWheel={(e) => {
+      {loading ? (
+        <div
+          style={{
+            width: "100vw",
+            height: mobile
+              ? "clamp(350px, 70vh, 900px)"
+              : "clamp(600px, 100vh, 1200px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--wine-red)",
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              color: "#fff",
+              fontSize: "1.2rem",
+              textAlign: "center",
+            }}
+          >
+            Loading specials...
+          </motion.div>
+        </div>
+      ) : (
+        <div
+          style={{
+            width: "100vw",
+            height: mobile
+              ? "clamp(350px, 70vh, 900px)"
+              : "clamp(600px, 100vh, 1200px)", // bigger for desktop
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            perspective: "1200px",
+            overflow: "hidden",
+            position: "relative",
+            touchAction: "none",
+            userSelect: "none",
+            background: "var(--wine-red)",
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onWheel={(e) => {
             if (!isCylinder) return;
             setAutoRotate(false);
             setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
           }}
-      >
-        {/* Cylinder */}
-        <motion.div
-          ref={containerRef}
-          style={{
+        >
+          {/* Cylinder */}
+          <motion.div
+            ref={containerRef}
+            style={{
               rotateY: isCylinder ? angle : 0,
               transformStyle: isCylinder ? "preserve-3d" : "flat",
               width: isCylinder
@@ -279,27 +274,33 @@ export default function CylinderMenuPopup() {
                   ? "90%"
                   : `${cardWidth * 2 + 16}px`
                 : "min(1100px, 92%)",
-              height: isCylinder ? `${cardHeight}px` : isTwo ? (isMobile ? "auto" : `${cardHeight}px`) : "auto",
+              height: isCylinder
+                ? `${cardHeight}px`
+                : isTwo
+                ? isMobile
+                  ? "auto"
+                  : `${cardHeight}px`
+                : "auto",
               position: "relative",
               transition: isCylinder ? "rotateY 0.1s linear" : "none",
               marginTop: "60px",
               padding: isMobile ? "0 20px" : "0",
               display: isCylinder ? undefined : "flex",
-                flexDirection: isTwo ? (isMobile ? "column" : "row") : "column",
-                flexWrap: isTwo ? "wrap" : undefined,
+              flexDirection: isTwo ? (isMobile ? "column" : "row") : "column",
+              flexWrap: isTwo ? "wrap" : undefined,
               gap: isTwo ? "1rem" : undefined,
               alignItems: "center",
               justifyContent: "center",
-          }}
-        >
-          {cards.map((card, i) => {
-            const rotateY = (anglePerCard * i) % 360;
-            return (
-              <motion.div
-                key={i}
-                onClick={() => setSelectedCard(card)}
-                initial={{ filter: "brightness(1)" }}
-                whileHover={!isMobile ? { filter: "brightness(1.1)" } : {}}
+            }}
+          >
+            {cards.map((card, i) => {
+              const rotateY = (anglePerCard * i) % 360;
+              return (
+                <motion.div
+                  key={i}
+                  onClick={() => setSelectedCard(card)}
+                  initial={{ filter: "brightness(1)" }}
+                  whileHover={!isMobile ? { filter: "brightness(1.1)" } : {}}
                   style={(() => {
                     const base: React.CSSProperties = {
                       borderRadius: "18px",
@@ -348,136 +349,141 @@ export default function CylinderMenuPopup() {
                       transform: "none",
                     };
                   })()}
-              >
-                <h2
-                  style={{
-                    fontSize: "1.1rem",
-                    fontWeight: "700",
-                    marginBottom: "0.2rem",
-                  }}
                 >
-                  {card.title}
-                </h2>
-                <p style={{ fontSize: "0.9rem", opacity: 0.9 }}>{card.desc}</p>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                  <h2
+                    style={{
+                      fontSize: "1.1rem",
+                      fontWeight: "700",
+                      marginBottom: "0.2rem",
+                    }}
+                  >
+                    {card.title}
+                  </h2>
+                  <p style={{ fontSize: "0.9rem", opacity: 0.9 }}>
+                    {card.desc}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
 
-        {/* intro slideshow removed */}
+          {/* intro slideshow removed */}
 
-        {/* Popup */}
-        {selectedCard &&
-          createPortal(
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  width: "100vw",
-                  height: "100vh",
-                  background: "rgba(0,0,0,0.9)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 999999999,
-                }}
-                onClick={() => setSelectedCard(null)}
-              >
+          {/* Popup */}
+          {selectedCard &&
+            createPortal(
+              <AnimatePresence>
                 <motion.div
-                  onClick={(e) => e.stopPropagation()}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 120, damping: 15 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
                   style={{
-                    position: "relative",
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
                     width: "100vw",
                     height: "100vh",
+                    background: "rgba(0,0,0,0.9)",
                     display: "flex",
-                    justifyContent: "center",
                     alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 999999999,
                   }}
+                  onClick={() => setSelectedCard(null)}
                 >
-                  {/* Close Button */}
- <button
-  onClick={() => setSelectedCard(null)}
-  style={{
-    position: "absolute",
-    top: "28px",
-    right: "28px",
-    width: "50px",
-    height: "50px",
-    borderRadius: "50%",
-    backdropFilter: "blur(14px)",
-    background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.3)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    boxShadow: "0 0 0 rgba(255,255,255,0.4)",
-    transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
-  }}
-  onMouseEnter={(e) => {
-    (e.currentTarget as HTMLElement).style.boxShadow =
-      "0 0 22px rgba(255,255,255,0.45)";
-    (e.currentTarget as HTMLElement).style.background =
-      "rgba(255,255,255,0.16)";
-  }}
-  onMouseLeave={(e) => {
-    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 rgba(255,255,255,0.4)";
-    (e.currentTarget as HTMLElement).style.background =
-      "rgba(255,255,255,0.08)";
-  }}
->
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="white"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{
-      transition: "0.35s",
-    }}
-    onMouseEnter={(e) => {
-      (e.currentTarget as SVGElement).style.transform = "rotate(90deg)";
-    }}
-    onMouseLeave={(e) => {
-      (e.currentTarget as SVGElement).style.transform = "rotate(0deg)";
-    }}
-  >
-    <path d="M18 6L6 18" />
-    <path d="M6 6l12 12" />
-  </svg>
-</button>
-
-
-                  <img
-                    src={selectedCard.popupImg}
-                    alt={selectedCard.title}
+                  <motion.div
+                    onClick={(e) => e.stopPropagation()}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 15 }}
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                      position: "relative",
+                      width: "100vw",
+                      height: "100vh",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
-                  />
+                  >
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setSelectedCard(null)}
+                      style={{
+                        position: "absolute",
+                        top: "28px",
+                        right: "28px",
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "50%",
+                        backdropFilter: "blur(14px)",
+                        background: "rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(255,255,255,0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        boxShadow: "0 0 0 rgba(255,255,255,0.4)",
+                        transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.boxShadow =
+                          "0 0 22px rgba(255,255,255,0.45)";
+                        (e.currentTarget as HTMLElement).style.background =
+                          "rgba(255,255,255,0.16)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.boxShadow =
+                          "0 0 0 rgba(255,255,255,0.4)";
+                        (e.currentTarget as HTMLElement).style.background =
+                          "rgba(255,255,255,0.08)";
+                      }}
+                    >
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{
+                          transition: "0.35s",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as SVGElement).style.transform =
+                            "rotate(90deg)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as SVGElement).style.transform =
+                            "rotate(0deg)";
+                        }}
+                      >
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6l12 12" />
+                      </svg>
+                    </button>
+
+                    <img
+                      src={selectedCard.popupImg}
+                      alt={selectedCard.title}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        borderRadius: "12px",
+                        boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                      }}
+                    />
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            </AnimatePresence>,
-            document.body
-          )}
-      </div>
+              </AnimatePresence>,
+              document.body
+            )}
+        </div>
+      )}
     </div>
   );
 }

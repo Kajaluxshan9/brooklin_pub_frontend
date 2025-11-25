@@ -10,7 +10,6 @@ import {
   Alert,
   CircularProgress,
   MenuItem,
-  Divider,
 } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
@@ -24,6 +23,9 @@ import { motion } from "framer-motion";
 import ContactBg from "../assets/components/image-2.jpg";
 import contactAnimation from "../pages/chef.json";
 import Lottie from "lottie-react";
+import { useApiWithCache } from "../hooks/useApi";
+import { openingHoursService } from "../services/opening-hours.service";
+import type { OpeningHours } from "../types/api.types";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -41,6 +43,46 @@ const ContactUs = () => {
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Fetch opening hours from backend
+  const { data: openingHoursData } = useApiWithCache<OpeningHours[]>(
+    "opening-hours",
+    () => openingHoursService.getAllOpeningHours()
+  );
+
+  // Format opening hours for display
+  const formatOpeningHours = (hours: OpeningHours[] | null) => {
+    if (!hours || hours.length === 0) {
+      return [
+        { days: "Mon - Thu", time: "11:00 AM - 11:00 PM" },
+        { days: "Fri - Sat", time: "11:00 AM - 2:00 AM" },
+        { days: "Sunday", time: "11:00 AM - 11:00 PM" },
+      ];
+    }
+
+    // Sort by day order
+    const dayOrder = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ];
+    const sortedHours = [...hours].sort(
+      (a, b) =>
+        dayOrder.indexOf(a.dayOfWeek.toLowerCase()) -
+        dayOrder.indexOf(b.dayOfWeek.toLowerCase())
+    );
+
+    return sortedHours.map((h) => ({
+      days: h.dayOfWeek,
+      time: h.isClosed ? "Closed" : `${h.openTime} - ${h.closeTime}`,
+    }));
+  };
+
+  const displayHours = formatOpeningHours(openingHoursData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -291,7 +333,14 @@ const ContactUs = () => {
               {/* <Divider sx={{ my: 1.5, bgcolor: "rgba(0,0,0,0.06)" }} /> */}
 
               {/* Get in Touch */}
-              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, py: 1.5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  py: 1.5,
+                }}
+              >
                 <Box
                   sx={{
                     bgcolor: "#D9A756",
@@ -314,16 +363,35 @@ const ContactUs = () => {
                   >
                     Get in Touch
                   </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8, mt: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 0.8,
+                      mt: 0.5,
+                    }}
+                  >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <PhoneIcon sx={{ color: "#D9A756", fontSize: 20 }} />
-                      <Typography sx={{ fontSize: "0.98rem", color: "#3C1F0E", fontWeight: 500 }}>
+                      <Typography
+                        sx={{
+                          fontSize: "0.98rem",
+                          color: "#3C1F0E",
+                          fontWeight: 500,
+                        }}
+                      >
                         (905) 655-3513
                       </Typography>
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <EmailIcon sx={{ color: "#D9A756", fontSize: 20 }} />
-                      <Typography sx={{ fontSize: "0.98rem", color: "#3C1F0E", fontWeight: 500 }}>
+                      <Typography
+                        sx={{
+                          fontSize: "0.98rem",
+                          color: "#3C1F0E",
+                          fontWeight: 500,
+                        }}
+                      >
                         brooklinpub@gmail.com
                       </Typography>
                     </Box>
@@ -333,11 +401,17 @@ const ContactUs = () => {
 
               {/* Lottie Animation Embed */}
 
-
               {/* <Divider sx={{ my: 1.5, bgcolor: "rgba(0,0,0,0.06)" }} /> */}
 
               {/* Opening Hours */}
-              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, py: 1.5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  py: 1.5,
+                }}
+              >
                 <Box
                   sx={{
                     bgcolor: "#D9A756",
@@ -361,30 +435,36 @@ const ContactUs = () => {
                     Opening Hours
                   </Typography>
                   <Box sx={{ mt: 0.5 }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.6 }}>
-                      <Typography fontWeight={600}>Mon - Thu</Typography>
-                      <Typography>11:00 AM - 11:00 PM</Typography>
-                    </Box>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.6 }}>
-                      <Typography fontWeight={600}>Fri - Sat</Typography>
-                      <Typography>11:00 AM - 2:00 AM</Typography>
-                    </Box>
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography fontWeight={600}>Sunday</Typography>
-                      <Typography>11:00 AM - 11:00 PM</Typography>
-                    </Box>
+                    {displayHours.map((h, idx) => (
+                      <Box
+                        key={idx}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mb: 0.6,
+                        }}
+                      >
+                        <Typography fontWeight={600}>{h.days}</Typography>
+                        <Typography>{h.time}</Typography>
+                      </Box>
+                    ))}
                   </Box>
                 </Box>
               </Box>
-                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                      <Box sx={{ width: { xs: '100%', sm: 300, md: 340 }, height: { xs: 180, sm: 220, md: 240 } }}>
-                        <Lottie
-                          animationData={contactAnimation}
-                          loop
-                          style={{ width: "100%", height: "100%" }}
-                        />
-                      </Box>
-                    </Box>
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                <Box
+                  sx={{
+                    width: { xs: "100%", sm: 300, md: 340 },
+                    height: { xs: 180, sm: 220, md: 240 },
+                  }}
+                >
+                  <Lottie
+                    animationData={contactAnimation}
+                    loop
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                </Box>
+              </Box>
             </Box>
           </motion.div>
 
@@ -398,24 +478,26 @@ const ContactUs = () => {
               component="form"
               onSubmit={handleSubmit}
               sx={{
-                    position: "relative",
-                    overflow: "hidden",
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
-                    borderRadius: 4,
-                    p: { xs: 3, sm: 4, md: 5 },
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
-                    border: "1px solid rgba(255,255,255,0.18)",
-                    // subtle inner highlight
-                    '&:before': {
-                      content: '""',
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0))',
-                      pointerEvents: 'none',
-                    },
+                position: "relative",
+                overflow: "hidden",
+                bgcolor: "rgba(255,255,255,0.12)",
+                backgroundImage:
+                  "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                borderRadius: 4,
+                p: { xs: 3, sm: 4, md: 5 },
+                boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                // subtle inner highlight
+                "&:before": {
+                  content: '""',
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0))",
+                  pointerEvents: "none",
+                },
               }}
             >
               <Typography
