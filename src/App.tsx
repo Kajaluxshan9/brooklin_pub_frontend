@@ -16,7 +16,6 @@ import ChefSpecial from "./pages/ChefSpecial";
 import SpecialDisplay from "./components/special/SpecialDisplay";
 import ScrollTopFab from "./components/common/ScrollTopFab";
 import MainMenu from "./pages/mainmenu";
-import DrinksMenu from "./pages/DrinkMenu";
 import FloatingSpecials from "./components/special/flotingSpecial";
 
 const theme = createTheme({

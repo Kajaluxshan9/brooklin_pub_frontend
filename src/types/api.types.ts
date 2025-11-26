@@ -28,6 +28,7 @@ export interface MenuItemMeasurement {
   createdAt: string;
   updatedAt: string;
   measurementType?: MeasurementType;
+  measurementTypeEntity?: MeasurementType; // Backend uses this property name
 }
 
 export interface MeasurementType {
@@ -43,6 +44,7 @@ export interface MenuCategory {
   id: string;
   name: string;
   description?: string;
+  imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
   primaryCategoryId?: string;
@@ -56,6 +58,7 @@ export interface PrimaryCategory {
   id: string;
   name: string;
   description?: string;
+  imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
   createdAt: string;

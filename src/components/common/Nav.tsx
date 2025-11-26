@@ -10,15 +10,14 @@ import RestaurantMenuRoundedIcon from "@mui/icons-material/RestaurantMenuRounded
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
 import LocalBarRoundedIcon from "@mui/icons-material/LocalBarRounded";
 import NightlightRoundedIcon from "@mui/icons-material/NightlightRounded";
-import ContactSupportRoundedIcon from "@mui/icons-material/ContactSupportRounded";
 import { Link } from "react-router-dom";
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
@@ -26,9 +25,8 @@ import { useLocation } from "react-router-dom";
 import { hasNewSpecial } from "../../lib/specials";
 import { useApiWithCache } from "../../hooks/useApi";
 import { menuService } from "../../services/menu.service";
-import type { PrimaryCategory } from "../../types/api.types";
-import menuData from "../../data/menuData";
-import specialsData from "../../data/specialsData";
+import { specialsService } from "../../services/specials.service";
+import type { PrimaryCategory, Special } from "../../types/api.types";
 
 type NavNode = {
   label: string;
@@ -44,6 +42,23 @@ const Nav = () => {
     () => menuService.getPrimaryCategories()
   );
 
+  // Fetch active specials from backend
+  const { data: specialsData } = useApiWithCache<Special[]>(
+    "active-specials",
+    () => specialsService.getActiveSpecials()
+  );
+
+  // Extract unique special types from backend data
+  const specialTypes = useMemo(() => {
+    if (!specialsData || specialsData.length === 0) return [];
+    const types = Array.from(new Set(specialsData.map((s) => s.type)));
+    return types.map((type) => ({
+      label: type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, " "),
+      path: `/special/${type}`,
+      id: type,
+    }));
+  }, [specialsData]);
+
   // Build navigation links dynamically
   const navLinks: NavNode[] = [
     { label: "Home", path: "/" },
@@ -51,18 +66,7 @@ const Nav = () => {
     {
       label: "Menu",
       dropdown:
-        // Prefer local `menuData` categories if available (from MainMenu). This makes the
-        // dropdown driven by the frontend menu dataset. If empty, fall back to API primaryCategories.
-        menuData && menuData.length > 0
-          ? Array.from(new Set(menuData.map((m: any) => String(m.categories))))
-              .map((cat) => String(cat).trim())
-              .filter(Boolean)
-              .map((cat) => ({
-                label: `${cat.charAt(0).toUpperCase()}${cat.slice(1)}`,
-                path: `/menu?category=${encodeURIComponent(cat)}`,
-                id: cat,
-              }))
-          : primaryCategories && primaryCategories.length > 0
+        primaryCategories && primaryCategories.length > 0
           ? primaryCategories
               .filter((pc) => pc.isActive)
               .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -75,26 +79,13 @@ const Nav = () => {
     },
     {
       label: "Special",
-      dropdown:
-        specialsData && specialsData.length > 0
-          ? Array.from(new Set(specialsData.map((s: any) => String(s.type || "")).filter(Boolean)))
-              .map((t) => String(t).trim())
-              .filter(Boolean)
-              .map((type) => ({
-                label: `${type.charAt(0).toUpperCase()}${type.slice(1)}`,
-                path: `/special/${encodeURIComponent(type)}`,
-                id: type,
-              }))
-          : [
-
-            ],
+      dropdown: specialTypes.length > 0 ? specialTypes : [],
     },
     { label: "Contact Us", path: "/contactus" },
   ];
   // which top-level parent is open
   const [openParent, setOpenParent] = useState<string | null>(null);
   const [mobileOpenParent, setMobileOpenParent] = useState<string | null>(null);
-  // which second-level child is open (inside the parent)
 
   const location = useLocation();
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
@@ -103,8 +94,16 @@ const Nav = () => {
   // Helper to parse `categories` fields which might be string, string[] or other
   const parseCategories = (val: any): string[] => {
     if (!val && val !== 0) return [];
-    if (Array.isArray(val)) return val.map(String).map((s) => s.trim()).filter(Boolean);
-    if (typeof val === "string") return val.split(",").map((s) => s.trim()).filter(Boolean);
+    if (Array.isArray(val))
+      return val
+        .map(String)
+        .map((s) => s.trim())
+        .filter(Boolean);
+    if (typeof val === "string")
+      return val
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
     return [String(val)];
   };
 
@@ -113,14 +112,14 @@ const Nav = () => {
     const fromPrimary = (primaryCategories || [])
       .filter((pc) => pc && pc.id)
       .flatMap((pc) => parseCategories(pc.id));
-    // add specials keys derived from shared specials data when available
-    const specialTypes =
-      specialsData && specialsData.length > 0
-        ? Array.from(new Set(specialsData.map((s: any) => String(s.type || "")).filter(Boolean)))
-        : ["daily", "night"];
 
-    return Array.from(new Set(["all", ...fromPrimary, ...specialTypes]));
-  }, [primaryCategories?.map((p) => p.id).join(",")]);
+    // add special types from backend data
+    const fromSpecials = (specialsData || [])
+      .map((s) => s.type)
+      .filter(Boolean);
+
+    return Array.from(new Set(["all", ...fromPrimary, ...fromSpecials]));
+  }, [primaryCategories, specialsData]);
 
   const getCategoryFromQuery = () => {
     try {
@@ -133,7 +132,9 @@ const Nav = () => {
     }
   };
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(getCategoryFromQuery());
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    getCategoryFromQuery()
+  );
 
   useEffect(() => {
     setSelectedCategory(getCategoryFromQuery());
@@ -227,7 +228,9 @@ const Nav = () => {
         return <NightlightRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
       case "Chef":
       case "Chef Special":
-        return <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+        return (
+          <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
+        );
       default:
         return null;
     }
@@ -394,7 +397,8 @@ const Nav = () => {
                           const isChildActive = location.pathname.startsWith(
                             item.path || ""
                           );
-                          const isSelectedByQuery = !!item.id && item.id === selectedCategory;
+                          const isSelectedByQuery =
+                            !!item.id && item.id === selectedCategory;
 
                           return (
                             <motion.li
@@ -419,9 +423,10 @@ const Nav = () => {
                                   px: 3,
                                   py: 1.2,
                                   minWidth: 230,
-                                  color: isChildActive || isSelectedByQuery
-                                    ? "#7A4A22"
-                                    : "primary.main",
+                                  color:
+                                    isChildActive || isSelectedByQuery
+                                      ? "#7A4A22"
+                                      : "primary.main",
                                   fontSize: "0.94rem",
                                   borderRadius: 0,
                                   position: "relative",
@@ -564,7 +569,12 @@ const Nav = () => {
                         primary={d.label}
                         primaryTypographyProps={{
                           align: "center",
-                          sx: { color: d.id && d.id === selectedCategory ? "#7A4A22" : undefined },
+                          sx: {
+                            color:
+                              d.id && d.id === selectedCategory
+                                ? "#7A4A22"
+                                : undefined,
+                          },
                         }}
                       />
                     </ListItemButton>
@@ -702,106 +712,115 @@ const Nav = () => {
           },
           // Build bottom nav items dynamically from the `navLinks` definition so labels/paths
           // are not duplicated or hard-coded. Start with Home + About, then append Menu/Special/Contact
-        ].concat(
-          // helper: map only Menu / Special / Contact Us
-          navLinks
-            .filter((n) => ["Menu", "Special", "Contact Us"].includes(n.label))
-            .map((n) => ({
-              label: n.label,
-              path: (n.path || (n.dropdown && n.dropdown.length > 0 ? n.dropdown[0].path : "/")) as string,
-              icon: getIconFor(n.label) || <InfoRoundedIcon fontSize="medium" />,
-            }))
-        ).map((item) => {
-          const isActive =
-            item.path === "/"
-              ? location.pathname === "/"
-              : location.pathname.startsWith(item.path || "");
+        ]
+          .concat(
+            // helper: map only Menu / Special / Contact Us
+            navLinks
+              .filter((n) =>
+                ["Menu", "Special", "Contact Us"].includes(n.label)
+              )
+              .map((n) => ({
+                label: n.label,
+                path: (n.path ||
+                  (n.dropdown && n.dropdown.length > 0
+                    ? n.dropdown[0].path
+                    : "/")) as string,
+                icon: getIconFor(n.label) || (
+                  <InfoRoundedIcon fontSize="medium" />
+                ),
+              }))
+          )
+          .map((item) => {
+            const isActive =
+              item.path === "/"
+                ? location.pathname === "/"
+                : location.pathname.startsWith(item.path || "");
 
-          // find the navLinks entry for dropdowns
-          const linkDef = navLinks.find((n) => n.label === item.label);
+            // find the navLinks entry for dropdowns
+            const linkDef = navLinks.find((n) => n.label === item.label);
 
-          if (linkDef && linkDef.dropdown) {
-            // parent with dropdown — render only the button here; centralized dropdown will be rendered once below
-            return (
-              <Box key={item.label} sx={{ position: "relative" }}>
-                <Button
-                  disableRipple
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMobileOpenParent((p) =>
-                      p === item.label ? null : item.label
-                    );
-                  }}
-                  sx={{
-                    minWidth: 0,
-                    color: isActive ? "#7A4A22" : "#5c4a3f",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    p: 0,
-                    fontSize: "0.65rem",
-                  }}
-                >
-                  <span
-                    style={{ position: "relative", display: "inline-block" }}
-                  >
-                    {item.icon}
-                    {item.label === "Special" && showSpecialBadge && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: -6,
-                          right: -2,
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: "#d9534f",
-                        }}
-                      />
-                    )}
-                  </span>
-                </Button>
-              </Box>
-            );
-          }
-
-          return (
-            <Button
-              key={item.path}
-              component={Link}
-              to={item.path}
-              disableRipple
-              sx={{
-                minWidth: 0,
-                color: isActive ? "#7A4A22" : "#5c4a3f",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                p: 0,
-                fontSize: "0.65rem",
-              }}
-            >
-              <span style={{ position: "relative", display: "inline-block" }}>
-                {item.icon}
-                {item.label === "Special" && showSpecialBadge && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: -6,
-                      right: -2,
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: "#d9534f",
+            if (linkDef && linkDef.dropdown) {
+              // parent with dropdown — render only the button here; centralized dropdown will be rendered once below
+              return (
+                <Box key={item.label} sx={{ position: "relative" }}>
+                  <Button
+                    disableRipple
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMobileOpenParent((p) =>
+                        p === item.label ? null : item.label
+                      );
                     }}
-                  />
-                )}
-              </span>
-            </Button>
-          );
-        })}
+                    sx={{
+                      minWidth: 0,
+                      color: isActive ? "#7A4A22" : "#5c4a3f",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      p: 0,
+                      fontSize: "0.65rem",
+                    }}
+                  >
+                    <span
+                      style={{ position: "relative", display: "inline-block" }}
+                    >
+                      {item.icon}
+                      {item.label === "Special" && showSpecialBadge && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: -6,
+                            right: -2,
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: "#d9534f",
+                          }}
+                        />
+                      )}
+                    </span>
+                  </Button>
+                </Box>
+              );
+            }
+
+            return (
+              <Button
+                key={item.path}
+                component={Link}
+                to={item.path}
+                disableRipple
+                sx={{
+                  minWidth: 0,
+                  color: isActive ? "#7A4A22" : "#5c4a3f",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 0,
+                  fontSize: "0.65rem",
+                }}
+              >
+                <span style={{ position: "relative", display: "inline-block" }}>
+                  {item.icon}
+                  {item.label === "Special" && showSpecialBadge && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: -6,
+                        right: -2,
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        background: "#d9534f",
+                      }}
+                    />
+                  )}
+                </span>
+              </Button>
+            );
+          })}
       </Box>
 
       {/* Popup dialog (used for Menu / Special) - mobile/bottom nav */}
@@ -835,7 +854,12 @@ const Nav = () => {
                       primary={d.label}
                       primaryTypographyProps={{
                         align: "center",
-                        sx: { color: d.id && d.id === selectedCategory ? "#7A4A22" : undefined },
+                        sx: {
+                          color:
+                            d.id && d.id === selectedCategory
+                              ? "#7A4A22"
+                              : undefined,
+                        },
                       }}
                     />
                   </ListItemButton>

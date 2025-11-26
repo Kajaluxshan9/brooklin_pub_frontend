@@ -15,7 +15,7 @@ const ChefSpecial = () => {
         line1="Welcome to Brooklin Pub"
         line2="Experience the finest dining and drinks in a cozy atmosphere."
       />
-      <SpecialDisplay initialShowChef={true} />
+      <SpecialDisplay />
 
       <Footer />
     </div>
