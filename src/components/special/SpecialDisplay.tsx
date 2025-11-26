@@ -1,5 +1,6 @@
 ﻿"use client";
 import { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Nav from "../common/Nav";
 import { addSpecial } from "../../lib/specials";
@@ -8,25 +9,11 @@ import { useApiWithCache } from "../../hooks/useApi";
 import { specialsService } from "../../services/specials.service";
 import type { Special } from "../../types/api.types";
 
-interface Card {
-  title: string;
-  desc: string;
-  bg: string;
-  popupImg: string;
-  status?: string;
-}
+import specialsDataFallback from "../../data/specialsData";
+import type { SpecialCard } from "../../data/specialsData";
 
-// Fallback cards for when API fails
-const fallbackCards: Card[] = [
-  {
-    title: "Appetizers",
-    desc: "Start your meal with crispy seafood bites.",
-    bg: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-    popupImg:
-      "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-    status: "new",
-  },
-];
+// Card type used locally
+type Card = SpecialCard;
 
 // Transform backend Special entities to Card format
 function transformSpecialsToCards(specials: Special[]): Card[] {
@@ -44,10 +31,30 @@ function transformSpecialsToCards(specials: Special[]): Card[] {
   }));
 }
 
+// Transform for chef specials (filters by type)
+function transformChefSpecialsToCards(specials: Special[]): Card[] {
+  return specials
+    .filter((special) => special.type === "chef")
+    .map((special) => ({
+      title: special.title,
+      desc: special.description || "Chef's handcrafted creation",
+      bg:
+        special.imageUrls?.[0] ||
+        "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+      popupImg:
+        special.imageUrls?.[1] ||
+        special.imageUrls?.[0] ||
+        "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+      status: "new",
+    }));
+}
+
 // Export for preloading - will be populated by the component
-export let exportedDailySpecials: Card[] = fallbackCards;
+export let exportedDailySpecials: Card[] = [];
+export let exportedChefSpecials: Card[] = [];
 
 export default function CylinderMenuPopup() {
+  const { type: routeType } = useParams<{ type?: string }>();
   const [angle, setAngle] = useState(0);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [isInteracting, setIsInteracting] = useState(false);
@@ -61,18 +68,55 @@ export default function CylinderMenuPopup() {
     () => specialsService.getActiveSpecials()
   );
 
-  // Transform backend data to cards format, fallback to fallbackCards if no data
-  const cards =
+  // Fetch all specials to derive chef specials (kept separate to avoid breaking existing API behavior)
+  const { data: allSpecialsData, loading: loadingChef } = useApiWithCache<Special[]>(
+    "chef-specials",
+    () => specialsService.getAllSpecials()
+  );
+
+  // Transform backend data to cards format, fallback to `specialsDataFallback` module if API yields nothing
+  const fallbackDaily = specialsDataFallback.filter((s: SpecialCard) => s.type === "daily");
+  const fallbackChef = specialsDataFallback.filter((s: SpecialCard) => s.type === "chef");
+
+  const dailyCards =
     specialsData && specialsData.length > 0
       ? transformSpecialsToCards(specialsData)
-      : fallbackCards;
+      : fallbackDaily;
+
+  const chefCards =
+    allSpecialsData && allSpecialsData.length > 0
+      ? transformChefSpecialsToCards(allSpecialsData)
+      : fallbackChef;
+
+  // Determine which cards to render based on the route param `/special/:type`.
+  const getCardsForRouteType = (typeParam?: string): Card[] => {
+    const t = typeParam ? String(typeParam).toLowerCase() : "";
+    if (!t || t === "daily") return dailyCards;
+
+    // Prefer API-provided specials (allSpecialsData) when available
+    const fromApi = (allSpecialsData || []).filter(
+      (s) => String(s.type || "").toLowerCase() === t
+    );
+    if (fromApi.length > 0) return transformSpecialsToCards(fromApi);
+
+    // Fallback to local specials data file
+    const fromFallback = specialsDataFallback.filter(
+      (s) => String(s.type || "").toLowerCase() === t
+    );
+    if (fromFallback.length > 0) return fromFallback as Card[];
+
+    // Nothing matched — show daily by default
+    return dailyCards;
+  };
+
+  const cards = getCardsForRouteType(routeType);
+  const isLoadingBoth = loading || loadingChef;
 
   // Update exported specials for preloading
   useEffect(() => {
-    if (cards.length > 0) {
-      exportedDailySpecials = cards;
-    }
-  }, [cards]);
+    if (dailyCards && dailyCards.length > 0) exportedDailySpecials = dailyCards;
+    if (chefCards && chefCards.length > 0) exportedChefSpecials = chefCards;
+  }, [dailyCards, chefCards]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
@@ -99,9 +143,9 @@ export default function CylinderMenuPopup() {
     setIsMobile(checkMobile());
   }, []);
 
-  // Register specials from this component into the shared specials list
+  // Register daily specials and chef specials into shared specials list
   useEffect(() => {
-    cards.forEach((c, idx) => {
+    dailyCards.forEach((c: Card, idx: number) => {
       try {
         addSpecial({
           id: `special-${idx}`,
@@ -116,7 +160,25 @@ export default function CylinderMenuPopup() {
         // swallow errors — this is just a simple registration
       }
     });
-  }, []);
+  }, [dailyCards]);
+
+  useEffect(() => {
+    chefCards.forEach((c: Card, idx: number) => {
+      try {
+        addSpecial({
+          id: `chef-${idx}`,
+          title: c.title,
+          desc: c.desc,
+          bg: c.bg,
+          popupImg: c.popupImg,
+          status: "new",
+          category: "chef",
+        });
+      } catch (err) {
+        // swallow errors — this is just a simple registration
+      }
+    });
+  }, [chefCards]);
 
   // intro slideshow removed
 
@@ -206,7 +268,7 @@ export default function CylinderMenuPopup() {
     <div>
       {!selectedCard && <Nav />}
 
-      {loading ? (
+      {isLoadingBoth ? (
         <div
           style={{
             width: "100vw",
@@ -293,7 +355,9 @@ export default function CylinderMenuPopup() {
               justifyContent: "center",
             }}
           >
-            {cards.map((card, i) => {
+            {/* Selection is now controlled by the Nav's /special/<type> route. */}
+
+            {cards.map((card: Card, i: number) => {
               const rotateY = (anglePerCard * i) % 360;
               return (
                 <motion.div

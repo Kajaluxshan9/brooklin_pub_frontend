@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -27,6 +27,8 @@ import { hasNewSpecial } from "../../lib/specials";
 import { useApiWithCache } from "../../hooks/useApi";
 import { menuService } from "../../services/menu.service";
 import type { PrimaryCategory } from "../../types/api.types";
+import menuData from "../../data/menuData";
+import specialsData from "../../data/specialsData";
 
 type NavNode = {
   label: string;
@@ -49,7 +51,18 @@ const Nav = () => {
     {
       label: "Menu",
       dropdown:
-        primaryCategories && primaryCategories.length > 0
+        // Prefer local `menuData` categories if available (from MainMenu). This makes the
+        // dropdown driven by the frontend menu dataset. If empty, fall back to API primaryCategories.
+        menuData && menuData.length > 0
+          ? Array.from(new Set(menuData.map((m: any) => String(m.categories))))
+              .map((cat) => String(cat).trim())
+              .filter(Boolean)
+              .map((cat) => ({
+                label: `${cat.charAt(0).toUpperCase()}${cat.slice(1)}`,
+                path: `/menu?category=${encodeURIComponent(cat)}`,
+                id: cat,
+              }))
+          : primaryCategories && primaryCategories.length > 0
           ? primaryCategories
               .filter((pc) => pc.isActive)
               .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -58,17 +71,23 @@ const Nav = () => {
                 path: `/menu?category=${pc.id}`,
                 id: pc.id,
               }))
-          : [
-              { label: "Main Menu", path: "/menu" },
-              { label: "Drinks Menu", path: "/menu" },
-            ],
+          : [],
     },
     {
       label: "Special",
-      dropdown: [
-        { label: "Daily Special", path: "/special/daily" },
-        { label: "Night Special", path: "/special/night" },
-      ],
+      dropdown:
+        specialsData && specialsData.length > 0
+          ? Array.from(new Set(specialsData.map((s: any) => String(s.type || "")).filter(Boolean)))
+              .map((t) => String(t).trim())
+              .filter(Boolean)
+              .map((type) => ({
+                label: `${type.charAt(0).toUpperCase()}${type.slice(1)}`,
+                path: `/special/${encodeURIComponent(type)}`,
+                id: type,
+              }))
+          : [
+
+            ],
     },
     { label: "Contact Us", path: "/contactus" },
   ];
@@ -80,6 +99,46 @@ const Nav = () => {
   const location = useLocation();
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const mobileDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  // Helper to parse `categories` fields which might be string, string[] or other
+  const parseCategories = (val: any): string[] => {
+    if (!val && val !== 0) return [];
+    if (Array.isArray(val)) return val.map(String).map((s) => s.trim()).filter(Boolean);
+    if (typeof val === "string") return val.split(",").map((s) => s.trim()).filter(Boolean);
+    return [String(val)];
+  };
+
+  // derive list of category names that might be used in query params
+  const allCategoryNames = useMemo(() => {
+    const fromPrimary = (primaryCategories || [])
+      .filter((pc) => pc && pc.id)
+      .flatMap((pc) => parseCategories(pc.id));
+    // add specials keys derived from shared specials data when available
+    const specialTypes =
+      specialsData && specialsData.length > 0
+        ? Array.from(new Set(specialsData.map((s: any) => String(s.type || "")).filter(Boolean)))
+        : ["daily", "night"];
+
+    return Array.from(new Set(["all", ...fromPrimary, ...specialTypes]));
+  }, [primaryCategories?.map((p) => p.id).join(",")]);
+
+  const getCategoryFromQuery = () => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const q = params.get("category");
+      if (!q) return allCategoryNames[0] || "all";
+      return q;
+    } catch (e) {
+      return allCategoryNames[0] || "all";
+    }
+  };
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(getCategoryFromQuery());
+
+  useEffect(() => {
+    setSelectedCategory(getCategoryFromQuery());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search, allCategoryNames.join(",")]);
 
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -159,11 +218,16 @@ const Nav = () => {
       case "Drinks Menu":
         return <LocalBarRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
       case "Daily Special":
+      case "Daily":
         return (
           <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
         );
       case "Night Special":
+      case "Night":
         return <NightlightRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      case "Chef":
+      case "Chef Special":
+        return <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
       default:
         return null;
     }
@@ -249,6 +313,13 @@ const Nav = () => {
                   >
                     {/* Parent Button (underline stays when dropdown item page is active) */}
                     <Button
+                      component={Link}
+                      to={
+                        // prefer the first dropdown path if available, otherwise fall back to a generic /menu
+                        link.dropdown && link.dropdown.length > 0
+                          ? link.dropdown[0].path || "/menu"
+                          : "/menu"
+                      }
                       color="primary"
                       sx={{
                         fontWeight: 500,
@@ -269,6 +340,7 @@ const Nav = () => {
                         },
                         "&:hover::after": { width: "100%" },
                       }}
+                      onClick={closeParentNow}
                     >
                       {link.label}
                       {link.label === "Special" && showSpecialBadge && (
@@ -322,6 +394,7 @@ const Nav = () => {
                           const isChildActive = location.pathname.startsWith(
                             item.path || ""
                           );
+                          const isSelectedByQuery = !!item.id && item.id === selectedCategory;
 
                           return (
                             <motion.li
@@ -346,7 +419,7 @@ const Nav = () => {
                                   px: 3,
                                   py: 1.2,
                                   minWidth: 230,
-                                  color: isChildActive
+                                  color: isChildActive || isSelectedByQuery
                                     ? "#7A4A22"
                                     : "primary.main",
                                   fontSize: "0.94rem",
@@ -358,8 +431,8 @@ const Nav = () => {
                                 }}
                                 onClick={closeParentNow}
                               >
-                                {/* Highlight left bar when active */}
-                                {isChildActive && (
+                                {/* Highlight left bar when active or selected by query */}
+                                {(isChildActive || isSelectedByQuery) && (
                                   <motion.span
                                     layoutId="special-left-bar"
                                     style={{
@@ -489,7 +562,10 @@ const Nav = () => {
                       </ListItemIcon>
                       <ListItemText
                         primary={d.label}
-                        primaryTypographyProps={{ align: "center" }}
+                        primaryTypographyProps={{
+                          align: "center",
+                          sx: { color: d.id && d.id === selectedCategory ? "#7A4A22" : undefined },
+                        }}
                       />
                     </ListItemButton>
                   ))}
@@ -624,22 +700,18 @@ const Nav = () => {
             path: "/about",
             icon: <InfoRoundedIcon fontSize="medium" />,
           },
-          {
-            label: "Menu",
-            path: "/menu",
-            icon: <RestaurantMenuRoundedIcon fontSize="medium" />,
-          },
-          {
-            label: "Special",
-            path: "/special/today",
-            icon: <LocalFireDepartmentRoundedIcon fontSize="medium" />,
-          },
-          {
-            label: "Contact",
-            path: "/contactus",
-            icon: <ContactSupportRoundedIcon fontSize="medium" />,
-          },
-        ].map((item) => {
+          // Build bottom nav items dynamically from the `navLinks` definition so labels/paths
+          // are not duplicated or hard-coded. Start with Home + About, then append Menu/Special/Contact
+        ].concat(
+          // helper: map only Menu / Special / Contact Us
+          navLinks
+            .filter((n) => ["Menu", "Special", "Contact Us"].includes(n.label))
+            .map((n) => ({
+              label: n.label,
+              path: (n.path || (n.dropdown && n.dropdown.length > 0 ? n.dropdown[0].path : "/")) as string,
+              icon: getIconFor(n.label) || <InfoRoundedIcon fontSize="medium" />,
+            }))
+        ).map((item) => {
           const isActive =
             item.path === "/"
               ? location.pathname === "/"
@@ -761,7 +833,10 @@ const Nav = () => {
                     </ListItemIcon>
                     <ListItemText
                       primary={d.label}
-                      primaryTypographyProps={{ align: "center" }}
+                      primaryTypographyProps={{
+                        align: "center",
+                        sx: { color: d.id && d.id === selectedCategory ? "#7A4A22" : undefined },
+                      }}
                     />
                   </ListItemButton>
                 ))}

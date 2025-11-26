@@ -79,16 +79,11 @@ export async function loadInitialSpecials(): Promise<void> {
 
     // Try importing component modules that now export their `cards` arrays.
     try {
-      const dailyComp = await import("../components/special/SpecialDisplay");
-      daily = dailyComp.exportedDailySpecials || [];
+      const specialComp = await import("../components/special/SpecialDisplay");
+      daily = specialComp.exportedDailySpecials || [];
+      chef = specialComp.exportedChefSpecials || [];
     } catch (e) {
       daily = [];
-    }
-
-    try {
-      const chefComp = await import("../components/special/ChefSpecialDisplay");
-      chef = chefComp.exportedChefSpecials || [];
-    } catch (e) {
       chef = [];
     }
 

@@ -1,5 +1,5 @@
 import Nav from "../components/common/Nav";
-import ChefSpecialDisplay from "../components/special/ChefSpecialDisplay";
+import SpecialDisplay from "../components/special/SpecialDisplay";
 import Footer from "../components/common/Footer";
 import InitialPage from "../components/home/InitialPage";
 import Callicon from "../components/icons/CalendarIcon";
@@ -15,7 +15,7 @@ const ChefSpecial = () => {
         line1="Welcome to Brooklin Pub"
         line2="Experience the finest dining and drinks in a cozy atmosphere."
       />
-      <ChefSpecialDisplay />
+      <SpecialDisplay initialShowChef={true} />
 
       <Footer />
     </div>

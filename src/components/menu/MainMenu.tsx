@@ -1,27 +1,17 @@
 import { useRef, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { DrawTextSVG } from "../icons/SvgNames";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
-import { useSearchParams } from "react-router-dom";
-import { useApiWithCache } from "../../hooks/useApi";
-import { menuService } from "../../services/menu.service";
-import type {
-  MenuCategory,
-  MenuItem as ApiMenuItem,
-} from "../../types/api.types";
-
+import menuData from "../../data/menuData";
 export default function MainMenu() {
-  const [searchParams] = useSearchParams();
-  const categoryParam = searchParams.get("category");
-
   const pathRef = useRef<SVGPathElement | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
   const [pageIndex, setPageIndex] = useState<number>(0);
   const pageSize = 6;
-
   type MenuItem = { name: string; desc: string; price: string; image?: string };
   type MenuEntry = {
     mainImage: string;
@@ -31,71 +21,10 @@ export default function MainMenu() {
     images?: string[];
   };
 
-  const [selectedItem, setSelectedItem] = useState<MenuEntry | null>(null);
   const [focusedItem, setFocusedItem] = useState<MenuItem | null>(null);
-
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
   const containerHeight = 4000;
-
-  // Fetch backend data
-  const { data: categories } = useApiWithCache<MenuCategory[]>(
-    "menu-categories",
-    () => menuService.getCategories()
-  );
-
-  const { data: allMenuItems } = useApiWithCache<ApiMenuItem[]>(
-    "all-menu-items",
-    () => menuService.getAllMenuItems()
-  );
-
-  // Helper function to get SVG path for category name
-  const getPathForCategory = (_name: string): string => {
-    // Return a default path - in production you could generate or store these
-    return `M4.20 42.90Q0 42.90 0 39.60Q0 38.05 1.05 36.95Q2.10 35.80 3.55 35.80Q4.60 35.80 5.20 36.50Q5.65 37.10 5.65 37.80Q5.65 38.40 5.43 38.98Q5.20 39.55 4.65 39.95Q3.85 40.70 2.80 40.70Q1.90 40.70 1.30 40.10Q1.85 41.55 4.15 41.55Q4.75 41.55 5.25 41.40Q9.55 40.25 12.75 36.45Q15.50 33.10 19.95 24.35L27.40 9.70Q28.00 8.55 28.78 7.57Q29.55 6.60 30.40 5.80Q28.50 5.85 26.43 6.30Q24.35 6.75 22.10 7.50Q17.55 9.05 15 11.10Q10.10 14.95 10.10 18.25Q10.10 20.20 12.35 20.20Q15 20.20 17.90 18.50Q20.55 16.95 22.50 14.55Q22.65 14.40 22.80 14.40Q23.15 14.40 23.15 14.65Q23.15 16.60 18.35 19.15Q13.95 21.55 11.65 21.55Q7 21.55 7 18Q7 16.35 8.30 14.50Q9.85 12.30 12.45 10.52Q15.05 8.75 18.75 7.40Q25.15 5.05 31.25 5Q34.40 2.30 37.75 2.30Q39.15 2.30 40.40 2.85Q40.65 2.95 40.65 3.20Q40.65 3.95 40.25 3.70Q39.45 3.25 38.25 3.25Q35.85 3.25 33.65 5.05Q37.80 5.45 39.85 7.35Q41.55 9.05 41.55 11.25Q41.55 14.55 38.70 17.85Q35.95 21.05 31.90 22.45Q38.70 23.65 38.70 29.05Q38.70 33.55 34.05 37.70Q29.00 42.15 21.85 42.65Q21.50 42.70 21.13 42.70Q20.75 42.70 20.35 42.70Q13.80 42.70 13.85 38.75Q8.80 42.90 4.20 42.90`;
-  };
-
-  // Transform backend data to frontend format
-  const menuData: MenuEntry[] = (() => {
-    if (!categories || !allMenuItems) return [];
-
-    let filteredCategories = categories.filter((c) => c.isActive);
-
-    // Filter by primary category if specified
-    if (categoryParam) {
-      filteredCategories = filteredCategories.filter(
-        (c) => c.primaryCategoryId === categoryParam
-      );
-    }
-
-    return filteredCategories
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((category) => {
-        const categoryItems = allMenuItems
-          .filter((item) => item.categoryId === category.id && item.isAvailable)
-          .sort((a, b) => a.sortOrder - b.sortOrder);
-
-        return {
-          mainImage:
-            categoryItems[0]?.imageUrls?.[0] ||
-            "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800",
-          name: category.name,
-          namePath: getPathForCategory(category.name),
-          menuItems: categoryItems.map((item) => ({
-            name: item.name,
-            desc: item.description || "",
-            price: item.price
-              ? `$${item.price.toFixed(2)}`
-              : item.hasMeasurements
-              ? "Market Price"
-              : "N/A",
-            image: item.imageUrls?.[0] || undefined,
-          })),
-          images: categoryItems
-            .filter((item) => item.imageUrls.length > 0)
-            .flatMap((item) => item.imageUrls),
-        };
-      });
-  })();
+  const padding = 36; // safe padding from edges
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -120,445 +49,584 @@ export default function MainMenu() {
      ${centerX} ${h}
   `;
 
-  const pathData = getCurvedPath(containerHeight);
 
-  const [markerPositions, setMarkerPositions] = useState<
-    { x: number; y: number }[]
-  >([]);
+  // points array removed: using CSS grid (gridConfig) for layout
+  const [gridConfig, setGridConfig] = useState<{
+    cols: number;
+    rows: number;
+    cellSize: number;
+    gap: number;
+    containerWidth: number;
+    containerHeight?: number;
+  }>({ cols: 1, rows: 1, cellSize: 120, gap: 18, containerWidth: 0 });
+  // selected item for popup modal
+  const [selectedItem, setSelectedItem] = useState<MenuEntry | null>(null);
+  // popup-related state
 
+  // helper clamp
+  const clamp = (val: number, a: number, b: number) =>
+    Math.max(a, Math.min(val, b));
+
+  // Lock body scroll when popup is open and handle Escape to close
   useEffect(() => {
-    const pathEl = pathRef.current;
-    if (!pathEl || menuData.length === 0) return;
-    const totalLength = pathEl.getTotalLength();
-    const step = totalLength / (menuData.length + 1);
-    const positions = menuData.map((_, i) => {
-      const pt = pathEl.getPointAtLength(step * (i + 1));
-      return { x: pt.x, y: pt.y };
+    if (typeof document === "undefined") return;
+    const original = document.body.style.overflow;
+    if (selectedItem) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = original;
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedItem(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = original;
+    };
+  }, [selectedItem]);
+
+  // whenever a new item is opened, reset the active thumbnail to first
+  useEffect(() => {
+    setPageIndex(0);
+    setFocusedItem(null);
+  }, [selectedItem]);
+
+  // helper to parse category fields (string or array)
+  const parseCategories = (val: any): string[] => {
+    if (!val && val !== 0) return [];
+    if (Array.isArray(val)) return val.map(String).map((s) => s.trim()).filter(Boolean);
+    if (typeof val === "string") return val.split(",").map((s) => s.trim()).filter(Boolean);
+    return [String(val)];
+  };
+
+  // read ?category= from query string (defaults to 'all')
+  const location = useLocation();
+  const getCategoryFromQuery = () => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const q = params.get("category");
+      return q ? String(q).trim() : "all";
+    } catch (e) {
+      return "all";
+    }
+  };
+
+  const selectedCategory = getCategoryFromQuery();
+
+  // Filter menuData according to selected category (or show all)
+  const filteredMenu = ((): typeof menuData => {
+    if (!selectedCategory || selectedCategory === "all") return menuData;
+    const key = String(selectedCategory).toLowerCase();
+    return menuData.filter((entry: any) => {
+      const cats = parseCategories(entry.categories || entry.category || "");
+      return cats.map((c) => c.toLowerCase()).includes(key);
     });
-    setMarkerPositions(positions);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menuData.length]);
+  })();
 
-  // Show loading state while data is being fetched
-  if (!categories || !allMenuItems) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ fontSize: 24, color: "#666" }}>Loading menu...</div>
-      </div>
-    );
-  }
+  // Generate grid-based points (replaces path-based random placement)
+  useEffect(() => {
+    const generateGridPoints = () => {
+      const numPoints = filteredMenu.length;
+      const sw = (typeof window !== "undefined" ? window.innerWidth : screenWidth) || screenWidth;
+      const newPoints: { x: number; y: number; size: number }[] = [];
 
-  if (menuData.length === 0) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          gap: 16,
-        }}
-      >
-        <div style={{ fontSize: 24, color: "#666" }}>No menu items found</div>
-        {categoryParam && (
-          <div style={{ fontSize: 16, color: "#999" }}>
-            Try selecting a different category
-          </div>
-        )}
-      </div>
-    );
-  }
+      // Decide columns based on viewport: single-column layout for mobile
+      const isMobileLocal = sw < 768;
+      // On mobile show a single column, otherwise try up to 3 columns
+      const desiredCols = isMobileLocal ? 1 : 3;
+      const cols = Math.min(desiredCols, Math.max(1, numPoints));
+      const rows = Math.ceil(numPoints / cols);
+
+      // compute widths/heights based on computed rows/cols so grid scales with item count
+      const usableWidth = Math.max(300, sw - padding * 2);
+      const cellWidth = usableWidth / cols;
+
+      // size caps
+      const maxSizeDesktop = 260;
+      const maxSizeMobile = 160;
+      const maxAllowed = isMobileLocal ? maxSizeMobile : maxSizeDesktop;
+
+      // compute a compact container height derived from rows so page height adapts to item count
+      const gap = Math.max(12, Math.round(cellWidth * 0.06));
+      const approxCell = Math.floor(Math.max(40, Math.min(cellWidth * 0.78, maxAllowed)));
+      const estimatedRowsHeight = rows * (approxCell + gap + 16); // 16px extra for labels/padding
+      const containerHeightUsed = Math.max(estimatedRowsHeight + padding * 2, 380);
+
+      // Single item -> center it and make it large
+      if (numPoints === 1) {
+        const swCenter = sw / 2;
+        const availWidth = sw - padding * 2;
+        const availHeight = containerHeightUsed - padding * 2;
+        const fullSize = Math.max(140, Math.min(availWidth, availHeight));
+        const finalX = clamp(
+          swCenter,
+          padding + fullSize / 2,
+          sw - padding - fullSize / 2
+        );
+        const finalY = clamp(
+          containerHeightUsed / 2,
+          padding + fullSize / 2,
+          containerHeightUsed - padding - fullSize / 2
+        );
+        newPoints.push({ x: finalX, y: finalY, size: fullSize });
+      } else {
+        // distribute rows evenly through available container height (respecting padding)
+        const availableHeight = Math.max(300, containerHeightUsed - padding * 2);
+        const rowGap = Math.floor(availableHeight / (rows + 1));
+
+        for (let i = 0; i < numPoints; i++) {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+
+          // center of the cell (x based on columns, y spreads across rows using rowGap)
+          const cx = padding + cellWidth * col + cellWidth / 2;
+          const cy = padding + rowGap * (row + 1);
+
+          // size scales with available cell space; reduce size when many items exist
+          const sizeFromWidth = Math.floor(cellWidth * 0.78);
+          const sizeFromHeight = Math.floor(rowGap * 0.7);
+          // reduce scale slightly when many rows to avoid overlap
+          const densityFactor = Math.max(0.5, 1 - (rows - 1) * 0.08);
+          let size = Math.floor(Math.min(sizeFromWidth, sizeFromHeight) * densityFactor);
+          size = Math.max(40, Math.min(size, maxAllowed));
+
+          const finalX = clamp(cx, padding + size / 2, sw - padding - size / 2);
+          const finalY = clamp(cy, padding + size / 2, containerHeightUsed - padding - size / 2);
+
+          newPoints.push({ x: finalX, y: finalY, size });
+        }
+      }
+
+      // also expose computed grid config so rendering can use a CSS grid
+      const containerWidth = Math.min(sw - padding * 2, Math.round(cellWidth * cols + gap * (cols - 1)));
+
+      setGridConfig({
+        cols,
+        rows,
+        cellSize: approxCell,
+        gap,
+        containerWidth,
+        containerHeight: containerHeightUsed,
+      });
+    };
+
+    const t = setTimeout(generateGridPoints, 80);
+    window.addEventListener("resize", generateGridPoints);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", generateGridPoints);
+    };
+  }, [filteredMenu.length, screenWidth]);
+
+  // mobile-detection removed; previously used for popup layout
+
+  // Inject Google Fonts link for the Inspiration family (only once)
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (document.getElementById("fonts-inspiration-preconnect")) return;
+
+    const pre1 = document.createElement("link");
+    pre1.rel = "preconnect";
+    pre1.href = "https://fonts.googleapis.com";
+    pre1.id = "fonts-inspiration-preconnect";
+    document.head.appendChild(pre1);
+
+    const pre2 = document.createElement("link");
+    pre2.rel = "preconnect";
+    pre2.href = "https://fonts.gstatic.com";
+    pre2.crossOrigin = "";
+    pre2.id = "fonts-inspiration-preconnect-2";
+    document.head.appendChild(pre2);
+
+    const sheet = document.createElement("link");
+    sheet.rel = "stylesheet";
+    sheet.href = "https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Great+Vibes&family=Inspiration&family=Momo+Signature&family=Moon+Dance&display=swap";
+    sheet.id = "fonts-inspiration-stylesheet";
+    document.head.appendChild(sheet);
+
+    return () => {
+      // keep links during the session; do not remove on unmount
+    };
+  }, []);
+
+  // Ensure the sticky heading sits below any site nav bar. We measure common
+  // nav/header elements and offset the heading so it doesn't get hidden.
+  const [, setHeaderOffset] = useState<number>(0);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const selectors = ["nav", "header", "#nav", ".nav", ".Nav", ".navbar", ".nav-bar"];
+    const measure = () => {
+      let h = 0;
+      for (const sel of selectors) {
+        const el = document.querySelector(sel) as HTMLElement | null;
+        if (el && el.offsetHeight) {
+          h = Math.max(h, el.offsetHeight);
+        }
+      }
+
+      // ensure a minimum top offset of 100px across all devices so the heading
+      // never sits under small navbars and is consistently positioned.
+      const buffer = 8;
+      const minTop = 100;
+      setHeaderOffset(Math.max(h + buffer, minTop));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  // No empty-cell allocation needed: show every menu item.
+  const effectiveContainerHeight = gridConfig.containerHeight ?? containerHeight;
 
   return (
     <div
       ref={ref}
       style={{
-        width: "100%",
+        height: effectiveContainerHeight,
+        background: "var(--wine-red)",
         position: "relative",
-        overflow: "hidden",
-        backgroundColor: "#0a0a0a",
-        paddingTop: 100,
+        overflow: "visible",
       }}
     >
-      <div
+     
+      <svg
+        width="100%"
+        height={effectiveContainerHeight}
+        viewBox={`0 0 ${screenWidth} ${effectiveContainerHeight}`}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
         style={{
-          position: "relative",
-          width: "100%",
-          height: containerHeight,
+          position: "sticky",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          overflow: "visible",
         }}
       >
-        <svg
-          viewBox={`0 0 ${screenWidth} ${containerHeight}`}
-          preserveAspectRatio="xMidYMid slice"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-          }}
-        >
-          <defs>
-            <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#ff6b6b" stopOpacity={0.4} />
-              <stop offset="50%" stopColor="#4ecdc4" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#ffe66d" stopOpacity={0.4} />
-            </linearGradient>
-          </defs>
-          <path
-            ref={pathRef}
-            d={pathData}
-            fill="none"
-            stroke="url(#pathGradient)"
-            strokeWidth={4}
-            opacity={0.5}
-          />
-          <motion.path
-            d={pathData}
-            fill="none"
-            stroke="#fff"
-            strokeWidth={3}
-            strokeLinecap="round"
-            strokeDasharray="1 0"
-            style={{ pathLength }}
-          />
-        </svg>
+        <motion.path
+          ref={pathRef}
+          d={getCurvedPath(effectiveContainerHeight)}
+          stroke="white"
+          strokeWidth="6"
+          fill="none"
+          strokeLinecap="round"
+          style={{ pathLength }}
+        />
+      </svg>
+      {/* Grid-aligned layout: centered container whose width depends on item count */}
+      <div
+        style={{
+          position: "absolute",
+          // start a little below the top padding and spread to bottom padding
+          top: padding,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: gridConfig.containerWidth ? gridConfig.containerWidth : "90%",
+          // make the grid fill the available container height so rows distribute evenly
+          height: gridConfig.containerHeight ? gridConfig.containerHeight - padding * 2 : effectiveContainerHeight - padding * 2,
+          display: "grid",
+          gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
+          // rows should split the full height equally
+          gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+          gap: `${gridConfig.gap}px`,
+          justifyContent: "center",
+          alignContent: "stretch",
+          zIndex: 10,
+          paddingBottom: 100,
+        }}
+      >
+        {filteredMenu.map((item: any, idx: number) => {
+          // compute per-row height and choose item size so it fits comfortably in the row
+          const availableHeight = effectiveContainerHeight - padding * 2 - (gridConfig.gap * (gridConfig.rows - 1));
+          const rowHeight = gridConfig.rows > 0 ? Math.floor(availableHeight / gridConfig.rows) : availableHeight;
+          const size = Math.min(gridConfig.cellSize || 220, Math.max(40, Math.floor(rowHeight * 0.78)));
 
-        {markerPositions.map((pos, idx) => {
-          const item = menuData[idx];
+          // Render every item (no empty cells)
+
           return (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.5 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: idx * 0.1 }}
-              style={{
-                position: "absolute",
-                left: pos.x,
-                top: pos.y,
-                transform: "translate(-50%, -50%)",
-                cursor: "pointer",
-                zIndex: 10,
-              }}
-              onClick={() => {
-                setSelectedItem(item);
-                setPageIndex(0);
-              }}
-            >
               <motion.div
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.95 }}
+                  key={idx}
+                  onClick={() => setSelectedItem(item)}
+              style={{
+                width: size,
+                height: "auto",
+                justifySelf: "center",
+                alignSelf: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "10px",
+                cursor: "pointer",
+              }}
+              whileHover={{
+                filter: "brightness(1.03)",
+              }}
+              transition={{ type: "spring", stiffness: 200, damping: 18 }}
+            >
+              {/* image circle wrapper */}
+              <div
                 style={{
-                  position: "relative",
-                  width: 180,
-                  height: 180,
+                  width: size,
+                  height: size,
                   borderRadius: "50%",
                   overflow: "hidden",
-                  border: "4px solid rgba(255,255,255,0.8)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-                  backgroundColor: "#1a1a1a",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#111",
+                  border: "4px solid white",
+                  boxShadow: "0 12px 30px rgba(0,0,0,0.7)",
                 }}
               >
-                <img
+                <motion.img
                   src={item.mainImage}
                   alt={item.name}
-                  loading="lazy"
                   style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
                   }}
+                  whileHover={{ filter: "brightness(1.08) contrast(1.05)" }}
+                  transition={{ duration: 0.25 }}
                 />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    width: "100%",
-                    padding: "12px 8px",
-                    backgroundColor: "rgba(0,0,0,0.75)",
-                    textAlign: "center",
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: 14,
-                    backdropFilter: "blur(8px)",
-                  }}
-                >
-                  {item.name}
-                </div>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 + idx * 0.1 }}
+              {/* svg name under the image */}
+              <div
                 style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "120%",
-                  transform: "translateY(-50%)",
+                  width: Math.min(size * 1.1, gridConfig.containerWidth || 9999),
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                   pointerEvents: "none",
-                  zIndex: 5,
                 }}
               >
                 <DrawTextSVG
                   path={item.namePath}
-                  stroke="#ffffff"
-                  width={200}
-                  scale={0.8}
+                  width={size}
+                  stroke="white"
+                  scale={1.2}
                 />
-              </motion.div>
+              </div>
             </motion.div>
           );
         })}
       </div>
+      {/* Popup/modal for submenu - show all images for the menu item (images only) */}
+      {selectedItem && (
+        <>
+        <Dialog
+          open={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+          maxWidth="lg"
+          sx={{ zIndex: 14000 }}
+          BackdropProps={{ sx: { zIndex: 13990, backgroundColor: 'rgba(0,0,0,0.45)' } }}
+          PaperProps={{
+            sx: {
+              background: "transparent",
+              boxShadow: "none",
+              overflow: "visible",
+              zIndex: 14001,
+            },
+          }}
+        >
+              <DialogContent sx={{ p: 2, display: 'flex', justifyContent: 'center', background: 'transparent' }}>
+                <Box sx={{ position: 'relative', width: 'min(920px, 96vw)', bgcolor: 'background.paper', borderRadius: 2, boxShadow: 6, p: 2 }}>
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => setSelectedItem(null)}
+                    size="large"
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                    }}
+                  >
+                    <span style={{ fontSize: 20, lineHeight: 1 }}>×</span>
+                  </IconButton>
 
-      <AnimatePresence>
-        {selectedItem && (
-          <Dialog
-            open={!!selectedItem}
-            onClose={() => {
-              setSelectedItem(null);
-              setFocusedItem(null);
-              setPageIndex(0);
-            }}
-            maxWidth="md"
-            fullWidth
-            sx={{ zIndex: 10000 }}
-            BackdropProps={{
-              sx: {
-                zIndex: 9990,
-                backgroundColor: "rgba(0,0,0,0.85)",
-                backdropFilter: "blur(12px)",
-              },
-            }}
-            PaperProps={{
-              sx: {
-                borderRadius: 3,
-                zIndex: 10001,
-                bgcolor: "background.paper",
-                backgroundImage:
-                  "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
-                color: "#fff",
-              },
-            }}
-          >
-            <DialogContent sx={{ p: 3, position: "relative" }}>
-              <IconButton
-                aria-label="close"
-                onClick={() => {
-                  setSelectedItem(null);
-                  setFocusedItem(null);
-                  setPageIndex(0);
-                }}
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 12,
-                  right: 12,
-                  color: "#fff",
-                  bgcolor: "rgba(255,255,255,0.1)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.2)" },
-                }}
-              >
-                ×
-              </IconButton>
-
-              <Box sx={{ textAlign: "center", mb: 3 }}>
-                <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800 }}>
-                  {selectedItem.name}
-                </h2>
-              </Box>
-
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {(() => {
-                  const start = pageIndex * pageSize;
-                  const end = start + pageSize;
-                  const pageItems = selectedItem.menuItems.slice(start, end);
-                  const totalPages = Math.ceil(
-                    selectedItem.menuItems.length / pageSize
-                  );
-
-                  return (
-                    <>
-                      <Box
-                        sx={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(200px, 1fr))",
-                          gap: 2,
-                        }}
+                  {/* Grid: show up to 6 images per page (responsive columns) */}
+                  <AnimatePresence mode="wait">
+                  <Box key={pageIndex} sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2,1fr)', sm: 'repeat(3,1fr)' }, gap: 2 }}>
+                    {(
+                      selectedItem?.menuItems?.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize) || []
+                    ).map((mi: any, i: number) => (
+                      <motion.div
+                        key={`${pageIndex}-${i}`}
+                        layoutId={`thumb-${mi.name}-${i}`}
+                        initial={{ scale: 0.3, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.3, opacity: 0, y: -20 }}
+                        transition={{ delay: i * 0.06, duration: 0.4, ease: "easeOut" }}
                       >
-                        {pageItems.map((mi, i) => (
-                          <motion.div
-                            key={start + i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                            onClick={() => setFocusedItem(mi)}
-                            style={{
-                              cursor: "pointer",
-                              borderRadius: 12,
-                              overflow: "hidden",
-                              backgroundColor: "rgba(255,255,255,0.05)",
-                              border: "1px solid rgba(255,255,255,0.1)",
-                              transition: "all 0.3s ease",
-                            }}
-                            whileHover={{
-                              scale: 1.03,
-                              backgroundColor: "rgba(255,255,255,0.1)",
-                            }}
-                          >
-                            {mi.image && (
-                              <img
-                                src={mi.image}
-                                alt={mi.name}
-                                loading="lazy"
-                                style={{
-                                  width: "100%",
-                                  height: 150,
-                                  objectFit: "cover",
-                                }}
-                              />
-                            )}
-                            <Box sx={{ p: 2 }}>
-                              <div style={{ fontWeight: 700, fontSize: 16 }}>
-                                {mi.name}
-                              </div>
-                              <div
-                                style={{
-                                  color: "#aaa",
-                                  fontSize: 14,
-                                  marginTop: 4,
-                                }}
-                              >
-                                {mi.price}
-                              </div>
-                              {mi.desc && (
-                                <div
-                                  style={{
-                                    color: "#888",
-                                    fontSize: 12,
-                                    marginTop: 8,
-                                  }}
-                                >
-                                  {mi.desc}
-                                </div>
-                              )}
-                            </Box>
-                          </motion.div>
-                        ))}
-                      </Box>
-
-                      {totalPages > 1 && (
                         <Box
+                          onClick={() => setFocusedItem(mi)}
                           sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: 2,
-                            mt: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1,
+                            cursor: 'pointer',
+                            transition: 'transform 160ms ease, box-shadow 160ms ease',
+                            '&:hover': { transform: 'translateY(-6px)' },
+                            '& img': { transition: 'transform 200ms ease, box-shadow 200ms ease' },
+                            '&:hover img': { transform: 'scale(1.04)'},
+                            '& .captionName': { transition: 'color 140ms ease' },
+                            '&:hover .captionName': { color: 'primary.main' }
                           }}
                         >
-                          <IconButton
-                            aria-label="previous page"
-                            disabled={pageIndex === 0}
-                            onClick={() =>
-                              setPageIndex((p) => Math.max(0, p - 1))
-                            }
-                            sx={{ color: "#fff" }}
-                          >
-                            ‹
-                          </IconButton>
-                          <span style={{ color: "#aaa" }}>
-                            Page {pageIndex + 1} of {totalPages}
-                          </span>
-                          <IconButton
-                            aria-label="next page"
-                            disabled={pageIndex >= totalPages - 1}
-                            onClick={() =>
-                              setPageIndex((p) =>
-                                Math.min(totalPages - 1, p + 1)
-                              )
-                            }
-                            sx={{ color: "#fff" }}
-                          >
-                            ›
-                          </IconButton>
+                          <Box
+                            component="img"
+                            src={mi.image || selectedItem.mainImage}
+                            alt={mi.name}
+                            loading="lazy"
+                            sx={{ width: '80%', height: 180, objectFit: 'cover', borderRadius: 1, justifySelf: 'center', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
+                          />
+                          <div style={{ textAlign: 'center', marginTop: 4 }}>
+                            <div className="captionName" style={{ fontWeight: 700 }}>{mi.name}</div>
+                            <div style={{ color: '#666' }}>{mi.price}</div>
+                          </div>
                         </Box>
-                      )}
-                    </>
-                  );
-                })()}
-              </Box>
-            </DialogContent>
-          </Dialog>
-        )}
-      </AnimatePresence>
+                      </motion.div>
+                    ))}
+                  </Box>
+                  </AnimatePresence>
 
-      <Dialog
-        open={!!focusedItem}
-        onClose={() => setFocusedItem(null)}
-        maxWidth="sm"
-        sx={{ zIndex: 15000 }}
-        BackdropProps={{
-          sx: {
-            zIndex: 14990,
-            backgroundColor: "rgba(0,0,0,0.55)",
-          },
-        }}
-        PaperProps={{ sx: { borderRadius: 2, zIndex: 15001 } }}
+{((selectedItem?.menuItems?.length || 0) > pageSize) && (() => {
+  const totalPages = Math.ceil((selectedItem?.menuItems?.length || 0) / pageSize);
+
+  const prevPage = Math.max(0, pageIndex - 1);
+  const nextPage = Math.min(totalPages - 1, pageIndex + 1);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+        mt: 2,
+      }}
+    >
+      {/* LEFT ARROW */}
+      <IconButton
+        aria-label="previous page"
+        onClick={() => setPageIndex(prevPage)}
+        disabled={pageIndex === 0}
       >
-        <DialogContent
-          sx={{ p: 2, position: "relative", bgcolor: "background.paper" }}
+        ‹
+      </IconButton>
+
+      {/* DOTS */}
+      <Box sx={{ display: "flex", gap: 1 }}>
+        
+        {/* PREVIOUS DOT */}
+        <motion.div
+          onClick={() => pageIndex > 0 && setPageIndex(prevPage)}
+          animate={{
+            scale: pageIndex === 0 ? 0.5 : 0.7,
+            opacity: pageIndex === 0 ? 0.3 : 1,
+            backgroundColor: pageIndex === 0 ? "#bdbdbd" : "#757575",
+          }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            cursor: pageIndex === 0 ? "default" : "pointer",
+          }}
+        />
+
+        {/* ACTIVE DOT */}
+        <motion.div
+          animate={{
+            scale: 1.4,
+            backgroundColor: "var(--wine-red)",
+          }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+          }}
+        />
+
+        {/* NEXT DOT */}
+        <motion.div
+          onClick={() => pageIndex < totalPages - 1 && setPageIndex(nextPage)}
+          animate={{
+            scale: pageIndex === totalPages - 1 ? 0.5 : 0.7,
+            opacity: pageIndex === totalPages - 1 ? 0.3 : 1,
+            backgroundColor: pageIndex === totalPages - 1 ? "#bdbdbd" : "#757575",
+          }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            cursor:
+              pageIndex === totalPages - 1 ? "default" : "pointer",
+          }}
+        />
+
+      </Box>
+
+      {/* RIGHT ARROW */}
+      <IconButton
+        aria-label="next page"
+        onClick={() => setPageIndex(nextPage)}
+        disabled={pageIndex === totalPages - 1}
+      >
+        ›
+      </IconButton>
+    </Box>
+  );
+})()}
+
+                  {/* Focused item: opening in a separate dialog (nested popup) */}
+                  {/* Inline details panel removed; a nested Dialog is rendered below when focusedItem is set. */}
+
+                  {/* Removed main image; thumbnails are shown in the grid above with pagination */}
+                </Box>
+              </DialogContent>
+        </Dialog>
+
+        {/* Nested details dialog for the clicked thumbnail (separate popup) */}
+        <Dialog
+          open={!!focusedItem}
+          onClose={() => setFocusedItem(null)}
+          maxWidth="sm"
+          sx={{ zIndex: 15000 }}
+          BackdropProps={{ sx: { zIndex: 14990, backgroundColor: 'rgba(0,0,0,0.55)' } }}
+          PaperProps={{ sx: { borderRadius: 2, zIndex: 15001 } }}
         >
-          <IconButton
-            aria-label="close details"
-            onClick={() => setFocusedItem(null)}
-            size="small"
-            sx={{ position: "absolute", top: 8, right: 8 }}
-          >
-            ×
-          </IconButton>
-          {focusedItem?.image && (
+          <DialogContent sx={{ p: 2, position: 'relative', bgcolor: 'background.paper' }}>
+            <IconButton
+              aria-label="close details"
+              onClick={() => setFocusedItem(null)}
+              size="small"
+              sx={{ position: 'absolute', top: 8, right: 8 }}
+            >
+              ×
+            </IconButton>
             <Box
               component="img"
-              src={focusedItem.image}
-              alt={focusedItem.name}
+              src={focusedItem?.image || selectedItem?.mainImage}
+              alt={focusedItem?.name}
               loading="lazy"
-              sx={{
-                width: "100%",
-                height: "auto",
-                maxHeight: "70vh",
-                objectFit: "cover",
-                borderRadius: 1,
-              }}
+              sx={{ width: '100%', height: 'auto', maxHeight: '70vh', objectFit: 'cover', borderRadius: 1 }}
             />
-          )}
-          <Box sx={{ mt: 1, textAlign: "center" }}>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>
-              {focusedItem?.name}
-            </div>
-            <div style={{ color: "#666", marginTop: 4 }}>
-              {focusedItem?.price}
-            </div>
-            {focusedItem?.desc && (
-              <div style={{ color: "#444", marginTop: 8 }}>
-                {focusedItem.desc}
-              </div>
-            )}
-          </Box>
-        </DialogContent>
-      </Dialog>
+            <Box sx={{ mt: 1, textAlign: 'center' }}>
+              <div style={{ fontWeight: 800, fontSize: 18 }}>{focusedItem?.name}</div>
+              <div style={{ color: '#666', marginTop: 4 }}>{focusedItem?.price}</div>
+              <div style={{ color: '#444', marginTop: 8 }}>{focusedItem?.desc}</div>
+            </Box>
+          </DialogContent>
+        </Dialog>
+      </>
+      )}
     </div>
   );
 }
+

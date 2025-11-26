@@ -13,6 +13,7 @@ import ContactUs from "./pages/ContactUs";
 import Special from "./pages/Special";
 // import Menu from "./pages/Menu";
 import ChefSpecial from "./pages/ChefSpecial";
+import SpecialDisplay from "./components/special/SpecialDisplay";
 import ScrollTopFab from "./components/common/ScrollTopFab";
 import MainMenu from "./pages/mainmenu";
 import DrinksMenu from "./pages/DrinkMenu";
@@ -53,10 +54,11 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/special/daily" element={<Special />} />
-          {/* <Route path="/menu" element={<Menu />} /> */}
           <Route path="/special/night" element={<ChefSpecial />} />
-          <Route path="/menu/main-menu" element={<MainMenu />} />
-          <Route path="/menu/drink-menu" element={<DrinksMenu />} />
+          {/* Generic special route for any type (e.g. /special/chef, /special/daily, /special/night) */}
+          <Route path="/special/:type" element={<SpecialDisplay />} />
+          {/* Generic menu route that responds to query params like ?category=<id> */}
+          <Route path="/menu" element={<MainMenu />} />
         </Routes>
         <ScrollTopFab />
       </Router>
