@@ -1,56 +1,13 @@
 import { useState, useEffect } from "react";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
 
 const pages = [
-  {
-    id: 1,
-    color: "#D9A756",
-    title: "MAKE YOURSELF HOME!",
-    subtitle: "Different ambiances, different moods.",
-    images: [
-      "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/interpret-bar-graphs/clip-art-christmas.png",
-      "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/beside-and-next-to/next-to-and-beside/clip-art-orange.png",
-      "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/beside-and-next-to/next-to-and-beside/clip-art-cat.png",
-      "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/interpret-bar-graphs/clip-art-shoe-flower.png",
-    ],
-    links: ["/christmas", "/orange", "/cat", "/shoe-flower"],
-  },
-  {
-    id: 2,
-    color: "#F3E3CC",
-    layout: "story",
-    title: "Our Story",
-    subtitle: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.
-Excepteur sint occaecat cupidatat non proident, sunt in culpa.
-Curabitur pretium tincidunt lacus. Nulla gravida orci a odio.
-In hac habitasse platea dictumst. Etiam faucibus cursus urna.
-Suspendisse potenti. Sed dignissim odio a lorem malesuada.
-`,
-    image: "./brooklinpub-logo.png",
-  },
-  {
-    id: 5,
-    color: "#7C8B48",
-    title: "FRESHLY BREWED MOMENTS",
-    subtitle: "Enjoy every sip, every bite, every vibe.",
-  },
-  {
-    id: 3,
-    color: "#8A2A2A",
-    title: "COZY SPACES",
-    subtitle: "Designed for comfort, inspired by warmth.",
-  },
-  {
-    id: 4,
-    color: "#c08a6aff",
-    title: "VISIT US TODAY",
-    subtitle: "Where great coffee meets great company.",
-  },
+  { id: 1, title: "hgtfuhvguy", subtitle: "nkjhjh", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/interpret-bar-graphs/clip-art-christmas.png" },
+  { id: 2, title: "", subtitle: "", image: "./brooklinpub-logo.png" },
+  { id: 5, title: "", subtitle: "", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/interpret-bar-graphs/clip-art-shoe-flower.png" },
+  { id: 3, title: "", subtitle: "", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/beside-and-next-to/next-to-and-beside/clip-art-cat.png" },
+  { id: 4, title: "", subtitle: "", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/beside-and-next-to/next-to-and-beside/clip-art-orange.png" },
 ];
 
 export default function App() {
@@ -114,18 +71,7 @@ export default function App() {
     }
   };
 
-  const imageVariants = {
-    hidden: { opacity: 0, x: -200 },
-    visible: (i: number) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.25,
-        duration: 0.8,
-        ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
-      },
-    }),
-  };
+  // imageVariants removed — no image grid in this layout
 
   const currentPage = pages[pageIndex];
 
@@ -136,7 +82,7 @@ export default function App() {
         width: "100%",
         overflow: "hidden",
         position: "relative",
-        backgroundColor: currentPage.color,
+        backgroundColor: "transparent",
       }}
     >
       {/* Pagination dots */}
@@ -178,22 +124,22 @@ export default function App() {
           exit="exit"
           transition={{ duration: 1 }}
           style={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            backgroundColor: currentPage.color,
-            display: "flex",
-            flexDirection:
-              currentPage.id === 2 ? (isMobile ? "column" : "row") : "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: isMobile
-              ? "center"
-              : currentPage.id === 2
-              ? "left"
-              : "center",
-            padding: isMobile ? "20px" : "60px",
-          }}
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              background: currentPage.image
+                ? `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${currentPage.image})`
+                : "transparent",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              padding: isMobile ? "20px" : "60px",
+            }}
         >
           {/* Text */}
           <motion.div
@@ -201,10 +147,6 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 1 }}
-            style={{
-              flex: currentPage.id === 2 ? 1 : undefined,
-              marginRight: currentPage.id === 2 && !isMobile ? "40px" : 0,
-            }}
           >
             <Typography
               sx={{
@@ -231,69 +173,7 @@ export default function App() {
             </Typography>
           </motion.div>
 
-          {/* Page 2 Image */}
-          {currentPage.id === 2 && currentPage.image && (
-            <motion.div
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 100 }}
-              transition={{ duration: 1 }}
-              style={{ flex: 1, display: "flex", justifyContent: "center" }}
-            >
-              <img
-                src={currentPage.image}
-                alt="story-img"
-                style={{
-                  width: isMobile ? "80%" : "100%",
-                  maxWidth: "500px",
-                  objectFit: "contain",
-                }}
-              />
-            </motion.div>
-          )}
-
-          {/* Multiple images */}
-          {currentPage.images && currentPage.id !== 2 && (
-            <Box
-              sx={{
-                width: "100%",
-                maxWidth: "1200px",
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: { xs: 1.5, sm: 2, md: 3 },
-                mt: isMobile ? 3 : 5,
-              }}
-            >
-              {currentPage.images.map((src, idx) => {
-                const isClickable =
-                  currentPage.id === 1 && currentPage.links?.[idx];
-
-                return (
-                  <Link
-                    key={idx}
-                    to={isClickable ? currentPage.links[idx] : "#"}
-                  >
-                    <motion.img
-                      src={src}
-                      custom={idx}
-                      variants={imageVariants}
-                      initial="hidden"
-                      animate="visible"
-                      whileHover={{ scale: 1.08 }}
-                      style={{
-                        width: "clamp(70px, 22vw, 180px)",
-                        height: "clamp(70px, 22vw, 180px)",
-                        objectFit: "contain",
-                        cursor: isClickable ? "pointer" : "default",
-                      }}
-                    />
-                  </Link>
-                );
-              })}
-            </Box>
-          )}
+          {/* (Background image is shown via container style; no image grid) */}
         </motion.div>
       </AnimatePresence>
     </Box>
