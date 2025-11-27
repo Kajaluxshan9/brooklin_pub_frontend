@@ -337,7 +337,7 @@ export default function MainMenu() {
     const sheet = document.createElement("link");
     sheet.rel = "stylesheet";
     sheet.href =
-      "https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Great+Vibes&family=Inspiration&family=Momo+Signature&family=Moon+Dance&display=swap";
+      "https://fonts.googleapis.com/css2?family=Corinthia&family=Carattere&family=Cedarville+Cursive&family=Great+Vibes&family=Inspiration&family=Momo+Signature&family=Moon+Dance&display=swap";
     sheet.id = "fonts-inspiration-stylesheet";
     document.head.appendChild(sheet);
 
@@ -521,7 +521,7 @@ export default function MainMenu() {
                 }}
               >
                 <DrawTextSVG
-                  path={item.namePath}
+                  text={item.name}
                   width={size}
                   stroke="white"
                   scale={1.2}
@@ -653,8 +653,8 @@ export default function MainMenu() {
 
                             {/* Show measurements if available */}
                             {mi.hasMeasurements &&
-                            mi.measurements &&
-                            mi.measurements.length > 0 ? (
+                              mi.measurements &&
+                              mi.measurements.length > 0 ? (
                               <Box
                                 sx={{
                                   mt: 1,
@@ -874,8 +874,8 @@ export default function MainMenu() {
 
                 {/* Display measurements if available */}
                 {focusedItem?.hasMeasurements &&
-                focusedItem?.measurements &&
-                focusedItem.measurements.length > 0 ? (
+                  focusedItem?.measurements &&
+                  focusedItem.measurements.length > 0 ? (
                   <div style={{ marginTop: 8 }}>
                     {focusedItem.measurements
                       .filter((m) => m.price > 0)
