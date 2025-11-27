@@ -7,6 +7,7 @@ import { addSpecial } from "../../lib/specials";
 import { createPortal } from "react-dom";
 import { useApiWithCache } from "../../hooks/useApi";
 import { specialsService } from "../../services/specials.service";
+import { getImageUrl } from "../../services/api";
 import type { Special } from "../../types/api.types";
 import specialsDataFallback from "../../data/specialsData";
 import type { SpecialCard } from "../../data/specialsData";
@@ -18,11 +19,11 @@ function transformSpecialsToCards(specials: Special[]): Card[] {
     title: special.title,
     desc: special.description || "Delicious special of the day",
     bg:
-      special.imageUrls?.[0] ||
+      getImageUrl(special.imageUrls?.[0]) ||
       "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
     popupImg:
-      special.imageUrls?.[1] ||
-      special.imageUrls?.[0] ||
+      getImageUrl(special.imageUrls?.[1]) ||
+      getImageUrl(special.imageUrls?.[0]) ||
       "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
     status: "new",
   }));
@@ -35,11 +36,11 @@ function transformChefSpecialsToCards(specials: Special[]): Card[] {
       title: special.title,
       desc: special.description || "Chef's handcrafted creation",
       bg:
-        special.imageUrls?.[0] ||
+        getImageUrl(special.imageUrls?.[0]) ||
         "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
       popupImg:
-        special.imageUrls?.[1] ||
-        special.imageUrls?.[0] ||
+        getImageUrl(special.imageUrls?.[1]) ||
+        getImageUrl(special.imageUrls?.[0]) ||
         "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
       status: "new",
     }));

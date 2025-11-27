@@ -14,6 +14,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useApiWithCache } from "../../hooks/useApi";
 import { menuService } from "../../services/menu.service";
+import { getImageUrl } from "../../services/api";
 import type {
   MenuCategory,
   MenuItem,
@@ -54,7 +55,6 @@ export default function MainMenu() {
     primaryCategoryId?: string;
   };
 
-  const [focusedItem, setFocusedItem] = useState<DisplayMenuItem | null>(null);
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
   const containerHeight = 4000;
   const padding = 36;
@@ -118,7 +118,7 @@ export default function MainMenu() {
               name: item.name,
               desc: item.description || "",
               price: priceDisplay,
-              image: item.imageUrls?.[0] || "https://via.placeholder.com/300",
+              image: getImageUrl(item.imageUrls?.[0]) || "https://via.placeholder.com/300",
               measurements: item.measurements,
               hasMeasurements: item.hasMeasurements,
             } as DisplayMenuItem;
@@ -138,7 +138,7 @@ export default function MainMenu() {
 
         return {
           mainImage:
-            category.imageUrl ||
+            getImageUrl(category.imageUrl) ||
             categoryItems[0]?.image ||
             "https://via.placeholder.com/400",
           name: category.name,
@@ -173,7 +173,6 @@ export default function MainMenu() {
 
   useEffect(() => {
     setPageIndex(0);
-    setFocusedItem(null);
   }, [selectedItem]);
 
   // Get selected primary category from URL
@@ -607,13 +606,11 @@ export default function MainMenu() {
                         }}
                       >
                         <Box
-                          onClick={() => setFocusedItem(mi)}
                           sx={{
                             display: "flex",
                             flexDirection: "row",
                             gap: 2,
                             p: 2,
-                            cursor: "pointer",
                             borderRadius: 2,
                             border: "1px solid rgba(0,0,0,0.08)",
                             bgcolor: "background.paper",
@@ -621,8 +618,6 @@ export default function MainMenu() {
                             "&:hover": {
                               bgcolor: "rgba(184, 115, 51, 0.05)",
                               borderColor: "rgba(184, 115, 51, 0.3)",
-                              transform: "translateX(4px)",
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                             },
                           }}
                         >
@@ -828,76 +823,6 @@ export default function MainMenu() {
                 {/* Inline details panel removed; a nested Dialog is rendered below when focusedItem is set. */}
 
                 {/* Removed main image; thumbnails are shown in the grid above with pagination */}
-              </Box>
-            </DialogContent>
-          </Dialog>
-
-          {/* Nested details dialog for the clicked thumbnail (separate popup) */}
-          <Dialog
-            open={!!focusedItem}
-            onClose={() => setFocusedItem(null)}
-            maxWidth="sm"
-            sx={{ zIndex: 15000 }}
-            BackdropProps={{
-              sx: { zIndex: 14990, backgroundColor: "rgba(0,0,0,0.55)" },
-            }}
-            PaperProps={{ sx: { borderRadius: 2, zIndex: 15001 } }}
-          >
-            <DialogContent
-              sx={{ p: 2, position: "relative", bgcolor: "background.paper" }}
-            >
-              <IconButton
-                aria-label="close details"
-                onClick={() => setFocusedItem(null)}
-                size="small"
-                sx={{ position: "absolute", top: 8, right: 8 }}
-              >
-                ×
-              </IconButton>
-              <Box
-                component="img"
-                src={focusedItem?.image || selectedItem?.mainImage}
-                alt={focusedItem?.name}
-                loading="lazy"
-                sx={{
-                  width: "100%",
-                  height: "auto",
-                  maxHeight: "70vh",
-                  objectFit: "cover",
-                  borderRadius: 1,
-                }}
-              />
-              <Box sx={{ mt: 1, textAlign: "center" }}>
-                <div style={{ fontWeight: 800, fontSize: 18 }}>
-                  {focusedItem?.name}
-                </div>
-
-                {/* Display measurements if available */}
-                {focusedItem?.hasMeasurements &&
-                  focusedItem?.measurements &&
-                  focusedItem.measurements.length > 0 ? (
-                  <div style={{ marginTop: 8 }}>
-                    {focusedItem.measurements
-                      .filter((m) => m.price > 0)
-                      .sort((a, b) => a.sortOrder - b.sortOrder)
-                      .map((measurement, idx) => (
-                        <div key={idx} style={{ color: "#666", marginTop: 4 }}>
-                          {measurement.measurementTypeEntity?.name ||
-                            measurement.measurementType?.name ||
-                            "Size"}
-                          : ${measurement.price.toFixed(2)}
-                        </div>
-                      ))}
-                  </div>
-                ) : focusedItem?.price ? (
-                  <div style={{ color: "#666", marginTop: 4 }}>
-                    {focusedItem?.price}
-                  </div>
-                ) : null}
-
-                <div style={{ color: "#444", marginTop: 8 }}>
-                  {focusedItem?.desc}
-                </div>
               </Box>
             </DialogContent>
           </Dialog>

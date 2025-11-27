@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Fab, Zoom, useMediaQuery } from "@mui/material";
+import { Zoom, useMediaQuery, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-// Floating scroll-to-top button: bottom-center, small, appears after scrolling.
+// Floating scroll-to-top button: tiny brown arrow in transparent round.
 export default function ScrollTopFab() {
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
@@ -20,24 +20,42 @@ export default function ScrollTopFab() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const size = isMobile ? 36 : 42;
+
   return (
     <Zoom in={visible} unmountOnExit>
-      <Fab
-        size={isMobile ? "small" : "medium"}
-        color="primary"
-        aria-label="scroll back to top"
+      <Box
         onClick={handleClick}
+        aria-label="scroll back to top"
         sx={{
           position: "fixed",
-          left: "50%",
-          bottom: isMobile ? 100 : 16, // keep above bottom mobile nav
-          transform: "translateX(-50%)",
+          right: 16,
+          bottom: isMobile ? 90 : 24,
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          backgroundColor: "rgba(184, 115, 51, 0.15)",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(184, 115, 51, 0.3)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          transition: "all 0.2s ease",
           zIndex: (theme) => theme.zIndex.tooltip + 1,
-          boxShadow: 3,
+          "&:hover": {
+            backgroundColor: "rgba(184, 115, 51, 0.25)",
+            transform: "translateY(-2px)",
+          },
         }}
       >
-        <KeyboardArrowUpIcon fontSize="small" />
-      </Fab>
+        <KeyboardArrowUpIcon
+          sx={{
+            color: "#b87333",
+            fontSize: isMobile ? 20 : 24
+          }}
+        />
+      </Box>
     </Zoom>
   );
 }

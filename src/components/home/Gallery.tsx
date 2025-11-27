@@ -48,30 +48,6 @@ interface GalleryRowProps {
   rowIndex: number;
 }
 
-// Container variants for staggered children animation
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    }
-  }
-};
-
-// Individual image variants
-const imageVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.5
-    }
-  }
-};
-
 function GalleryRow({ images, title, description, rowIndex }: GalleryRowProps) {
   const loopImages = [...images, ...images, ...images, ...images];
   const rowRef = useRef<HTMLDivElement | null>(null);

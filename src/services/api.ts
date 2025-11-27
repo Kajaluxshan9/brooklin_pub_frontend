@@ -1,6 +1,34 @@
 // API Configuration and Utilities
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  import.meta.env.VITE_API_BASE_URL;
+
+/**
+ * Helper function to get the full URL for an image.
+ * Handles both relative paths (from local storage) and absolute URLs (legacy S3).
+ * @param url - The image URL (can be relative like /uploads/... or absolute https://...)
+ * @returns The full URL to access the image
+ */
+export const getImageUrl = (url: string | undefined | null): string => {
+  if (!url) return '';
+
+  // If it's already an absolute URL (http:// or https://), return as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // If it's a data URL (base64), return as-is
+  if (url.startsWith('data:')) {
+    return url;
+  }
+
+  // If it's a relative path starting with /, prepend the API base URL
+  if (url.startsWith('/')) {
+    return `${API_BASE_URL}${url}`;
+  }
+
+  // Otherwise, assume it's a relative path and prepend API base URL with /
+  return `${API_BASE_URL}/${url}`;
+};
 
 export interface ApiError {
   message: string;

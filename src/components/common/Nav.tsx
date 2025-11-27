@@ -9,7 +9,9 @@ import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import RestaurantMenuRoundedIcon from "@mui/icons-material/RestaurantMenuRounded";
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
 import LocalBarRoundedIcon from "@mui/icons-material/LocalBarRounded";
-import NightlightRoundedIcon from "@mui/icons-material/NightlightRounded";
+import SportsEsportsRoundedIcon from "@mui/icons-material/SportsEsportsRounded";
+import AcUnitRoundedIcon from "@mui/icons-material/AcUnitRounded";
+import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import { Link } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -22,7 +24,6 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import { hasNewSpecial } from "../../lib/specials";
 import { useApiWithCache } from "../../hooks/useApi";
 import { menuService } from "../../services/menu.service";
 import { specialsService } from "../../services/specials.service";
@@ -33,6 +34,28 @@ type NavNode = {
   path?: string;
   dropdown?: NavNode[];
   id?: string;
+};
+
+// Helper function to check if a special is currently visible based on display dates
+const isSpecialVisible = (special: Special): boolean => {
+  if (!special.isActive) return false;
+
+  const now = new Date();
+
+  // For specials with display date range (game_time, seasonal, chef)
+  if (special.displayStartDate && special.displayEndDate) {
+    const startDate = new Date(special.displayStartDate);
+    const endDate = new Date(special.displayEndDate);
+    return now >= startDate && now <= endDate;
+  }
+
+  // For daily specials, always visible if active
+  if (special.type === 'daily') {
+    return true;
+  }
+
+  // If no display dates but active, show it
+  return true;
 };
 
 const Nav = () => {
@@ -48,16 +71,32 @@ const Nav = () => {
     () => specialsService.getActiveSpecials()
   );
 
-  // Extract unique special types from backend data
-  const specialTypes = useMemo(() => {
-    if (!specialsData || specialsData.length === 0) return [];
-    const types = Array.from(new Set(specialsData.map((s) => s.type)));
-    return types.map((type) => ({
-      label: type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, " "),
-      path: `/special/${type}`,
-      id: type,
-    }));
+  // Filter specials that are currently visible (within display date range)
+  const visibleSpecials = useMemo(() => {
+    if (!specialsData) return [];
+    return specialsData.filter(isSpecialVisible);
   }, [specialsData]);
+
+  // Extract unique special types from visible specials only
+  const specialTypes = useMemo(() => {
+    if (!visibleSpecials || visibleSpecials.length === 0) return [];
+
+    // Get unique types that have at least one visible special
+    const typeMap = new Map<string, { label: string; path: string; id: string }>();
+
+    visibleSpecials.forEach((s) => {
+      if (!typeMap.has(s.type)) {
+        const label = s.type.charAt(0).toUpperCase() + s.type.slice(1).replace(/_/g, " ");
+        typeMap.set(s.type, {
+          label,
+          path: `/special/${s.type}`,
+          id: s.type,
+        });
+      }
+    });
+
+    return Array.from(typeMap.values());
+  }, [visibleSpecials]);
 
   // Build navigation links dynamically
   const navLinks: NavNode[] = [
@@ -144,25 +183,6 @@ const Nav = () => {
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [showSpecialBadge, setShowSpecialBadge] = useState<boolean>(() =>
-    typeof window !== "undefined" ? hasNewSpecial() : false
-  );
-
-  useEffect(() => {
-    const onUpdate = () => setShowSpecialBadge(hasNewSpecial());
-    if (typeof window !== "undefined" && (window as any).addEventListener) {
-      window.addEventListener("specials-updated", onUpdate);
-    }
-    return () => {
-      if (
-        typeof window !== "undefined" &&
-        (window as any).removeEventListener
-      ) {
-        window.removeEventListener("specials-updated", onUpdate);
-      }
-    };
-  }, []);
-
   // Close mobile dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -213,27 +233,36 @@ const Nav = () => {
   };
 
   const getIconFor = (label: string) => {
-    switch (label) {
-      case "Main Menu":
-        return <RestaurantMenuRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
-      case "Drinks Menu":
-        return <LocalBarRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
-      case "Daily Special":
-      case "Daily":
-        return (
-          <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
-        );
-      case "Night Special":
-      case "Night":
-        return <NightlightRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
-      case "Chef":
-      case "Chef Special":
-        return (
-          <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
-        );
-      default:
-        return null;
+    const lowerLabel = label.toLowerCase();
+
+    // Menu icons
+    if (lowerLabel.includes("menu") || lowerLabel === "main menu") {
+      return <RestaurantMenuRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
     }
+    if (lowerLabel.includes("drink") || lowerLabel.includes("bar")) {
+      return <LocalBarRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+    }
+
+    // Special icons
+    if (lowerLabel.includes("daily")) {
+      return <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+    }
+    if (lowerLabel.includes("chef")) {
+      return <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+    }
+    if (lowerLabel.includes("game")) {
+      return <SportsEsportsRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+    }
+    if (lowerLabel.includes("seasonal")) {
+      return <AcUnitRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+    }
+
+    // Contact icon
+    if (lowerLabel.includes("contact")) {
+      return <PhoneRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+    }
+
+    return null;
   };
 
   /** ======= Desktop View ======= */
@@ -346,20 +375,6 @@ const Nav = () => {
                       onClick={closeParentNow}
                     >
                       {link.label}
-                      {link.label === "Special" && showSpecialBadge && (
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            background: "#d9534f",
-                            marginLeft: 8,
-                            verticalAlign: "middle",
-                          }}
-                          aria-hidden
-                        />
-                      )}
                     </Button>
 
                     {openParent === link.label && (
@@ -487,20 +502,6 @@ const Nav = () => {
                       }}
                     >
                       {link.label}
-                      {link.label === "Special" && showSpecialBadge && (
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            background: "#d9534f",
-                            marginLeft: 8,
-                            verticalAlign: "middle",
-                          }}
-                          aria-hidden
-                        />
-                      )}
                     </Button>
                     {isActive && (
                       <motion.div
@@ -762,24 +763,7 @@ const Nav = () => {
                       fontSize: "0.65rem",
                     }}
                   >
-                    <span
-                      style={{ position: "relative", display: "inline-block" }}
-                    >
-                      {item.icon}
-                      {item.label === "Special" && showSpecialBadge && (
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: -6,
-                            right: -2,
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            background: "#d9534f",
-                          }}
-                        />
-                      )}
-                    </span>
+                    {item.icon}
                   </Button>
                 </Box>
               );
@@ -802,22 +786,7 @@ const Nav = () => {
                   fontSize: "0.65rem",
                 }}
               >
-                <span style={{ position: "relative", display: "inline-block" }}>
-                  {item.icon}
-                  {item.label === "Special" && showSpecialBadge && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: -6,
-                        right: -2,
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        background: "#d9534f",
-                      }}
-                    />
-                  )}
-                </span>
+                {item.icon}
               </Button>
             );
           })}

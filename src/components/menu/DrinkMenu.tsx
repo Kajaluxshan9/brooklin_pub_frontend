@@ -171,7 +171,7 @@ export default function LongScrollMenu() {
         { name: "Cheese Deluxe", desc: "Double cheese & bacon", price: "14€" },
       ],
     },
-    
+
   ];
 
   const [points, setPoints] = useState<
@@ -456,7 +456,7 @@ export default function LongScrollMenu() {
             />
 
             <DrawTextSVG
-              path={menuData[idx].namePath}
+              text={menuData[idx].namePath}
               width={isMobile ? circleSize * 1.2 : circleSize * 1.2}
               stroke="white"
               scale={1.8}
