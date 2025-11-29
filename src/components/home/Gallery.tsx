@@ -315,7 +315,10 @@ export default function Gallery() {
       .map((category) => {
         // Get images from stories in this category
         const images = (category.stories || [])
-          .filter((story) => story.isActive && story.imageUrls && story.imageUrls.length > 0)
+          .filter(
+            (story) =>
+              story.isActive && story.imageUrls && story.imageUrls.length > 0
+          )
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map((story) => getImageUrl(story.imageUrls[0]) || "");
 
