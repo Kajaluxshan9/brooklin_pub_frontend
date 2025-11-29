@@ -50,7 +50,7 @@ const isSpecialVisible = (special: Special): boolean => {
   }
 
   // For daily specials, always visible if active
-  if (special.type === 'daily') {
+  if (special.type === "daily") {
     return true;
   }
 
@@ -82,11 +82,15 @@ const Nav = () => {
     if (!visibleSpecials || visibleSpecials.length === 0) return [];
 
     // Get unique types that have at least one visible special
-    const typeMap = new Map<string, { label: string; path: string; id: string }>();
+    const typeMap = new Map<
+      string,
+      { label: string; path: string; id: string }
+    >();
 
     visibleSpecials.forEach((s) => {
       if (!typeMap.has(s.type)) {
-        const label = s.type.charAt(0).toUpperCase() + s.type.slice(1).replace(/_/g, " ");
+        const label =
+          s.type.charAt(0).toUpperCase() + s.type.slice(1).replace(/_/g, " ");
         typeMap.set(s.type, {
           label,
           path: `/special/${s.type}`,
@@ -95,7 +99,14 @@ const Nav = () => {
       }
     });
 
-    return Array.from(typeMap.values());
+    // Sort to ensure 'daily' comes first
+    const sorted = Array.from(typeMap.values()).sort((a, b) => {
+      if (a.id === "daily") return -1;
+      if (b.id === "daily") return 1;
+      return a.label.localeCompare(b.label);
+    });
+
+    return sorted;
   }, [visibleSpecials]);
 
   // Build navigation links dynamically
@@ -118,6 +129,7 @@ const Nav = () => {
     },
     {
       label: "Special",
+      path: "/special/daily", // Default path when clicking Special
       dropdown: specialTypes.length > 0 ? specialTypes : [],
     },
     { label: "Contact Us", path: "/contactus" },
@@ -245,10 +257,14 @@ const Nav = () => {
 
     // Special icons
     if (lowerLabel.includes("daily")) {
-      return <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      return (
+        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
+      );
     }
     if (lowerLabel.includes("chef")) {
-      return <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      return (
+        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
+      );
     }
     if (lowerLabel.includes("game")) {
       return <SportsEsportsRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
@@ -347,10 +363,11 @@ const Nav = () => {
                     <Button
                       component={Link}
                       to={
-                        // prefer the first dropdown path if available, otherwise fall back to a generic /menu
-                        link.dropdown && link.dropdown.length > 0
+                        // Use explicit path if defined, otherwise prefer the first dropdown path
+                        link.path ||
+                        (link.dropdown && link.dropdown.length > 0
                           ? link.dropdown[0].path || "/menu"
-                          : "/menu"
+                          : "/menu")
                       }
                       color="primary"
                       sx={{
@@ -646,7 +663,7 @@ const Nav = () => {
                 sx={{
                   fontFamily: '"Moon Dance", serif',
                   fontWeight: 700,
-                  fontSize: "1.3rem",
+                  fontSize: "1.1rem",
                   color: "primary.main",
                   display: { xs: "block", md: "none" },
                   lineHeight: 1,

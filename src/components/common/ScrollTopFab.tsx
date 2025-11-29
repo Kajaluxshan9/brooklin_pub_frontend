@@ -29,7 +29,8 @@ export default function ScrollTopFab() {
         aria-label="scroll back to top"
         sx={{
           position: "fixed",
-          right: 16,
+          left: "50%",
+          transform: "translateX(-50%)",
           bottom: isMobile ? 90 : 24,
           width: size,
           height: size,
@@ -45,14 +46,14 @@ export default function ScrollTopFab() {
           zIndex: (theme) => theme.zIndex.tooltip + 1,
           "&:hover": {
             backgroundColor: "rgba(184, 115, 51, 0.25)",
-            transform: "translateY(-2px)",
+            transform: "translateX(-50%) translateY(-2px)",
           },
         }}
       >
         <KeyboardArrowUpIcon
           sx={{
             color: "#b87333",
-            fontSize: isMobile ? 20 : 24
+            fontSize: isMobile ? 20 : 24,
           }}
         />
       </Box>

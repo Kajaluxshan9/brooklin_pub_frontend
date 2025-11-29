@@ -17,6 +17,8 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import LocalBarIcon from "@mui/icons-material/LocalBar";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import GroupIcon from "@mui/icons-material/Group";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import { motion } from "framer-motion";
@@ -27,13 +29,43 @@ import { useApiWithCache } from "../hooks/useApi";
 import { openingHoursService } from "../services/opening-hours.service";
 import type { OpeningHours } from "../types/api.types";
 
+// Subject/Reason options for the dropdown
+const subjectOptions = [
+  { value: "general", label: "General Inquiry" },
+  { value: "reservation", label: "Table Reservation" },
+  { value: "event", label: "Event Inquiry" },
+  { value: "catering", label: "Catering Request" },
+  { value: "feedback", label: "Feedback" },
+  { value: "jobs", label: "Job Application" },
+  { value: "other", label: "Other" },
+];
+
+// Generate time slots for reservation
+const generateTimeSlots = () => {
+  const slots: string[] = [];
+  for (let hour = 11; hour <= 22; hour++) {
+    const h = hour > 12 ? hour - 12 : hour;
+    const ampm = hour >= 12 ? "PM" : "AM";
+    slots.push(`${h}:00 ${ampm}`);
+    slots.push(`${h}:30 ${ampm}`);
+  }
+  return slots;
+};
+
+const timeSlots = generateTimeSlots();
+
+// Guest count options
+const guestOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "10+"];
+
 const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     subject: "",
-    reason: "",
+    reservationDate: "",
+    reservationTime: "",
+    guestCount: "",
     message: "",
   });
   const [loading, setLoading] = useState(false);
@@ -43,6 +75,9 @@ const ContactUs = () => {
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Check if reservation is selected
+  const isReservation = formData.subject === "reservation";
 
   // Fetch opening hours from backend
   const { data: openingHoursData } = useApiWithCache<OpeningHours[]>(
@@ -87,6 +122,10 @@ const ContactUs = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
   const validate = () => {
@@ -96,6 +135,18 @@ const ContactUs = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email || !emailRegex.test(formData.email))
       newErrors.email = "Please enter a valid email address";
+    if (!formData.subject) newErrors.subject = "Please select a subject";
+
+    // Reservation-specific validations
+    if (isReservation) {
+      if (!formData.reservationDate)
+        newErrors.reservationDate = "Please select a date";
+      if (!formData.reservationTime)
+        newErrors.reservationTime = "Please select a time";
+      if (!formData.guestCount)
+        newErrors.guestCount = "Please select number of guests";
+    }
+
     if (!formData.message || formData.message.trim().length < 10)
       newErrors.message = "Message should be at least 10 characters";
     setErrors(newErrors);
@@ -108,33 +159,48 @@ const ContactUs = () => {
     setLoading(true);
     try {
       const apiUrl = (import.meta as any).env.VITE_API_BASE_URL || "/api";
+
+      // Build message with reservation details if applicable
+      let fullMessage = formData.message;
+      if (isReservation) {
+        fullMessage = `RESERVATION REQUEST\n\nDate: ${formData.reservationDate}\nTime: ${formData.reservationTime}\nNumber of Guests: ${formData.guestCount}\n\nAdditional Notes:\n${formData.message}`;
+      }
+
       const resp = await fetch(`${apiUrl}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          message: fullMessage,
+        }),
       });
       if (resp.ok) {
         setSnackbar({
           open: true,
           severity: "success",
-          message: "Message sent successfully! We'll be in touch soon.",
+          message: isReservation
+            ? "Reservation request sent! We'll confirm your booking soon."
+            : "Message sent successfully! We'll be in touch soon.",
         });
         setFormData({
           name: "",
           email: "",
           phone: "",
           subject: "",
-          reason: "",
+          reservationDate: "",
+          reservationTime: "",
+          guestCount: "",
           message: "",
         });
       } else {
-        const subject = encodeURIComponent(
-          formData.subject || "Contact from website"
-        );
+        const subjectLine = isReservation
+          ? `Reservation Request - ${formData.reservationDate}`
+          : formData.subject || "Contact from website";
+        const subject = encodeURIComponent(subjectLine);
         const body = encodeURIComponent(
           `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
             formData.phone || "N/A"
-          }\n\n${formData.message}`
+          }\n\n${fullMessage}`
         );
         window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
         setSnackbar({
@@ -144,13 +210,20 @@ const ContactUs = () => {
         });
       }
     } catch (err) {
-      const subject = encodeURIComponent(
-        formData.subject || "Contact from website"
-      );
+      const subjectLine = isReservation
+        ? `Reservation Request - ${formData.reservationDate}`
+        : formData.subject || "Contact from website";
+      const subject = encodeURIComponent(subjectLine);
+
+      let fullMessage = formData.message;
+      if (isReservation) {
+        fullMessage = `RESERVATION REQUEST\n\nDate: ${formData.reservationDate}\nTime: ${formData.reservationTime}\nNumber of Guests: ${formData.guestCount}\n\nAdditional Notes:\n${formData.message}`;
+      }
+
       const body = encodeURIComponent(
         `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
           formData.phone || "N/A"
-        }\n\n${formData.message}`
+        }\n\n${fullMessage}`
       );
       window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
       setSnackbar({
@@ -601,32 +674,15 @@ const ContactUs = () => {
                 </Box>
 
                 <TextField
+                  select
                   fullWidth
                   label="Subject"
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "rgba(243,227,204,0.3)",
-                      borderRadius: 2,
-                      "&:hover fieldset": { borderColor: "#D9A756" },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#D9A756",
-                        borderWidth: 2,
-                      },
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
-                  }}
-                />
-
-                <TextField
-                  select
-                  fullWidth
-                  label="Topic"
-                  name="reason"
-                  value={formData.reason}
-                  onChange={handleChange}
+                  required
+                  error={!!errors.subject}
+                  helperText={errors.subject}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       bgcolor: "rgba(243,227,204,0.3)",
@@ -640,23 +696,178 @@ const ContactUs = () => {
                     "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
                   }}
                 >
-                  <MenuItem value="">Select a topic</MenuItem>
-                  <MenuItem value="general">General Inquiry</MenuItem>
-                  <MenuItem value="reservation">Reservation</MenuItem>
-                  <MenuItem value="event">Event Inquiry</MenuItem>
-                  <MenuItem value="feedback">Feedback</MenuItem>
-                  <MenuItem value="jobs">Job Application</MenuItem>
+                  <MenuItem value="">Select a subject</MenuItem>
+                  {subjectOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
                 </TextField>
+
+                {/* Reservation Fields - shown only when reservation is selected */}
+                {isReservation && (
+                  <Box
+                    component={motion.div}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 3,
+                      p: 2.5,
+                      borderRadius: 2,
+                      bgcolor: "rgba(217, 167, 86, 0.1)",
+                      border: "1px dashed rgba(217, 167, 86, 0.4)",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <CalendarMonthIcon sx={{ color: "#D9A756" }} />
+                      <Typography sx={{ fontWeight: 600, color: "#3C1F0E" }}>
+                        Reservation Details
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                        gap: 2.5,
+                      }}
+                    >
+                      <TextField
+                        fullWidth
+                        label="Reservation Date"
+                        name="reservationDate"
+                        type="date"
+                        value={formData.reservationDate}
+                        onChange={handleChange}
+                        required
+                        error={!!errors.reservationDate}
+                        helperText={errors.reservationDate}
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{
+                          min: new Date().toISOString().split("T")[0],
+                        }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            bgcolor: "rgba(255,255,255,0.5)",
+                            borderRadius: 2,
+                            "&:hover fieldset": { borderColor: "#D9A756" },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#D9A756",
+                              borderWidth: 2,
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#6A3A1E",
+                          },
+                        }}
+                      />
+
+                      <TextField
+                        select
+                        fullWidth
+                        label="Preferred Time"
+                        name="reservationTime"
+                        value={formData.reservationTime}
+                        onChange={handleChange}
+                        required
+                        error={!!errors.reservationTime}
+                        helperText={errors.reservationTime}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            bgcolor: "rgba(255,255,255,0.5)",
+                            borderRadius: 2,
+                            "&:hover fieldset": { borderColor: "#D9A756" },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#D9A756",
+                              borderWidth: 2,
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#6A3A1E",
+                          },
+                        }}
+                      >
+                        <MenuItem value="">Select a time</MenuItem>
+                        {timeSlots.map((time) => (
+                          <MenuItem key={time} value={time}>
+                            {time}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Box>
+
+                    <TextField
+                      select
+                      fullWidth
+                      label="Number of Guests"
+                      name="guestCount"
+                      value={formData.guestCount}
+                      onChange={handleChange}
+                      required
+                      error={!!errors.guestCount}
+                      helperText={errors.guestCount}
+                      InputProps={{
+                        startAdornment: (
+                          <GroupIcon sx={{ color: "#D9A756", mr: 1 }} />
+                        ),
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          bgcolor: "rgba(255,255,255,0.5)",
+                          borderRadius: 2,
+                          "&:hover fieldset": { borderColor: "#D9A756" },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#D9A756",
+                            borderWidth: 2,
+                          },
+                        },
+                        "& .MuiInputLabel-root.Mui-focused": {
+                          color: "#6A3A1E",
+                        },
+                      }}
+                    >
+                      <MenuItem value="">Select number of guests</MenuItem>
+                      {guestOptions.map((count) => (
+                        <MenuItem key={count} value={count.toString()}>
+                          {count}{" "}
+                          {count === 1
+                            ? "Guest"
+                            : count === "10+"
+                            ? " Guests (Large Party)"
+                            : "Guests"}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Box>
+                )}
 
                 <TextField
                   fullWidth
-                  label="Your Message"
+                  label={
+                    isReservation ? "Special Requests / Notes" : "Your Message"
+                  }
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
                   required
                   multiline
-                  rows={5}
+                  rows={isReservation ? 3 : 5}
+                  placeholder={
+                    isReservation
+                      ? "Any dietary restrictions, special occasions, seating preferences..."
+                      : ""
+                  }
                   error={!!errors.message}
                   helperText={errors.message}
                   sx={{

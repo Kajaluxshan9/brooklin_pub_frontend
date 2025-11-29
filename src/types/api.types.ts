@@ -143,9 +143,11 @@ export interface OpeningHours {
 
 export interface OpeningHoursStatus {
   isOpen: boolean;
-  currentDay: string;
-  todayHours: OpeningHours | null;
-  nextOpenTime: string | null;
+  currentHours?: OpeningHours | null;
+  nextOpenTime?: string | null;
+  // Legacy properties for backwards compatibility
+  currentDay?: string;
+  todayHours?: OpeningHours | null;
 }
 
 export interface Story {
