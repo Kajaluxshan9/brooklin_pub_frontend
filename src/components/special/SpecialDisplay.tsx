@@ -1,18 +1,22 @@
-﻿"use client";
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Nav from "../common/Nav";
 import { addSpecial } from "../../lib/specials";
 import { createPortal } from "react-dom";
 import { useApiWithCache } from "../../hooks/useApi";
 import { specialsService } from "../../services/specials.service";
 import { getImageUrl } from "../../services/api";
 import type { Special } from "../../types/api.types";
-import specialsDataFallback from "../../data/specialsData";
-import type { SpecialCard } from "../../data/specialsData";
+
 // Card type used locally
-type Card = SpecialCard;
+type Card = {
+  title: string;
+  desc: string;
+  bg: string;
+  popupImg: string;
+  status?: string;
+  type?: string;
+};
 // Transform backend Special entities to Card format
 function transformSpecialsToCards(specials: Special[]): Card[] {
   return specials.map((special) => ({
@@ -66,31 +70,25 @@ export default function CylinderMenuPopup() {
     "chef-specials",
     () => specialsService.getAllSpecials()
   );
-  // Transform backend data to cards format, fallback to `specialsDataFallback` module if API yields nothing
-  const fallbackDaily = specialsDataFallback.filter((s: SpecialCard) => s.type === "daily");
-  const fallbackChef = specialsDataFallback.filter((s: SpecialCard) => s.type === "chef");
+  // Transform backend data to cards format (no fallback - purely backend data)
   const dailyCards =
     specialsData && specialsData.length > 0
       ? transformSpecialsToCards(specialsData)
-      : fallbackDaily;
+      : [];
   const chefCards =
     allSpecialsData && allSpecialsData.length > 0
       ? transformChefSpecialsToCards(allSpecialsData)
-      : fallbackChef;
+      : [];
+
   // Determine which cards to render based on the route param `/special/:type`.
   const getCardsForRouteType = (typeParam?: string): Card[] => {
     const t = typeParam ? String(typeParam).toLowerCase() : "";
     if (!t || t === "daily") return dailyCards;
-    // Prefer API-provided specials (allSpecialsData) when available
+    // Filter by type from API data
     const fromApi = (allSpecialsData || []).filter(
       (s) => String(s.type || "").toLowerCase() === t
     );
     if (fromApi.length > 0) return transformSpecialsToCards(fromApi);
-    // Fallback to local specials data file
-    const fromFallback = specialsDataFallback.filter(
-      (s) => String(s.type || "").toLowerCase() === t
-    );
-    if (fromFallback.length > 0) return fromFallback as Card[];
     // Nothing matched — show daily by default
     return dailyCards;
   };
@@ -235,7 +233,6 @@ export default function CylinderMenuPopup() {
   }, []);
   return (
     <div>
-      {!selectedCard && <Nav />}
       <div
         style={{
           width: "100vw",
@@ -250,7 +247,8 @@ export default function CylinderMenuPopup() {
           position: "relative",
           touchAction: "none",
           userSelect: "none",
-          background: "var(--wine-red)",
+          background:
+            "linear-gradient(180deg, rgba(138,42,42,0.95) 0%, rgba(106,58,30,0.9) 100%)",
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -274,17 +272,17 @@ export default function CylinderMenuPopup() {
             width: isCylinder
               ? `${cardWidth}px`
               : isTwo
-                ? isMobile
-                  ? "90%"
-                  : `${cardWidth * 2 + 16}px`
-                : "min(1100px, 92%)",
+              ? isMobile
+                ? "90%"
+                : `${cardWidth * 2 + 16}px`
+              : "min(1100px, 92%)",
             height: isCylinder
               ? `${cardHeight}px`
               : isTwo
-                ? isMobile
-                  ? "auto"
-                  : `${cardHeight}px`
-                : "auto",
+              ? isMobile
+                ? "auto"
+                : `${cardHeight}px`
+              : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
             marginTop: "60px",
@@ -341,8 +339,8 @@ export default function CylinderMenuPopup() {
                       ? "92%"
                       : `${cardWidth}px`
                     : isMobile
-                      ? "92%"
-                      : `${cardWidth}px`;
+                    ? "92%"
+                    : `${cardWidth}px`;
                   const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
                   return {
                     ...base,
@@ -363,9 +361,7 @@ export default function CylinderMenuPopup() {
                 >
                   {card.title}
                 </h2>
-                <p style={{ fontSize: "0.9rem", opacity: 0.9 }}>
-                  {card.desc}
-                </p>
+                <p style={{ fontSize: "0.9rem", opacity: 0.9 }}>{card.desc}</p>
               </motion.div>
             );
           })}

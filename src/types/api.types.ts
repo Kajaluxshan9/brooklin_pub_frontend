@@ -134,9 +134,12 @@ export interface Event {
 export interface OpeningHours {
   id: string;
   dayOfWeek: string;
-  openTime: string;
-  closeTime: string;
-  isClosed: boolean;
+  openTime: string | null;
+  closeTime: string | null;
+  isOpen: boolean; // true = day is open, false = day is closed
+  isActive: boolean; // admin can toggle to temporarily close
+  isClosedNextDay?: boolean; // true if closing time is next day (overnight)
+  specialNote?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -154,7 +157,7 @@ export interface Story {
   id: string;
   title: string;
   content: string;
-  imageUrl?: string;
+  imageUrls: string[];
   categoryId: string;
   isActive: boolean;
   sortOrder: number;

@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect, useRef, useMemo } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -18,7 +17,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
@@ -59,6 +57,10 @@ const isSpecialVisible = (special: Special): boolean => {
 };
 
 const Nav = () => {
+  // EastServe ordering URL
+  const orderUrl =
+    "https://www.eastserve.ca/ordering/restaurant/menu?company_uid=f0d6a7d8-6663-43c6-af55-0d11a9773920&restaurant_uid=29e4ef84-c523-4a58-9e4b-6546d6637312&facebook=true";
+
   // Fetch primary categories from backend
   const { data: primaryCategories } = useApiWithCache<PrimaryCategory[]>(
     "primary-categories",
@@ -249,33 +251,33 @@ const Nav = () => {
 
     // Menu icons
     if (lowerLabel.includes("menu") || lowerLabel === "main menu") {
-      return <RestaurantMenuRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      return <RestaurantMenuRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
     }
     if (lowerLabel.includes("drink") || lowerLabel.includes("bar")) {
-      return <LocalBarRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      return <LocalBarRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
     }
 
     // Special icons
     if (lowerLabel.includes("daily")) {
       return (
-        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
+        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />
       );
     }
     if (lowerLabel.includes("chef")) {
       return (
-        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />
+        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />
       );
     }
     if (lowerLabel.includes("game")) {
-      return <SportsEsportsRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      return <SportsEsportsRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
     }
     if (lowerLabel.includes("seasonal")) {
-      return <AcUnitRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      return <AcUnitRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
     }
 
     // Contact icon
     if (lowerLabel.includes("contact")) {
-      return <PhoneRoundedIcon sx={{ mr: 1, color: "#7A4A22" }} />;
+      return <PhoneRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
     }
 
     return null;
@@ -373,7 +375,7 @@ const Nav = () => {
                       sx={{
                         fontWeight: 500,
                         textTransform: "none",
-                        color: isActive ? "#7A4A22" : "primary.main",
+                        color: isActive ? "#6A3A1E" : "primary.main",
                         position: "relative",
                         px: 0.5,
                         "&::after": {
@@ -383,7 +385,7 @@ const Nav = () => {
                           left: 0,
                           width: isActive ? "100%" : "0%",
                           height: "2px",
-                          backgroundColor: "#7A4A22",
+                          backgroundColor: "#6A3A1E",
                           transition: "width 0.25s ease",
                           borderRadius: 2,
                         },
@@ -457,7 +459,7 @@ const Nav = () => {
                                   minWidth: 230,
                                   color:
                                     isChildActive || isSelectedByQuery
-                                      ? "#7A4A22"
+                                      ? "#6A3A1E"
                                       : "primary.main",
                                   fontSize: "0.94rem",
                                   borderRadius: 0,
@@ -478,7 +480,7 @@ const Nav = () => {
                                       top: 0,
                                       width: "4px",
                                       height: "100%",
-                                      background: "#7A4A22",
+                                      background: "#6A3A1E",
                                       borderRadius: "0 6px 6px 0",
                                     }}
                                   />
@@ -513,7 +515,7 @@ const Nav = () => {
                       sx={{
                         fontWeight: 500,
                         textTransform: "none",
-                        color: isActive ? "#7A4A22" : "primary.main",
+                        color: isActive ? "#6A3A1E" : "primary.main",
                         position: "relative",
                         "&:hover": { color: "primary.dark" },
                       }}
@@ -529,7 +531,7 @@ const Nav = () => {
                           bottom: 0,
                           height: 2,
                           width: "100%",
-                          background: "#7A4A22",
+                          background: "#6A3A1E",
                           borderRadius: 2,
                         }}
                       />
@@ -540,6 +542,10 @@ const Nav = () => {
             </Box>
             <Button
               variant="contained"
+              component="a"
+              href={orderUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               sx={{
                 ml: 2,
                 px: 3,
@@ -548,7 +554,6 @@ const Nav = () => {
                 textTransform: "none",
                 fontWeight: 600,
               }}
-              onClick={() => {}}
             >
               Order Online
             </Button>
@@ -562,12 +567,28 @@ const Nav = () => {
           onClose={() => setMobileOpenParent(null)}
           fullWidth
           maxWidth="xs"
-          PaperProps={{ sx: { borderRadius: 2 } }}
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              bgcolor: "#FAF7F2",
+              border: "2px solid #D9A756",
+            },
+          }}
         >
-          <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>
+          <DialogTitle
+            sx={{
+              fontWeight: 700,
+              textAlign: "center",
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              color: "#3C1F0E",
+              fontSize: "1.5rem",
+              borderBottom: "1px solid rgba(217,167,86,0.3)",
+              pb: 2,
+            }}
+          >
             {mobileOpenParent}
           </DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ py: 2 }}>
             <List>
               {mobileOpenParent &&
                 navLinks
@@ -578,20 +599,28 @@ const Nav = () => {
                       component={Link}
                       to={d.path || "/"}
                       onClick={() => setMobileOpenParent(null)}
-                      sx={{ justifyContent: "center", gap: 1, py: 1 }}
+                      sx={{
+                        justifyContent: "center",
+                        py: 1.5,
+                        borderRadius: 2,
+                        mb: 0.5,
+                        "&:hover": {
+                          bgcolor: "rgba(217,167,86,0.15)",
+                        },
+                      }}
                     >
-                      <ListItemIcon sx={{ minWidth: 36 }}>
-                        {getIconFor(d.label)}
-                      </ListItemIcon>
                       <ListItemText
                         primary={d.label}
                         primaryTypographyProps={{
                           align: "center",
                           sx: {
+                            fontFamily: '"Inter", sans-serif',
+                            fontWeight: 500,
+                            fontSize: "1rem",
                             color:
                               d.id && d.id === selectedCategory
-                                ? "#7A4A22"
-                                : undefined,
+                                ? "#D9A756"
+                                : "#3C1F0E",
                           },
                         }}
                       />
@@ -661,12 +690,13 @@ const Nav = () => {
               <Box
                 component="span"
                 sx={{
-                  fontFamily: '"Moon Dance", serif',
+                  fontFamily: '"Cormorant Garamond", Georgia, serif',
                   fontWeight: 700,
-                  fontSize: "1.1rem",
-                  color: "primary.main",
+                  fontSize: "1.15rem",
+                  color: "#3C1F0E",
                   display: { xs: "block", md: "none" },
-                  lineHeight: 1,
+                  lineHeight: 1.1,
+                  letterSpacing: "0.02em",
                 }}
               >
                 The Brooklin Pub
@@ -676,6 +706,10 @@ const Nav = () => {
             {/* ORDER BUTTON */}
             <Button
               variant="contained"
+              component="a"
+              href={orderUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               sx={{
                 borderRadius: 999,
                 textTransform: "none",
@@ -683,8 +717,8 @@ const Nav = () => {
                 py: "6px",
                 fontSize: "0.85rem",
                 fontWeight: 600,
-                bgcolor: "#7A4A22",
-                "&:hover": { bgcolor: "#623819" },
+                bgcolor: "#6A3A1E",
+                "&:hover": { bgcolor: "#3C1F0E" },
               }}
             >
               Order
@@ -771,7 +805,7 @@ const Nav = () => {
                     }}
                     sx={{
                       minWidth: 0,
-                      color: isActive ? "#7A4A22" : "#5c4a3f",
+                      color: isActive ? "#6A3A1E" : "#6A3A1E",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
@@ -794,7 +828,7 @@ const Nav = () => {
                 disableRipple
                 sx={{
                   minWidth: 0,
-                  color: isActive ? "#7A4A22" : "#5c4a3f",
+                  color: isActive ? "#6A3A1E" : "#6A3A1E",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -815,12 +849,28 @@ const Nav = () => {
         onClose={() => setMobileOpenParent(null)}
         fullWidth
         maxWidth="xs"
-        PaperProps={{ sx: { borderRadius: 2 } }}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            bgcolor: "#FAF7F2",
+            border: "2px solid #D9A756",
+          },
+        }}
       >
-        <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            textAlign: "center",
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            color: "#3C1F0E",
+            fontSize: "1.5rem",
+            borderBottom: "1px solid rgba(217,167,86,0.3)",
+            pb: 2,
+          }}
+        >
           {mobileOpenParent}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ py: 2 }}>
           <List>
             {mobileOpenParent &&
               navLinks
@@ -831,20 +881,28 @@ const Nav = () => {
                     component={Link}
                     to={d.path || "/"}
                     onClick={() => setMobileOpenParent(null)}
-                    sx={{ justifyContent: "center", gap: 1, py: 1 }}
+                    sx={{
+                      justifyContent: "center",
+                      py: 1.5,
+                      borderRadius: 2,
+                      mb: 0.5,
+                      "&:hover": {
+                        bgcolor: "rgba(217,167,86,0.15)",
+                      },
+                    }}
                   >
-                    <ListItemIcon sx={{ minWidth: 36 }}>
-                      {getIconFor(d.label)}
-                    </ListItemIcon>
                     <ListItemText
                       primary={d.label}
                       primaryTypographyProps={{
                         align: "center",
                         sx: {
+                          fontFamily: '"Inter", sans-serif',
+                          fontWeight: 500,
+                          fontSize: "1rem",
                           color:
                             d.id && d.id === selectedCategory
-                              ? "#7A4A22"
-                              : undefined,
+                              ? "#D9A756"
+                              : "#3C1F0E",
                         },
                       }}
                     />

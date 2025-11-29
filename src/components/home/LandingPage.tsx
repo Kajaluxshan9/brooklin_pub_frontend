@@ -149,7 +149,6 @@ const LandingPage = () => {
         background: "var(--brown-gradient)",
         overflow: "hidden",
         position: "relative",
-        
       }}
     >
       {images.map((src, i) => (
@@ -192,21 +191,29 @@ const LandingPage = () => {
           left: 0,
           width: "100%",
           height: "100%",
-          background: "rgba(92, 50, 50, 0.6)",
+          background:
+            "linear-gradient(180deg, rgba(60,31,14,0.6) 0%, rgba(106,58,30,0.5) 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           zIndex: 10,
           textAlign: "center",
-          color: "#fff",
+          color: "#F3E3CC",
           padding: "20px",
         }}
       >
         <h1
           className="landing-heading"
-          style={{ fontSize: "2.5rem", fontWeight: "bold", lineHeight: "1.2" }}
+          style={{
+            fontSize: "clamp(2rem, 5vw, 3.5rem)",
+            fontWeight: 700,
+            lineHeight: 1.2,
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            letterSpacing: "0.05em",
+            textShadow: "0 2px 12px rgba(60,31,14,0.5)",
+          }}
         >
-         Step in to the Brooklin Pub
+          Step into the Brooklin Pub
         </h1>
       </div>
 

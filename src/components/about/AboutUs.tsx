@@ -1,29 +1,59 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Real content for the About section
 const pages = [
-  { id: 1, title: "hgtfuhvguy", subtitle: "nkjhjh", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/interpret-bar-graphs/clip-art-christmas.png" },
-  { id: 2, title: "", subtitle: "", image: "./brooklinpub-logo.png" },
-  { id: 5, title: "", subtitle: "", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/interpret-bar-graphs/clip-art-shoe-flower.png" },
-  { id: 3, title: "", subtitle: "", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/beside-and-next-to/next-to-and-beside/clip-art-cat.png" },
-  { id: 4, title: "", subtitle: "", image: "https://geniusbees.s3.eu-north-1.amazonaws.com/activity-template-images/beside-and-next-to/next-to-and-beside/clip-art-orange.png" },
+  {
+    id: 1,
+    title: "Our Story",
+    subtitle:
+      "Serving Brooklin since 1985 with passion, pride, and great food.",
+    image:
+      "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&q=80",
+  },
+  {
+    id: 2,
+    title: "The Pub",
+    subtitle:
+      "A welcoming neighborhood gathering place for friends and family.",
+    image:
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80",
+  },
+  {
+    id: 3,
+    title: "Our Kitchen",
+    subtitle: "Fresh ingredients, homemade recipes, and dishes made with love.",
+    image:
+      "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=1200&q=80",
+  },
+  {
+    id: 4,
+    title: "Community",
+    subtitle: "More than a pub – we're part of the Brooklin family.",
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+  },
 ];
 
-export default function App() {
+export default function AboutUs() {
   const [pageIndex, setPageIndex] = useState(0);
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [direction, setDirection] = useState("left");
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   const randomDirection = () => {
     const dirs = ["left", "right", "top", "bottom"];
     return dirs[Math.floor(Math.random() * dirs.length)];
   };
 
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (!scrollEnabled) return;
+  // Handle wheel event only when container is hovered (for desktop)
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      if (!scrollEnabled || !isHovering) return;
+
       setScrollEnabled(false);
       setDirection(randomDirection());
 
@@ -34,11 +64,9 @@ export default function App() {
       }
 
       setTimeout(() => setScrollEnabled(true), 1000);
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: true });
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, [scrollEnabled]);
+    },
+    [scrollEnabled, isHovering]
+  );
 
   const getVariants = (dir: string) => {
     switch (dir) {
@@ -75,14 +103,53 @@ export default function App() {
 
   const currentPage = pages[pageIndex];
 
+  // Touch swipe handling for mobile
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!scrollEnabled || touchStartY.current === null) return;
+
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+
+    // Require minimum swipe distance (50px)
+    if (Math.abs(diff) > 50) {
+      setScrollEnabled(false);
+      setDirection(randomDirection());
+
+      if (diff > 0) {
+        // Swiped up - next page
+        setPageIndex((prev) => (prev + 1) % pages.length);
+      } else {
+        // Swiped down - previous page
+        setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
+      }
+
+      setTimeout(() => setScrollEnabled(true), 1000);
+    }
+
+    touchStartY.current = null;
+  };
+
   return (
     <Box
+      ref={containerRef}
+      onWheel={handleWheel}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       sx={{
         height: "100vh",
         width: "100%",
         overflow: "hidden",
         position: "relative",
         backgroundColor: "transparent",
+        cursor: isHovering ? "ns-resize" : "default",
       }}
     >
       {/* Pagination dots */}
@@ -124,22 +191,22 @@ export default function App() {
           exit="exit"
           transition={{ duration: 1 }}
           style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              background: currentPage.image
-                ? `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${currentPage.image})`
-                : "transparent",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              padding: isMobile ? "20px" : "60px",
-            }}
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            background: currentPage.image
+              ? `linear-gradient(rgba(60,31,14,0.55), rgba(106,58,30,0.45)), url(${currentPage.image})`
+              : "linear-gradient(135deg, #6A3A1E 0%, #3C1F0E 100%)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            padding: isMobile ? "20px" : "60px",
+          }}
         >
           {/* Text */}
           <motion.div
@@ -150,23 +217,25 @@ export default function App() {
           >
             <Typography
               sx={{
-                fontWeight: 300,
-                letterSpacing: "0.25em",
+                fontWeight: 600,
+                letterSpacing: "0.15em",
                 mb: 3,
-                fontFamily: "Montserrat, sans-serif",
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
                 textTransform: "uppercase",
-                fontSize: "clamp(1.4rem, 4vw, 3rem)",
-                color: currentPage.id === 2 ? "brown" : "white",
+                fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
+                color: "#F3E3CC",
+                textShadow: "0 2px 12px rgba(60,31,14,0.4)",
               }}
             >
               {currentPage.title}
             </Typography>
             <Typography
               sx={{
-                fontFamily: "Roboto, sans-serif",
-                fontSize: "clamp(0.9rem, 2.5vw, 1.2rem)",
-                color:
-                  currentPage.id === 2 ? "brown" : "rgba(255,255,255,0.85)",
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
+                color: "rgba(243,227,204,0.9)",
+                maxWidth: "600px",
+                lineHeight: 1.6,
               }}
             >
               {currentPage.subtitle}

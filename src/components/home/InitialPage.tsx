@@ -32,8 +32,8 @@ const InitialPage = ({ line1, line2 }: InitialPageProps) => {
       }}
     >
       <Typography
-        fontWeight={700}
         sx={{
+          fontWeight: 700,
           fontSize: {
             xs: "1.8rem",
             sm: "2.3rem",
@@ -41,13 +41,14 @@ const InitialPage = ({ line1, line2 }: InitialPageProps) => {
             lg: "3.2rem",
           },
           lineHeight: 1.2,
+          color: "#3C1F0E",
+          fontFamily: '"Cormorant Garamond", Georgia, serif',
         }}
       >
         {line1}
       </Typography>
 
       <Typography
-        color="text.secondary"
         sx={{
           fontSize: {
             xs: "0.9rem",
@@ -55,6 +56,8 @@ const InitialPage = ({ line1, line2 }: InitialPageProps) => {
             md: "1.1rem",
           },
           maxWidth: "650px",
+          color: "#3C1F0E",
+          fontFamily: '"Inter", sans-serif',
         }}
       >
         {line2}

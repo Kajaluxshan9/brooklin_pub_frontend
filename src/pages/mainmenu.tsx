@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import Nav from "../components/common/Nav";
 import MainMenu from "../components/menu/MainMenu";
 import Footer from "../components/common/Footer";
-import InitialPage from "../components/home/InitialPage";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import { Box, Typography } from "@mui/material";
 import { motion } from "framer-motion";
+import BgImage from "../assets/images/hero-bg.jpg";
 
-const Special = () => {
+const MainMenuPage = () => {
   const [isMobile, setIsMobile] = useState<boolean>(
     typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
@@ -24,19 +24,32 @@ const Special = () => {
       <Nav />
       <Callicon />
       <SocialMedia />
-      <InitialPage
-        line1="Welcome to Brooklin Pub"
-        line2="Experience the finest dining and drinks in a cozy atmosphere."
-      />
 
-      {/* Menu Header Section with Light Brown Transparent Background */}
+      {/* Hero Section - consistent with Landing Page */}
       <Box
         sx={{
-          background:
-            "linear-gradient(180deg, rgba(139, 69, 19, 0.85) 0%, rgba(92, 47, 13, 0.9) 100%)",
+          minHeight: { xs: "50vh", md: "60vh" },
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          px: { xs: 2, sm: 4 },
+          backgroundImage: `url(${BgImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
           position: "relative",
-          overflow: "hidden",
-          py: { xs: 4, md: 6 },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background:
+              "linear-gradient(180deg, rgba(60,31,14,0.7) 0%, rgba(106,58,30,0.6) 100%)",
+          },
         }}
       >
         {/* Decorative overlay pattern */}
@@ -47,8 +60,8 @@ const Special = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.05) 0%, transparent 50%),
-                              radial-gradient(circle at 80% 50%, rgba(255,255,255,0.03) 0%, transparent 50%)`,
+            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(217,167,86,0.1) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 50%, rgba(217,167,86,0.08) 0%, transparent 50%)`,
             pointerEvents: "none",
           }}
         />
@@ -77,25 +90,25 @@ const Special = () => {
             sx={{
               width: 80,
               height: 2,
-              backgroundColor: "rgba(255, 215, 0, 0.6)",
+              backgroundColor: "#D9A756",
               mb: 2,
             }}
           />
 
           <Typography
-            component={motion.h2}
+            component={motion.h1}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             sx={{
               margin: 0,
-              color: "#FAF7F2",
+              color: "#F3E3CC",
               fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4rem" },
               letterSpacing: { xs: 2, md: 4 },
               textTransform: "uppercase",
               fontWeight: 700,
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              textShadow: "2px 2px 8px rgba(0,0,0,0.3)",
+              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
+              textShadow: "2px 2px 12px rgba(0,0,0,0.4)",
               lineHeight: 1.2,
             }}
           >
@@ -108,14 +121,15 @@ const Special = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             sx={{
-              mt: 1.5,
-              color: "rgba(250, 247, 242, 0.8)",
-              fontSize: { xs: "0.95rem", md: "1.1rem" },
-              fontFamily: "'Lato', 'Roboto', sans-serif",
+              mt: 2,
+              color: "rgba(243, 227, 204, 0.9)",
+              fontSize: { xs: "1rem", md: "1.2rem" },
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 400,
               letterSpacing: 1,
-              maxWidth: 500,
+              maxWidth: 600,
               px: 2,
+              textShadow: "1px 1px 4px rgba(0,0,0,0.3)",
             }}
           >
             Fresh ingredients, timeless recipes, unforgettable flavors
@@ -130,8 +144,8 @@ const Special = () => {
             sx={{
               width: 120,
               height: 2,
-              backgroundColor: "rgba(255, 215, 0, 0.6)",
-              mt: 2.5,
+              backgroundColor: "#D9A756",
+              mt: 3,
             }}
           />
         </Box>
@@ -149,4 +163,4 @@ const Special = () => {
   );
 };
 
-export default Special;
+export default MainMenuPage;

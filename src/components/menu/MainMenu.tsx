@@ -118,7 +118,8 @@ export default function MainMenu() {
               name: item.name,
               desc: item.description || "",
               price: priceDisplay,
-              image: getImageUrl(item.imageUrls?.[0]) || "https://via.placeholder.com/300",
+              image:
+                getImageUrl(item.imageUrls?.[0]) || "/placeholder-food.svg",
               measurements: item.measurements,
               hasMeasurements: item.hasMeasurements,
             } as DisplayMenuItem;
@@ -140,7 +141,7 @@ export default function MainMenu() {
           mainImage:
             getImageUrl(category.imageUrl) ||
             categoryItems[0]?.image ||
-            "https://via.placeholder.com/400",
+            "/placeholder-category.svg",
           name: category.name,
           namePath: generateNamePath(category.name),
           menuItems: categoryItems,

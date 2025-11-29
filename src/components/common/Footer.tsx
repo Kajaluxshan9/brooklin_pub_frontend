@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -8,13 +8,17 @@ import {
 } from "@mui/material";
 import { useApiWithCache } from "../../hooks/useApi";
 import { openingHoursService } from "../../services/opening-hours.service";
-import type { OpeningHours, OpeningHoursStatus } from "../../types/api.types";
+import type { OpeningHours } from "../../types/api.types";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import { motion } from "framer-motion";
+import moment from "moment-timezone";
+
+// Toronto timezone for accurate open/close status
+const TIMEZONE = "America/Toronto";
 
 const Footer = () => {
   const quickLinks = [
@@ -31,25 +35,14 @@ const Footer = () => {
     () => openingHoursService.getAllOpeningHours()
   );
 
-  // Fetch current open/close status - refresh every minute
-  const [statusData, setStatusData] = useState<OpeningHoursStatus | null>(null);
+  // State to trigger re-render for status updates
+  const [, setTick] = useState(0);
 
+  // Re-render every minute to update status
   useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const status = await openingHoursService.getCurrentStatus();
-        setStatusData(status);
-      } catch (error) {
-        console.error("Error fetching status:", error);
-      }
-    };
-
-    // Fetch immediately
-    fetchStatus();
-
-    // Then refresh every 60 seconds to keep status current
-    const interval = setInterval(fetchStatus, 60000);
-
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -110,13 +103,101 @@ const Footer = () => {
       )
     : [];
 
-  // Check if a specific day is today
+  // Check if a specific day is today (using Toronto timezone)
   const isToday = (dayOfWeek: string) => {
-    const today = new Date()
-      .toLocaleDateString("en-US", { weekday: "long" })
-      .toLowerCase();
+    const today = moment().tz(TIMEZONE).format("dddd").toLowerCase();
     return dayOfWeek.toLowerCase() === today;
   };
+
+  // Helper to check if hours are overnight (close time is before open time or isClosedNextDay flag)
+  const isOvernightHours = (hours: OpeningHours): boolean => {
+    if (hours.isClosedNextDay) return true;
+    if (!hours.openTime || !hours.closeTime) return false;
+    return hours.closeTime < hours.openTime;
+  };
+
+  // Calculate current open status locally (like admin panel)
+  const currentStatus = useMemo(() => {
+    if (!openingHoursData || openingHoursData.length === 0) {
+      return { isOpen: false, message: "" };
+    }
+
+    const now = moment().tz(TIMEZONE);
+    const currentDay = now.format("dddd").toLowerCase();
+    const currentTime = now.format("HH:mm");
+
+    // Find today's hours
+    const todayHours = openingHoursData.find(
+      (oh) => oh.dayOfWeek.toLowerCase() === currentDay
+    );
+
+    // Check if currently open based on today's hours
+    if (
+      todayHours &&
+      todayHours.isActive &&
+      todayHours.isOpen &&
+      todayHours.openTime &&
+      todayHours.closeTime
+    ) {
+      const openTime = todayHours.openTime;
+      const closeTime = todayHours.closeTime;
+
+      // Handle overnight hours (close time is before open time OR isClosedNextDay flag)
+      if (isOvernightHours(todayHours)) {
+        // Business closes next day - we're open if we're past opening time OR before close time
+        if (currentTime >= openTime || currentTime <= closeTime) {
+          return {
+            isOpen: true,
+            message: `Open until ${moment(closeTime, "HH:mm").format(
+              "h:mm A"
+            )} (overnight)`,
+          };
+        }
+      } else {
+        // Same day close
+        if (currentTime >= openTime && currentTime <= closeTime) {
+          return {
+            isOpen: true,
+            message: `Open until ${moment(closeTime, "HH:mm").format(
+              "h:mm A"
+            )}`,
+          };
+        }
+      }
+    }
+
+    // Check if we're in overnight hours from previous day
+    const previousDay = now.clone().subtract(1, "day");
+    const previousDayName = previousDay.format("dddd").toLowerCase();
+    const previousDayHours = openingHoursData.find(
+      (oh) => oh.dayOfWeek.toLowerCase() === previousDayName
+    );
+
+    if (
+      previousDayHours &&
+      previousDayHours.isActive &&
+      previousDayHours.isOpen &&
+      previousDayHours.openTime &&
+      previousDayHours.closeTime
+    ) {
+      // Check if previous day has overnight hours
+      if (
+        isOvernightHours(previousDayHours) &&
+        currentTime <= previousDayHours.closeTime
+      ) {
+        return {
+          isOpen: true,
+          message: `Open until ${moment(
+            previousDayHours.closeTime,
+            "HH:mm"
+          ).format("h:mm A")}`,
+        };
+      }
+    }
+
+    // Currently closed - find next opening
+    return { isOpen: false, message: "Currently closed" };
+  }, [openingHoursData]);
 
   // Animation variants
   const containerVariants = {
@@ -199,10 +280,10 @@ const Footer = () => {
                 <Typography
                   variant="h6"
                   sx={{
-                    fontFamily: '"Playfair Display", serif',
+                    fontFamily: '"Cormorant Garamond", Georgia, serif',
                     fontWeight: 700,
                     letterSpacing: 0.5,
-                    color: "#2C1810",
+                    color: "#3C1F0E",
                     fontSize: "1.1rem",
                     lineHeight: 1.2,
                   }}
@@ -211,7 +292,7 @@ const Footer = () => {
                 </Typography>
                 <Typography
                   sx={{
-                    color: "#8B4513",
+                    color: "#D9A756",
                     fontSize: "0.7rem",
                     fontWeight: 600,
                     letterSpacing: 1.5,
@@ -226,10 +307,10 @@ const Footer = () => {
             {/* Contact Info */}
             <Typography
               sx={{
-                fontFamily: '"Playfair Display", serif',
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
                 fontWeight: 700,
                 fontSize: "1.1rem",
-                color: "#2C1810",
+                color: "#3C1F0E",
                 mb: 1.5,
                 mt: 2,
                 letterSpacing: 0.5,
@@ -253,13 +334,13 @@ const Footer = () => {
                   cursor: "pointer",
                 }}
               >
-                <LocationOnIcon sx={{ fontSize: 16, color: "#8B4513" }} />
+                <LocationOnIcon sx={{ fontSize: 16, color: "#D9A756" }} />
                 <Typography
                   sx={{
-                    color: "#5D4037",
+                    color: "#6A3A1E",
                     fontSize: "0.85rem",
                     fontWeight: 500,
-                    "&:hover": { color: "#8B4513" },
+                    "&:hover": { color: "#D9A756" },
                   }}
                 >
                   15 Baldwin St, Whitby, ON
@@ -279,13 +360,13 @@ const Footer = () => {
                   cursor: "pointer",
                 }}
               >
-                <PhoneIcon sx={{ fontSize: 16, color: "#8B4513" }} />
+                <PhoneIcon sx={{ fontSize: 16, color: "#D9A756" }} />
                 <Typography
                   sx={{
-                    color: "#5D4037",
+                    color: "#6A3A1E",
                     fontSize: "0.85rem",
                     fontWeight: 500,
-                    "&:hover": { color: "#8B4513" },
+                    "&:hover": { color: "#D9A756" },
                   }}
                 >
                   (905) 425-3055
@@ -305,13 +386,13 @@ const Footer = () => {
                   cursor: "pointer",
                 }}
               >
-                <EmailIcon sx={{ fontSize: 16, color: "#8B4513" }} />
+                <EmailIcon sx={{ fontSize: 16, color: "#D9A756" }} />
                 <Typography
                   sx={{
-                    color: "#5D4037",
+                    color: "#6A3A1E",
                     fontSize: "0.85rem",
                     fontWeight: 500,
-                    "&:hover": { color: "#8B4513" },
+                    "&:hover": { color: "#D9A756" },
                   }}
                 >
                   brooklinpub@gmail.com
@@ -335,7 +416,7 @@ const Footer = () => {
                 whileHover={{ scale: 1.1, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
-                  bgcolor: "#8B4513",
+                  bgcolor: "#D9A756",
                   color: "#fff",
                   width: 36,
                   height: 36,
@@ -351,7 +432,7 @@ const Footer = () => {
                 whileHover={{ scale: 1.1, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
-                  bgcolor: "#8B4513",
+                  bgcolor: "#D9A756",
                   color: "#fff",
                   width: 36,
                   height: 36,
@@ -374,10 +455,10 @@ const Footer = () => {
           >
             <Typography
               sx={{
-                fontFamily: '"Playfair Display", serif',
+                fontFamily: '"Cormorant Garamond", serif',
                 fontWeight: 700,
                 fontSize: "1.1rem",
-                color: "#2C1810",
+                color: "#3C1F0E",
                 mb: 0.5,
                 letterSpacing: 0.5,
               }}
@@ -386,7 +467,7 @@ const Footer = () => {
             </Typography>
 
             {/* Open/Closed Status Badge */}
-            {statusData && (
+            {openingHoursData && openingHoursData.length > 0 && (
               <Box
                 component={motion.div}
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -398,11 +479,11 @@ const Footer = () => {
                   px: 2,
                   py: 0.5,
                   borderRadius: "20px",
-                  bgcolor: statusData.isOpen
+                  bgcolor: currentStatus.isOpen
                     ? "rgba(34, 139, 34, 0.1)"
                     : "rgba(180, 83, 9, 0.1)",
                   border: `1px solid ${
-                    statusData.isOpen
+                    currentStatus.isOpen
                       ? "rgba(34, 139, 34, 0.3)"
                       : "rgba(180, 83, 9, 0.3)"
                   }`,
@@ -411,19 +492,21 @@ const Footer = () => {
               >
                 <motion.div
                   animate={{
-                    scale: statusData.isOpen ? [1, 1.2, 1] : 1,
+                    scale: currentStatus.isOpen ? [1, 1.2, 1] : 1,
                   }}
                   transition={{
                     duration: 1.5,
-                    repeat: statusData.isOpen ? Infinity : 0,
+                    repeat: currentStatus.isOpen ? Infinity : 0,
                     ease: "easeInOut",
                   }}
                   style={{
                     width: 8,
                     height: 8,
                     borderRadius: "50%",
-                    backgroundColor: statusData.isOpen ? "#228B22" : "#B45309",
-                    boxShadow: statusData.isOpen
+                    backgroundColor: currentStatus.isOpen
+                      ? "#228B22"
+                      : "#B45309",
+                    boxShadow: currentStatus.isOpen
                       ? "0 0 8px rgba(34, 139, 34, 0.5)"
                       : "0 0 8px rgba(180, 83, 9, 0.5)",
                   }}
@@ -432,12 +515,12 @@ const Footer = () => {
                   sx={{
                     fontSize: "0.75rem",
                     fontWeight: 700,
-                    color: statusData.isOpen ? "#228B22" : "#B45309",
+                    color: currentStatus.isOpen ? "#228B22" : "#B45309",
                     textTransform: "uppercase",
                     letterSpacing: 0.5,
                   }}
                 >
-                  {statusData.isOpen ? "Open Now" : "Closed"}
+                  {currentStatus.isOpen ? "Open Now" : "Closed"}
                 </Typography>
               </Box>
             )}
@@ -458,10 +541,17 @@ const Footer = () => {
                   const dayName =
                     dayAbbr[hours.dayOfWeek.toLowerCase()] ||
                     hours.dayOfWeek.slice(0, 3).toUpperCase();
-                  const timeStr = hours.isClosed
+                  // Check if day is closed (isOpen=false or isActive=false or no times set)
+                  const isClosed =
+                    !hours.isOpen ||
+                    !hours.isActive ||
+                    !hours.openTime ||
+                    !hours.closeTime;
+                  // Check if overnight hours (logic available but hidden on public UI)
+                  const timeStr = isClosed
                     ? "CLOSED"
-                    : `${formatTime(hours.openTime)} - ${formatTime(
-                        hours.closeTime
+                    : `${formatTime(hours.openTime!)} - ${formatTime(
+                        hours.closeTime!
                       )}`;
 
                   return (
@@ -495,14 +585,14 @@ const Footer = () => {
                           sx={{
                             fontSize: "0.85rem",
                             fontWeight: isTodayRow ? 700 : 600,
-                            color: isTodayRow ? "#8B4513" : "#5D4037",
+                            color: isTodayRow ? "#D9A756" : "#6A3A1E",
                             minWidth: 40,
                             letterSpacing: 0.5,
                           }}
                         >
                           {dayName}
                         </Typography>
-                        {isTodayRow && statusData?.isOpen && (
+                        {isTodayRow && currentStatus.isOpen && (
                           <Box
                             component="span"
                             sx={{
@@ -519,7 +609,7 @@ const Footer = () => {
                             Today
                           </Box>
                         )}
-                        {isTodayRow && !statusData?.isOpen && (
+                        {isTodayRow && !currentStatus.isOpen && (
                           <Box
                             component="span"
                             sx={{
@@ -541,11 +631,11 @@ const Footer = () => {
                         sx={{
                           fontSize: "0.85rem",
                           fontWeight: isTodayRow ? 600 : 500,
-                          color: hours.isClosed
+                          color: isClosed
                             ? "#B45309"
                             : isTodayRow
-                            ? "#2C1810"
-                            : "#5D4037",
+                            ? "#3C1F0E"
+                            : "#6A3A1E",
                           letterSpacing: 0.3,
                         }}
                       >
@@ -572,7 +662,7 @@ const Footer = () => {
                           sx={{
                             fontSize: "0.85rem",
                             fontWeight: 600,
-                            color: "#5D4037",
+                            color: "#6A3A1E",
                           }}
                         >
                           {day}
@@ -581,7 +671,7 @@ const Footer = () => {
                           sx={{
                             fontSize: "0.85rem",
                             fontWeight: 500,
-                            color: "#5D4037",
+                            color: "#6A3A1E",
                           }}
                         >
                           11 A.M. - 11 P.M.
@@ -602,10 +692,10 @@ const Footer = () => {
           >
             <Typography
               sx={{
-                fontFamily: '"Playfair Display", serif',
+                fontFamily: '"Cormorant Garamond", serif',
                 fontWeight: 700,
                 fontSize: "1.1rem",
-                color: "#2C1810",
+                color: "#3C1F0E",
                 mb: 2,
                 letterSpacing: 0.5,
               }}
@@ -638,7 +728,7 @@ const Footer = () => {
                   }}
                   underline="none"
                   sx={{
-                    color: "#5D4037",
+                    color: "#6A3A1E",
                     fontSize: "0.9rem",
                     fontWeight: 500,
                     transition: "all 0.2s ease",
@@ -646,13 +736,13 @@ const Footer = () => {
                     alignItems: "center",
                     gap: 0.5,
                     "&:hover": {
-                      color: "#8B4513",
+                      color: "#D9A756",
                     },
                     "&::before": {
                       content: '""',
                       width: 0,
                       height: "2px",
-                      bgcolor: "#8B4513",
+                      bgcolor: "#D9A756",
                       transition: "width 0.2s ease",
                       display: { xs: "none", md: "block" },
                     },
@@ -723,7 +813,7 @@ const Footer = () => {
             <MUILink
               href="#"
               underline="hover"
-              sx={{ color: "#8B4513", fontWeight: 600 }}
+              sx={{ color: "#D9A756", fontWeight: 600 }}
             >
               AK Vision Systems
             </MUILink>

@@ -15,17 +15,81 @@ import Special from "./pages/Special";
 import ChefSpecial from "./pages/ChefSpecial";
 import SpecialDisplay from "./components/special/SpecialDisplay";
 import ScrollTopFab from "./components/common/ScrollTopFab";
-import MainMenu from "./pages/mainmenu";
-import FloatingSpecials from "./components/special/flotingSpecial";
+import MainMenu from "./pages/MainMenu";
 
 const theme = createTheme({
   palette: {
-    primary: { main: "#8B4513" },
-    secondary: { main: "#DAA520" },
-    background: { default: "#f5f5f5" },
+    primary: {
+      main: "#6A3A1E", // --brown-primary
+      dark: "#3C1F0E", // --brown-dark
+      light: "#8B4513", // lighter brown
+    },
+    secondary: {
+      main: "#D9A756", // --gold-accent
+      light: "#E8C078",
+      dark: "#B8923F",
+    },
+    background: {
+      default: "#FAF7F2", // warm cream
+      paper: "#FFFFFF",
+    },
+    text: {
+      primary: "#3C1F0E", // --brown-dark for main text
+      secondary: "#6A3A1E", // --brown-primary for secondary
+    },
+    error: {
+      main: "#8A2A2A", // --wine-red
+    },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    // Primary font for body text - clean, modern, highly readable
+    fontFamily: '"Inter", "Helvetica Neue", "Arial", sans-serif',
+    // Heading styles with elegant serif
+    h1: {
+      fontFamily: '"Cormorant Garamond", "Georgia", serif',
+      fontWeight: 600,
+    },
+    h2: {
+      fontFamily: '"Cormorant Garamond", "Georgia", serif',
+      fontWeight: 600,
+    },
+    h3: {
+      fontFamily: '"Cormorant Garamond", "Georgia", serif',
+      fontWeight: 600,
+    },
+    h4: {
+      fontFamily: '"Cormorant Garamond", "Georgia", serif',
+      fontWeight: 500,
+    },
+    h5: {
+      fontFamily: '"Cormorant Garamond", "Georgia", serif',
+      fontWeight: 500,
+    },
+    h6: {
+      fontFamily: '"Cormorant Garamond", "Georgia", serif',
+      fontWeight: 500,
+    },
+    subtitle1: {
+      fontFamily: '"Inter", sans-serif',
+      fontWeight: 500,
+    },
+    subtitle2: {
+      fontFamily: '"Inter", sans-serif',
+      fontWeight: 500,
+    },
+    body1: {
+      fontFamily: '"Inter", sans-serif',
+      fontWeight: 400,
+    },
+    body2: {
+      fontFamily: '"Inter", sans-serif',
+      fontWeight: 400,
+    },
+    button: {
+      fontFamily: '"Inter", sans-serif',
+      fontWeight: 600,
+      textTransform: "none" as const,
+    },
   },
   components: {
     MuiToolbar: {
@@ -47,7 +111,6 @@ function App() {
       <CssBaseline />
       <Router>
         <ScrollToTop />
-        <FloatingSpecials />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />

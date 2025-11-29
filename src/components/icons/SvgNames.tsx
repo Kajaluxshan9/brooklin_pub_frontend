@@ -62,7 +62,7 @@ export function DrawTextSVG({
         strokeLinecap="round"
         strokeLinejoin="round"
         style={{
-          fontFamily: "'Corinthia', cursive",
+          fontFamily: "'Great Vibes', cursive",
           fontSize: "72px",
           letterSpacing: "2px",
           paintOrder: "stroke fill",
@@ -138,3 +138,4 @@ export function DrawPathSVG({
     </motion.svg>
   );
 }
+

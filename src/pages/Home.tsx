@@ -1,59 +1,134 @@
-"use client";
 import Nav from "../components/common/Nav";
-import AdditionalSpecial from "../components/special/additionalSpecial";
+import AdditionalSpecial from "../components/special/AdditionalSpecial";
 import LandingPage from "../components/home/LandingPage";
+import EventsSection from "../components/home/EventsSection";
 import Footer from "../components/common/Footer";
 import { Box, Typography } from "@mui/material";
-import BgImage from "../assets/components/image-2.jpg";
+import BgImage from "../assets/images/hero-bg.jpg";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import { exportedDailySpecials } from "../components/special/SpecialDisplay";
+import { useApiWithCache } from "../hooks/useApi";
+import { specialsService } from "../services/specials.service";
+import { getImageUrl } from "../services/api";
+import type { Special, DayOfWeek } from "../types/api.types";
+
+// Transform Special to popup card format
+interface PopupCard {
+  title: string;
+  popupImg: string;
+  type: string;
+}
+
+// Get current day of week in lowercase
+const getCurrentDayOfWeek = (): DayOfWeek => {
+  const days: DayOfWeek[] = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ] as DayOfWeek[];
+  return days[new Date().getDay()];
+};
+
+// Check if a special should be shown in the popup
+// Only show: seasonal, game_time, chef, and current day's daily special
+const shouldShowInPopup = (special: Special): boolean => {
+  if (!special.isActive) return false;
+
+  const now = new Date();
+
+  // For specials with display date range, check if within range
+  if (special.displayStartDate && special.displayEndDate) {
+    const startDate = new Date(special.displayStartDate);
+    const endDate = new Date(special.displayEndDate);
+    if (now < startDate || now > endDate) return false;
+  }
+
+  // Show seasonal, game_time, and chef specials
+  if (
+    special.type === "seasonal" ||
+    special.type === "game_time" ||
+    special.type === "chef"
+  ) {
+    return true;
+  }
+
+  // For daily specials, only show if it matches current day
+  if (special.type === "daily" && special.dayOfWeek) {
+    const currentDay = getCurrentDayOfWeek();
+    return special.dayOfWeek.toLowerCase() === currentDay;
+  }
+
+  return false;
+};
 
 const Home = () => {
-  useEffect(() => {
-    // Home no longer handles global specials loading or notifications;
-    // that logic runs at the app level so the floating badge appears on every page.
-  }, []);
+  // Fetch active specials from backend
+  const { data: specialsData } = useApiWithCache<Special[]>(
+    "active-specials-popup",
+    () => specialsService.getActiveSpecials()
+  );
 
-  // Slideshow for new specials on Home page
-  const newCards = exportedDailySpecials?.filter((c) => c.status === "new") || [];
+  // Filter specials for popup display
+  const popupCards = useMemo((): PopupCard[] => {
+    if (!specialsData || specialsData.length === 0) return [];
+
+    return specialsData.filter(shouldShowInPopup).map((special) => ({
+      title: special.title,
+      popupImg:
+        getImageUrl(special.imageUrls?.[1]) ||
+        getImageUrl(special.imageUrls?.[0]) ||
+        "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+      type: special.type,
+    }));
+  }, [specialsData]);
+
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [slideshowIndex, setSlideshowIndex] = useState(0);
 
   useEffect(() => {
-    if (newCards.length > 0) {
+    if (popupCards.length > 0) {
       setShowSlideshow(true);
       setSlideshowIndex(0);
     }
-  }, []);
+  }, [popupCards.length]);
 
   useEffect(() => {
-    if (!showSlideshow || newCards.length <= 1) return;
-    const t = setInterval(() => setSlideshowIndex((i) => (i + 1) % newCards.length), 3000);
+    if (!showSlideshow || popupCards.length <= 1) return;
+    const t = setInterval(
+      () => setSlideshowIndex((i) => (i + 1) % popupCards.length),
+      4000
+    );
     return () => clearInterval(t);
-  }, [showSlideshow, newCards.length]);
+  }, [showSlideshow, popupCards.length]);
 
   return (
     <div>
       <Nav />
-      {showSlideshow && newCards.length > 0 &&
+      {showSlideshow &&
+        popupCards.length > 0 &&
         createPortal(
           <AnimatePresence>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
+              transition={{ duration: 0.4 }}
               style={{
                 position: "fixed",
                 top: 0,
                 left: 0,
                 width: "100vw",
                 height: "100vh",
-                background: "rgba(0,0,0,0.9)",
+                background:
+                  "linear-gradient(135deg, rgba(60,31,14,0.97) 0%, rgba(106,58,30,0.95) 100%)",
+                backdropFilter: "blur(8px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -61,120 +136,302 @@ const Home = () => {
               }}
               onClick={() => setShowSlideshow(false)}
             >
+              {/* Decorative elements */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: `radial-gradient(circle at 20% 30%, rgba(217,167,86,0.15) 0%, transparent 40%),
+                                  radial-gradient(circle at 80% 70%, rgba(217,167,86,0.1) 0%, transparent 40%)`,
+                  pointerEvents: "none",
+                }}
+              />
+
               <motion.div
                 onClick={(e) => e.stopPropagation()}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 110, damping: 14 }}
+                initial={{ scale: 0.85, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.85, opacity: 0, y: 30 }}
+                transition={{ type: "spring", stiffness: 100, damping: 18 }}
                 style={{
                   position: "relative",
-                  width: "min(1100px, 92vw)",
-                  height: "min(760px, 86vh)",
+                  width: "min(1000px, 90vw)",
+                  maxHeight: "85vh",
                   display: "flex",
-                  justifyContent: "center",
+                  flexDirection: "column",
                   alignItems: "center",
+                  background: "rgba(255,255,255,0.05)",
+                  borderRadius: "24px",
+                  border: "1px solid rgba(217,167,86,0.3)",
+                  padding: "24px",
+                  boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
                 }}
               >
-                  <style>{`.slideshow-arrow { top: auto !important; bottom: 18px !important; transform: none !important; }`}</style>
-                <button
-                  onClick={() => setShowSlideshow(false)}
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    right: "20px",
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    backdropFilter: "blur(10px)",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                    <path d="M18 6L6 18" />
-                    <path d="M6 6l12 12" />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={(e) => { e.stopPropagation(); setSlideshowIndex((i) => (i - 1 + newCards.length) % newCards.length); }}
-                  style={{
-                    position: "absolute",
-                    left: "18px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "56px",
-                    height: "56px",
-                    borderRadius: "8px",
-                    background: "rgba(0,0,0,0.35)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  className="slideshow-arrow left"
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                    <path d="M15 18l-6-6 6-6" />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={(e) => { e.stopPropagation(); setSlideshowIndex((i) => (i + 1) % newCards.length); }}
-                  style={{
-                    position: "absolute",
-                    right: "18px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "56px",
-                    height: "56px",
-                    borderRadius: "8px",
-                    background: "rgba(0,0,0,0.35)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  className="slideshow-arrow right"
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                    <path d="M9 6l6 6-6 6" />
-                  </svg>
-                </button>
-
-                <img
-                  src={newCards[slideshowIndex].popupImg}
-                  alt={newCards[slideshowIndex].title}
+                {/* Header with title and close */}
+                <div
                   style={{
                     width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    borderRadius: "12px",
-                    boxShadow: "0 18px 60px rgba(0,0,0,0.6)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "16px",
                   }}
-                />
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "4px",
+                        height: "32px",
+                        background: "#D9A756",
+                        borderRadius: "2px",
+                      }}
+                    />
+                    <h2
+                      style={{
+                        margin: 0,
+                        fontFamily: '"Cormorant Garamond", Georgia, serif',
+                        fontSize: "clamp(1.3rem, 3vw, 1.8rem)",
+                        fontWeight: 700,
+                        color: "#F3E3CC",
+                        letterSpacing: "0.03em",
+                      }}
+                    >
+                      Today's Special
+                    </h2>
+                  </div>
+
+                  <button
+                    onClick={() => setShowSlideshow(false)}
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "50%",
+                      background: "rgba(217,167,86,0.15)",
+                      border: "1px solid rgba(217,167,86,0.4)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(217,167,86,0.3)";
+                      e.currentTarget.style.transform = "rotate(90deg)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background =
+                        "rgba(217,167,86,0.15)";
+                      e.currentTarget.style.transform = "rotate(0deg)";
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#D9A756"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    >
+                      <path d="M18 6L6 18" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Image container */}
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    flex: 1,
+                    minHeight: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    src={popupCards[slideshowIndex].popupImg}
+                    alt={popupCards[slideshowIndex].title}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "calc(85vh - 160px)",
+                      objectFit: "contain",
+                      borderRadius: "16px",
+                      boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+                    }}
+                  />
+                </div>
+
+                {/* Card info and navigation */}
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: "20px",
+                    paddingTop: "16px",
+                    borderTop: "1px solid rgba(217,167,86,0.2)",
+                  }}
+                >
+                  {/* Left arrow */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSlideshowIndex(
+                        (i) => (i - 1 + popupCards.length) % popupCards.length
+                      );
+                    }}
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "12px",
+                      background: "rgba(217,167,86,0.1)",
+                      border: "1px solid rgba(217,167,86,0.3)",
+                      color: "#D9A756",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        "rgba(217,167,86,0.25)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(217,167,86,0.1)";
+                    }}
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#D9A756"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    >
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+
+                  {/* Title and dots */}
+                  <div
+                    style={{
+                      textAlign: "center",
+                      flex: 1,
+                      padding: "0 16px",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: "0 0 8px 0",
+                        fontFamily: '"Cormorant Garamond", Georgia, serif',
+                        fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
+                        fontWeight: 600,
+                        color: "#F3E3CC",
+                      }}
+                    >
+                      {popupCards[slideshowIndex].title}
+                    </h3>
+
+                    {/* Pagination dots */}
+                    {popupCards.length > 1 && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        {popupCards.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSlideshowIndex(idx);
+                            }}
+                            style={{
+                              width: idx === slideshowIndex ? "24px" : "8px",
+                              height: "8px",
+                              borderRadius: "4px",
+                              background:
+                                idx === slideshowIndex
+                                  ? "#D9A756"
+                                  : "rgba(217,167,86,0.3)",
+                              border: "none",
+                              cursor: "pointer",
+                              transition: "all 0.3s ease",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right arrow */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSlideshowIndex((i) => (i + 1) % popupCards.length);
+                    }}
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "12px",
+                      background: "rgba(217,167,86,0.1)",
+                      border: "1px solid rgba(217,167,86,0.3)",
+                      color: "#D9A756",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        "rgba(217,167,86,0.25)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(217,167,86,0.1)";
+                    }}
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#D9A756"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    >
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                  </button>
+                </div>
               </motion.div>
             </motion.div>
           </AnimatePresence>,
           document.body
-        )}
-
+        )}{" "}
       <LandingPage />
       <Callicon />
       <SocialMedia />
-
       <Box
         sx={{
-          minHeight: { xs: "60vh", sm: "70vh", md: "80vh" }, // responsive height
+          minHeight: { xs: "60vh", sm: "70vh", md: "80vh" },
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -185,31 +442,50 @@ const Home = () => {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+          },
         }}
       >
         <Typography
           variant="h3"
           fontWeight={700}
           sx={{
-            fontSize: { xs: "1.8rem", sm: "2.5rem", md: "3rem" }, // responsive title
+            fontSize: { xs: "1.8rem", sm: "2.5rem", md: "3rem" },
+            color: "#fff",
+            textShadow: "2px 2px 8px rgba(0,0,0,0.5)",
+            position: "relative",
+            zIndex: 1,
+            fontFamily: '"Cormorant Garamond", serif',
           }}
           gutterBottom
         >
-          Your Title Text Here
+          A Local Favorite Since 1985
         </Typography>
 
         <Typography
           variant="body1"
           sx={{
             maxWidth: "700px",
-            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" }, // responsive paragraph
+            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
+            color: "rgba(255,255,255,0.9)",
+            textShadow: "1px 1px 4px rgba(0,0,0,0.5)",
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          Your description paragraph or message goes here. This text will resize
-          smoothly across mobile, tablet, and desktop screens.
+          Experience the warmth of our classic pub atmosphere, where great food,
+          cold drinks, and unforgettable moments come together.
         </Typography>
       </Box>
-
+      <EventsSection />
       <AdditionalSpecial />
       <Footer />
     </div>

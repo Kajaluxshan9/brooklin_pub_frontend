@@ -57,7 +57,7 @@ const MenuListRandomGrid = () => {
         sx={{
           fontSize: { xs: "24px", sm: "32px", md: "48px" },
           mb: 4,
-          fontFamily: "Georgia, serif",
+          fontFamily: '"Cormorant Garamond", Georgia, serif',
           textAlign: "center",
         }}
       >

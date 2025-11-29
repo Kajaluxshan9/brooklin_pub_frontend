@@ -22,8 +22,8 @@ import GroupIcon from "@mui/icons-material/Group";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import { motion } from "framer-motion";
-import ContactBg from "../assets/components/image-2.jpg";
-import contactAnimation from "../pages/chef.json";
+import ContactBg from "../assets/images/hero-bg.jpg";
+import contactAnimation from "../assets/animations/contact-animation.json";
 import Lottie from "lottie-react";
 import { useApiWithCache } from "../hooks/useApi";
 import { openingHoursService } from "../services/opening-hours.service";
@@ -111,10 +111,14 @@ const ContactUs = () => {
         dayOrder.indexOf(b.dayOfWeek.toLowerCase())
     );
 
-    return sortedHours.map((h) => ({
-      days: h.dayOfWeek,
-      time: h.isClosed ? "Closed" : `${h.openTime} - ${h.closeTime}`,
-    }));
+    return sortedHours.map((h) => {
+      // Check if day is closed (isOpen=false or isActive=false or no times set)
+      const isClosed = !h.isOpen || !h.isActive || !h.openTime || !h.closeTime;
+      return {
+        days: h.dayOfWeek,
+        time: isClosed ? "Closed" : `${h.openTime} - ${h.closeTime}`,
+      };
+    });
   };
 
   const displayHours = formatOpeningHours(openingHoursData);
@@ -248,7 +252,7 @@ const ContactUs = () => {
         backgroundBlendMode: "overlay",
         position: "relative",
         overflow: "hidden",
-        fontFamily: "'Roboto', sans-serif",
+        fontFamily: '"Inter", sans-serif',
       }}
     >
       <Nav />
@@ -307,7 +311,7 @@ const ContactUs = () => {
           <Typography
             variant="h1"
             sx={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Cormorant Garamond", serif',
               fontWeight: 800,
               fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.5rem" },
               color: "#3C1F0E",
@@ -386,7 +390,7 @@ const ContactUs = () => {
                   <Typography
                     variant="h6"
                     sx={{
-                      fontFamily: '"Playfair Display", serif',
+                      fontFamily: '"Cormorant Garamond", serif',
                       fontWeight: 700,
                       color: "#3C1F0E",
                     }}
@@ -429,7 +433,7 @@ const ContactUs = () => {
                   <Typography
                     variant="h6"
                     sx={{
-                      fontFamily: '"Playfair Display", serif',
+                      fontFamily: '"Cormorant Garamond", serif',
                       fontWeight: 700,
                       color: "#3C1F0E",
                     }}
@@ -500,7 +504,7 @@ const ContactUs = () => {
                   <Typography
                     variant="h6"
                     sx={{
-                      fontFamily: '"Playfair Display", serif',
+                      fontFamily: '"Cormorant Garamond", serif',
                       fontWeight: 700,
                       color: "#3C1F0E",
                     }}
@@ -576,7 +580,7 @@ const ContactUs = () => {
               <Typography
                 variant="h4"
                 sx={{
-                  fontFamily: '"Playfair Display", serif',
+                  fontFamily: '"Cormorant Garamond", serif',
                   fontWeight: 800,
                   color: "#3C1F0E",
                   mb: 1,
@@ -967,3 +971,4 @@ const ContactUs = () => {
 };
 
 export default ContactUs;
+

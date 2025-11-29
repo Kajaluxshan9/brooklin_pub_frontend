@@ -3,19 +3,25 @@ import Typography from "@mui/material/Typography";
 
 const sections = [
   {
-    title: "Left Side Text 1",
-    description: "This is the first section's text content on the left side.",
-    image: "https://i.pinimg.com/736x/b7/7a/96/b77a96c72fa03abf25c398e565aec1a1.jpg",
+    title: "Crafted with Care",
+    description:
+      "Every dish at Brooklin Pub is prepared with the freshest ingredients and a passion for authentic flavors. Our kitchen team takes pride in creating memorable meals.",
+    image:
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80",
   },
   {
-    title: "Right Side Text 2",
-    description: "This is the second section's text content on the right side.",
-    image: "https://i.pinimg.com/736x/b0/2f/c8/b02fc86b1a599455dfb134e44b033b02.jpg",
+    title: "Game Day Ready",
+    description:
+      "Catch all the action on our big screens with ice-cold drinks and our famous pub bites. The perfect spot to cheer on your favorite team with friends.",
+    image:
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&q=80",
   },
   {
-    title: "Left Side Text 3",
-    description: "This is the third section's text content on the left side.",
-    image: "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
+    title: "Unforgettable Nights",
+    description:
+      "From live music to trivia nights, Brooklin Pub is the place to be for entertainment and great times. Join us for an experience you won't forget.",
+    image:
+      "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200&q=80",
   },
 ];
 
@@ -25,32 +31,21 @@ const AdditionalSpecial = () => {
       {sections.map((section, index) => {
         const isEven = index % 2 === 0;
 
-        // 🎨 Different font families
-        const titleFont =
-          index === 0
-            ? "'Moon Dance', cursive"
-            : index === 1
-            ? "'Roboto Mono', monospace"
-            : "'Poppins', sans-serif";
+        // 🎨 Consistent font families matching brand theme
+        const titleFont = "'Cormorant Garamond', Georgia, serif";
+        const bodyFont = "'Inter', sans-serif";
 
-        const bodyFont =
-          index === 0
-            ? "'Poppins', sans-serif"
-            : index === 1
-            ? "'Playfair Display', serif"
-            : "'Roboto Mono', monospace";
-
-        // 🔥 Different font sizes (responsive)
+        // 🔥 Consistent responsive font sizes
         const titleSize = {
-          xs: "48px", // 📱 mobile
-          sm: "72px", // small tablets
-          md: index === 0 ? "148px" : index === 1 ? "136px" : "140px", // desktop
+          xs: "2.5rem",
+          sm: "3.5rem",
+          md: "4.5rem",
         };
 
         const bodySize = {
-          xs: "14px",
-          sm: "16px",
-          md: index === 0 ? "16px" : index === 1 ? "18px" : "15px",
+          xs: "1rem",
+          sm: "1.1rem",
+          md: "1.2rem",
         };
 
         return (
@@ -72,7 +67,9 @@ const AdditionalSpecial = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: isEven ? "primary.main" : "secondary.main",
+                background: isEven
+                  ? "linear-gradient(135deg, #6A3A1E 0%, #3C1F0E 100%)"
+                  : "linear-gradient(135deg, #D9A756 0%, #B8923F 100%)",
                 color: "white",
                 p: { xs: 2, sm: 3, md: 4 },
                 textAlign: { xs: "center", md: "left" },
@@ -125,3 +122,7 @@ const AdditionalSpecial = () => {
 };
 
 export default AdditionalSpecial;
+
+
+
+

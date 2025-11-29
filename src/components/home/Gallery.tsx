@@ -1,49 +1,16 @@
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect, useMemo } from "react";
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { motion, useInView } from "framer-motion";
+import { useApiWithCache } from "../../hooks/useApi";
+import { storiesService } from "../../services/stories.service";
+import { getImageUrl } from "../../services/api";
+import type { StoryCategory } from "../../types/api.types";
 
-const galleryRows = [
-  {
-    title: "Culinary Masterpieces",
-    description:
-      "Experience the finest flavors crafted with passion, where every dish tells a story of tradition and innovation.",
-    images: [
-      "https://i.pinimg.com/736x/6b/3a/c2/6b3ac22af731ea09354668e6fc51eeb8.jpg",
-      "https://source.unsplash.com/400x300/?pizza",
-      "https://source.unsplash.com/400x300/?salad",
-    ],
-  },
-  {
-    title: "Sweet Indulgences",
-    description:
-      "Treat yourself to our exquisite selection of desserts and beverages, perfect for those sweet moments.",
-    images: [
-      "https://source.unsplash.com/400x300/?dessert",
-      "https://source.unsplash.com/400x300/?drink",
-      "https://source.unsplash.com/400x300/?coffee",
-    ],
-  },
-  {
-    title: "Savory Delights",
-    description:
-      "Hearty meals that bring comfort and joy to your table, prepared with the freshest ingredients.",
-    images: [
-      "https://source.unsplash.com/400x300/?burger",
-      "https://source.unsplash.com/400x300/?pasta",
-      "https://source.unsplash.com/400x300/?steak",
-    ],
-  },
-  {
-    title: "Ambiance & Spirits",
-    description:
-      "Relax in our cozy atmosphere with a curated wine list and signature cocktails designed to elevate your evening.",
-    images: [
-      "https://source.unsplash.com/400x300/?soup",
-      "https://source.unsplash.com/400x300/?wine",
-      "https://source.unsplash.com/400x300/?restaurant",
-    ],
-  },
-];
+interface GalleryRowData {
+  title: string;
+  description: string;
+  images: string[];
+}
 
 interface GalleryRowProps {
   images: string[];
@@ -134,8 +101,8 @@ function GalleryRow({
             component="h2"
             sx={{
               fontWeight: 800,
-              fontFamily: '"Playfair Display", serif',
-              color: "#2C1810",
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              color: "#3C1F0E",
               mb: 1,
               letterSpacing: "-0.02em",
               fontSize: "1.5rem",
@@ -146,7 +113,7 @@ function GalleryRow({
           <Typography
             variant="body1"
             sx={{
-              color: "#5D4037",
+              color: "#6A3A1E",
               fontStyle: "italic",
               fontWeight: 400,
               lineHeight: 1.5,
@@ -208,7 +175,9 @@ function GalleryRow({
               animate={{
                 scale: currentImageIndex === idx ? 1.3 : 1,
                 backgroundColor:
-                  currentImageIndex === idx ? "#8B4513" : "#D7CCC8",
+                  currentImageIndex === idx
+                    ? "#D9A756"
+                    : "rgba(217,167,86,0.4)",
               }}
               transition={{ duration: 0.3 }}
               onClick={() => setCurrentImageIndex(idx)}
@@ -257,8 +226,8 @@ function GalleryRow({
           component="h2"
           sx={{
             fontWeight: 800,
-            fontFamily: '"Playfair Display", serif',
-            color: "#2C1810",
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            color: "#3C1F0E",
             mb: 1.5,
             letterSpacing: "-0.02em",
           }}
@@ -330,9 +299,38 @@ export default function Gallery() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isInView = useInView(containerRef, { once: false, margin: "-20%" });
 
+  // Fetch story categories with their stories from backend
+  const { data: categoriesData, loading } = useApiWithCache<StoryCategory[]>(
+    "story-categories",
+    () => storiesService.getAllCategories()
+  );
+
+  // Transform backend data to gallery rows format
+  const galleryRows: GalleryRowData[] = useMemo(() => {
+    if (!categoriesData || categoriesData.length === 0) return [];
+
+    return categoriesData
+      .filter((category) => category.isActive)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((category) => {
+        // Get images from stories in this category
+        const images = (category.stories || [])
+          .filter((story) => story.isActive && story.imageUrls && story.imageUrls.length > 0)
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((story) => getImageUrl(story.imageUrls[0]) || "");
+
+        return {
+          title: category.name,
+          description: category.description || "",
+          images: images.length > 0 ? images : [], // No fallback - empty if no images
+        };
+      })
+      .filter((row) => row.images.length > 0); // Only show rows that have images
+  }, [categoriesData]);
+
   // Lock scroll on mobile when gallery is active
   useEffect(() => {
-    if (isMobile && isInView && !isGalleryComplete) {
+    if (isMobile && isInView && !isGalleryComplete && galleryRows.length > 0) {
       // Scroll the gallery into full view
       containerRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -354,7 +352,7 @@ export default function Gallery() {
         window.scrollTo(0, parseInt(scrollY || "0") * -1);
       };
     }
-  }, [isMobile, isInView, isGalleryComplete]);
+  }, [isMobile, isInView, isGalleryComplete, galleryRows.length]);
 
   // Handle row cycle complete
   const handleRowComplete = () => {
@@ -365,6 +363,38 @@ export default function Gallery() {
       setIsGalleryComplete(true);
     }
   };
+
+  // Don't render if loading or no data
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          width: "100vw",
+          py: { xs: 6, md: 10 },
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#F3E3CC",
+          minHeight: 200,
+        }}
+      >
+        <Typography
+          sx={{
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            color: "#6A3A1E",
+            fontSize: "1.2rem",
+          }}
+        >
+          Loading gallery...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Don't render if no gallery rows with images
+  if (galleryRows.length === 0) {
+    return null;
+  }
 
   return (
     <Box
@@ -397,7 +427,7 @@ export default function Gallery() {
       ))}
 
       {/* Progress indicator for mobile */}
-      {isMobile && !isGalleryComplete && (
+      {isMobile && !isGalleryComplete && galleryRows.length > 1 && (
         <Box
           sx={{
             position: "fixed",
@@ -416,7 +446,7 @@ export default function Gallery() {
               animate={{
                 width: idx === activeRowIndex ? 24 : 8,
                 backgroundColor:
-                  idx <= activeRowIndex ? "#8B4513" : "rgba(139, 69, 19, 0.3)",
+                  idx <= activeRowIndex ? "#D9A756" : "rgba(217,167,86,0.35)",
               }}
               transition={{ duration: 0.3 }}
               sx={{
