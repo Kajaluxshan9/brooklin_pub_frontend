@@ -103,10 +103,11 @@ export default function CylinderMenuPopup() {
   // Derived value for card sizing
   const mobile = screenWidth < 768;
   const cardWidth = mobile
-    ? Math.max(120, Math.min(screenWidth * 0.6, 320)) // mobile
+    ? Math.max(100, Math.min(screenWidth * 0.5, 260)) // Smaller cards on mobile
     : Math.max(180, Math.min(screenWidth * 0.3, 300)); // desktop
   const cardHeight = cardWidth * 1.05;
-  const radius = cardWidth * 1.7;
+  // Smaller radius on mobile for tighter cylinder
+  const radius = mobile ? cardWidth * 1.2 : cardWidth * 1.7;
   const total = cards.length;
   const isCylinder = total > 2;
   const isTwo = total === 2;
@@ -154,14 +155,16 @@ export default function CylinderMenuPopup() {
     });
   }, [chefCards]);
   // intro slideshow removed
-  // Auto rotate
+  // Auto rotate - slower on mobile, disabled for small card counts
   useEffect(() => {
     if (!autoRotate || !isCylinder) return;
+    // Mobile: slower rotation speed for smoother experience
+    const rotationSpeed = isMobile ? 0.2 : 0.4;
     const interval = setInterval(() => {
-      setAngle((prev) => (prev + 0.4) % 360);
+      setAngle((prev) => (prev + rotationSpeed) % 360);
     }, 30);
     return () => clearInterval(interval);
-  }, [autoRotate]);
+  }, [autoRotate, isMobile]);
   // if not a cylinder (1-2 cards) keep angle fixed at 0
   useEffect(() => {
     if (!isCylinder) setAngle(0);
@@ -171,7 +174,8 @@ export default function CylinderMenuPopup() {
     if (!isCylinder) return;
     if (!isMobile && isInteracting && lastX !== null) {
       const deltaX = e.clientX - lastX;
-      setAngle((prev) => (prev + deltaX * 0.3) % 360);
+      // Invert rotation direction to match natural drag (drag right -> rotate to previous)
+      setAngle((prev) => (prev - deltaX * 0.3 + 360) % 360);
     }
     setLastX(e.clientX);
   };
@@ -203,7 +207,8 @@ export default function CylinderMenuPopup() {
     if (isMobile && isInteracting && lastX !== null && e.touches.length === 1) {
       const touchX = e.touches[0].clientX;
       const deltaX = touchX - lastX;
-      setAngle((prev) => (prev + deltaX * 0.4) % 360);
+      // Reduced sensitivity on mobile for smoother control
+      setAngle((prev) => (prev - deltaX * 0.25 + 360) % 360);
       setLastX(touchX);
     }
   };
@@ -237,12 +242,12 @@ export default function CylinderMenuPopup() {
         style={{
           width: "100vw",
           height: mobile
-            ? "clamp(350px, 70vh, 900px)"
+            ? "clamp(320px, 60vh, 600px)"
             : "clamp(600px, 100vh, 1200px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          perspective: "1200px",
+          perspective: mobile ? "800px" : "1200px",
           overflow: "hidden",
           position: "relative",
           touchAction: "none",
@@ -259,7 +264,7 @@ export default function CylinderMenuPopup() {
         onWheel={(e) => {
           if (!isCylinder) return;
           setAutoRotate(false);
-          setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
+          setAngle((prev) => (prev - e.deltaY * 0.2 + 360) % 360);
         }}
       >
         {/* Animated Background Layers */}
@@ -543,6 +548,7 @@ export default function CylinderMenuPopup() {
                 >
                   {/* Close Button */}
                   <button
+                    aria-label="Close special popup"
                     onClick={() => setSelectedCard(null)}
                     style={{
                       position: "absolute",
@@ -595,6 +601,7 @@ export default function CylinderMenuPopup() {
                           "rotate(0deg)";
                       }}
                     >
+                      <title>Close special popup</title>
                       <path d="M18 6L6 18" />
                       <path d="M6 6l12 12" />
                     </svg>

@@ -1,3 +1,4 @@
+import { useParams } from "react-router-dom";
 import Nav from "../components/common/Nav";
 import SpecialDisplay from "../components/special/SpecialDisplay";
 import Footer from "../components/common/Footer";
@@ -8,6 +9,30 @@ import { motion } from "framer-motion";
 import BgImage from "../assets/images/hero-bg.jpg";
 
 const Special = () => {
+  const { type } = useParams<{ type?: string }>();
+  const specialType = type || "daily";
+
+  // Generate appropriate title based on special type
+  const getTitle = () => {
+    if (specialType === "daily") return "Daily Specials";
+    if (specialType === "chef") return "Chef's Specials";
+    if (specialType === "night") return "Night Specials";
+    // Capitalize first letter for other types
+    return `${
+      specialType.charAt(0).toUpperCase() + specialType.slice(1)
+    } Specials`;
+  };
+
+  const getSubtitle = () => {
+    if (specialType === "daily")
+      return "Discover our chef's handpicked selections and daily delights";
+    if (specialType === "chef")
+      return "Exquisite creations crafted with passion by our master chef";
+    if (specialType === "night")
+      return "Evening exclusives to elevate your dining experience";
+    return "Discover our special offerings";
+  };
+
   return (
     <div>
       <Nav />
@@ -17,14 +42,14 @@ const Special = () => {
       {/* Hero Section - consistent with Landing Page */}
       <Box
         sx={{
-          minHeight: { xs: "40vh", sm: "50vh", md: "60vh" },
+          minHeight: { xs: "55vh", sm: "50vh", md: "60vh" },
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
           px: { xs: 2, sm: 4 },
-          pt: { xs: 8, sm: 6, md: 0 },
+          pt: { xs: 10, sm: 6, md: 0 },
           backgroundImage: `url(${BgImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -102,7 +127,7 @@ const Special = () => {
               lineHeight: 1.2,
             }}
           >
-            Our Specials
+            {getTitle()}
           </Typography>
 
           <Typography
@@ -122,7 +147,7 @@ const Special = () => {
               textShadow: "1px 1px 4px rgba(0,0,0,0.3)",
             }}
           >
-            Discover our chef's handpicked selections and daily delights
+            {getSubtitle()}
           </Typography>
 
           {/* Decorative line below */}

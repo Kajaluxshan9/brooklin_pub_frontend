@@ -3,14 +3,13 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
-import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
-import RestaurantMenuRoundedIcon from "@mui/icons-material/RestaurantMenuRounded";
-import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
-import LocalBarRoundedIcon from "@mui/icons-material/LocalBarRounded";
-import SportsEsportsRoundedIcon from "@mui/icons-material/SportsEsportsRounded";
-import AcUnitRoundedIcon from "@mui/icons-material/AcUnitRounded";
-import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
+// Modern, distinctive icons for bottom navigation
+import CottageRoundedIcon from "@mui/icons-material/CottageRounded";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+// Icons used inline elsewhere — legacy icons removed
+import AlternateEmailRoundedIcon from "@mui/icons-material/AlternateEmailRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { Link } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -21,7 +20,7 @@ import ListItemText from "@mui/material/ListItemText";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useApiWithCache } from "../../hooks/useApi";
 import { menuService } from "../../services/menu.service";
 import { specialsService } from "../../services/specials.service";
@@ -117,6 +116,7 @@ const Nav = () => {
     { label: "About Us", path: "/about" },
     {
       label: "Menu",
+      path: "/menu", // Default path when no dropdown items
       dropdown:
         primaryCategories && primaryCategories.length > 0
           ? primaryCategories
@@ -141,6 +141,7 @@ const Nav = () => {
   const [mobileOpenParent, setMobileOpenParent] = useState<string | null>(null);
 
   const location = useLocation();
+  const navigate = useNavigate();
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const mobileDropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -246,42 +247,7 @@ const Nav = () => {
     setOpenParent(null);
   };
 
-  const getIconFor = (label: string) => {
-    const lowerLabel = label.toLowerCase();
-
-    // Menu icons
-    if (lowerLabel.includes("menu") || lowerLabel === "main menu") {
-      return <RestaurantMenuRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
-    }
-    if (lowerLabel.includes("drink") || lowerLabel.includes("bar")) {
-      return <LocalBarRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
-    }
-
-    // Special icons
-    if (lowerLabel.includes("daily")) {
-      return (
-        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />
-      );
-    }
-    if (lowerLabel.includes("chef")) {
-      return (
-        <LocalFireDepartmentRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />
-      );
-    }
-    if (lowerLabel.includes("game")) {
-      return <SportsEsportsRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
-    }
-    if (lowerLabel.includes("seasonal")) {
-      return <AcUnitRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
-    }
-
-    // Contact icon
-    if (lowerLabel.includes("contact")) {
-      return <PhoneRoundedIcon sx={{ mr: 1, color: "#6A3A1E" }} />;
-    }
-
-    return null;
-  };
+  // Icon mapping moved inline — Removed legacy `getIconFor` helper to avoid unused variable TS6133
 
   /** ======= Desktop View ======= */
   if (!isMobileOrTablet) {
@@ -751,96 +717,103 @@ const Nav = () => {
         }}
         ref={mobileNavRef}
       >
-        {[
-          {
-            label: "Home",
-            path: "/",
-            icon: <HomeRoundedIcon fontSize="medium" />,
-          },
-          {
-            label: "About",
-            path: "/about",
-            icon: <InfoRoundedIcon fontSize="medium" />,
-          },
-          // Build bottom nav items dynamically from the `navLinks` definition so labels/paths
-          // are not duplicated or hard-coded. Start with Home + About, then append Menu/Special/Contact
-        ]
-          .concat(
-            // helper: map only Menu / Special / Contact Us
-            navLinks
-              .filter((n) =>
-                ["Menu", "Special", "Contact Us"].includes(n.label)
-              )
-              .map((n) => ({
-                label: n.label,
-                path: (n.path ||
-                  (n.dropdown && n.dropdown.length > 0
-                    ? n.dropdown[0].path
-                    : "/")) as string,
-                icon: getIconFor(n.label) || (
-                  <InfoRoundedIcon fontSize="medium" />
-                ),
-              }))
-          )
-          .map((item) => {
-            const isActive =
-              item.path === "/"
-                ? location.pathname === "/"
-                : location.pathname.startsWith(item.path || "");
+        {/* Home */}
+        <Button
+          component={Link}
+          to="/"
+          disableRipple
+          sx={{
+            minWidth: 0,
+            color: location.pathname === "/" ? "#D9A756" : "#6A3A1E",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 0,
+          }}
+        >
+          <CottageRoundedIcon fontSize="medium" />
+        </Button>
 
-            // find the navLinks entry for dropdowns
-            const linkDef = navLinks.find((n) => n.label === item.label);
+        {/* About */}
+        <Button
+          component={Link}
+          to="/about"
+          disableRipple
+          sx={{
+            minWidth: 0,
+            color: location.pathname.startsWith("/about")
+              ? "#D9A756"
+              : "#6A3A1E",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 0,
+          }}
+        >
+          <InfoOutlinedIcon fontSize="medium" />
+        </Button>
 
-            if (linkDef && linkDef.dropdown) {
-              // parent with dropdown — render only the button here; centralized dropdown will be rendered once below
-              return (
-                <Box key={item.label} sx={{ position: "relative" }}>
-                  <Button
-                    disableRipple
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMobileOpenParent((p) =>
-                        p === item.label ? null : item.label
-                      );
-                    }}
-                    sx={{
-                      minWidth: 0,
-                      color: isActive ? "#6A3A1E" : "#6A3A1E",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      p: 0,
-                      fontSize: "0.65rem",
-                    }}
-                  >
-                    {item.icon}
-                  </Button>
-                </Box>
-              );
-            }
+        {/* Menu */}
+        <Button
+          component={Link}
+          to="/menu"
+          disableRipple
+          sx={{
+            minWidth: 0,
+            color: location.pathname.startsWith("/menu")
+              ? "#D9A756"
+              : "#6A3A1E",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 0,
+          }}
+        >
+          <MenuBookRoundedIcon fontSize="medium" />
+        </Button>
 
-            return (
-              <Button
-                key={item.path}
-                component={Link}
-                to={item.path}
-                disableRipple
-                sx={{
-                  minWidth: 0,
-                  color: isActive ? "#6A3A1E" : "#6A3A1E",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 0,
-                  fontSize: "0.65rem",
-                }}
-              >
-                {item.icon}
-              </Button>
-            );
-          })}
+        {/* Special */}
+        <Button
+          component={Link}
+          to="/special/daily"
+          disableRipple
+          sx={{
+            minWidth: 0,
+            color: location.pathname.startsWith("/special")
+              ? "#D9A756"
+              : "#6A3A1E",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 0,
+          }}
+        >
+          <StarRoundedIcon fontSize="medium" />
+        </Button>
+
+        {/* Contact */}
+        <Button
+          component={Link}
+          to="/contactus"
+          disableRipple
+          sx={{
+            minWidth: 0,
+            color: location.pathname.startsWith("/contactus")
+              ? "#D9A756"
+              : "#6A3A1E",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 0,
+          }}
+        >
+          <AlternateEmailRoundedIcon fontSize="medium" />
+        </Button>
       </Box>
 
       {/* Popup dialog (used for Menu / Special) - mobile/bottom nav */}
@@ -878,9 +851,16 @@ const Nav = () => {
                 ?.dropdown?.map((d) => (
                   <ListItemButton
                     key={d.label}
-                    component={Link}
-                    to={d.path || "/"}
-                    onClick={() => setMobileOpenParent(null)}
+                    onClick={() => {
+                      const targetPath = d.path;
+                      setMobileOpenParent(null);
+                      // Navigate after closing dialog
+                      setTimeout(() => {
+                        if (targetPath) {
+                          navigate(targetPath);
+                        }
+                      }, 100);
+                    }}
                     sx={{
                       justifyContent: "center",
                       py: 1.5,

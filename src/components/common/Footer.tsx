@@ -362,8 +362,9 @@ const Footer = () => {
             >
               <IconButton
                 component={motion.a}
-                href="https://facebook.com"
+                href="https://www.facebook.com/brooklinpub"
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
@@ -382,8 +383,9 @@ const Footer = () => {
               </IconButton>
               <IconButton
                 component={motion.a}
-                href="https://instagram.com"
+                href="https://www.instagram.com/brooklinpubngrill/"
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
@@ -402,8 +404,9 @@ const Footer = () => {
               </IconButton>
               <IconButton
                 component={motion.a}
-                href="https://tiktok.com"
+                href="https://www.tiktok.com/@brooklinpubngrill"
                 target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{

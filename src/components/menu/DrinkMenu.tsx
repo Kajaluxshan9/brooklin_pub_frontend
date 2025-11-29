@@ -700,6 +700,7 @@ function MenuPanel({
       {/* Close Icon Button */}
       <button
         onClick={onClose}
+        aria-label="Close drinks popup"
         style={{
           position: "absolute",
           top: "18px",

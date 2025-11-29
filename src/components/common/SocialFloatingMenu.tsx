@@ -8,11 +8,11 @@ const SocialFloatingMenu = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const iconSize = isMobile ? "lg" : "xl";
 
-  // Social icons list
+  // Social icons list with actual Brooklin Pub links
   const allIcons = [
-    { icon: faTiktok, link: "https://www.tiktok.com/" },
-    { icon: faInstagram, link: "https://instagram.com/" },
-    { icon: faFacebook, link: "https://facebook.com/" },
+    { icon: faTiktok, link: "https://www.tiktok.com/@brooklinpubngrill" },
+    { icon: faInstagram, link: "https://www.instagram.com/brooklinpubngrill/" },
+    { icon: faFacebook, link: "https://www.facebook.com/brooklinpub" },
   ];
 
   // On mobile: show social icons on the left (remove call icon)

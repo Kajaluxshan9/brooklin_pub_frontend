@@ -11,11 +11,9 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import ContactUs from "./pages/ContactUs";
 import Special from "./pages/Special";
-// import Menu from "./pages/Menu";
-import ChefSpecial from "./pages/ChefSpecial";
-import SpecialDisplay from "./components/special/SpecialDisplay";
 import ScrollTopFab from "./components/common/ScrollTopFab";
 import MainMenu from "./pages/MainMenu";
+import Events from "./pages/Events";
 
 const theme = createTheme({
   palette: {
@@ -115,10 +113,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/contactus" element={<ContactUs />} />
-          <Route path="/special/daily" element={<Special />} />
-          <Route path="/special/night" element={<ChefSpecial />} />
-          {/* Generic special route for any type (e.g. /special/chef, /special/daily, /special/night) */}
-          <Route path="/special/:type" element={<SpecialDisplay />} />
+          <Route path="/events" element={<Events />} />
+          {/* All special routes use the Special page wrapper with SpecialDisplay */}
+          <Route path="/special/:type" element={<Special />} />
+          {/* Fallback: /special without type redirects to daily */}
+          <Route path="/special" element={<Special />} />
           {/* Generic menu route that responds to query params like ?category=<id> */}
           <Route path="/menu" element={<MainMenu />} />
         </Routes>

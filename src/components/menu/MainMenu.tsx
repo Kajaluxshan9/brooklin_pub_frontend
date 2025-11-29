@@ -1,13 +1,9 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  motion,
-  AnimatePresence,
-} from "framer-motion";
+import { motion } from "framer-motion";
 import { DrawTextSVG } from "../icons/SvgNames";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useApiWithCache } from "../../hooks/useApi";
@@ -21,8 +17,7 @@ import type {
 
 export default function MainMenu() {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [pageIndex, setPageIndex] = useState<number>(0);
-  const pageSize = 6;
+  // Removed pagination - show all items
 
   // Fetch data from backend
   const { data: categories } = useApiWithCache<MenuCategory[]>(
@@ -142,9 +137,7 @@ export default function MainMenu() {
     };
   }, [selectedItem]);
 
-  useEffect(() => {
-    setPageIndex(0);
-  }, [selectedItem]);
+  // Pagination removed - all items shown
 
   // Get selected primary category from URL
   const location = useLocation();
@@ -253,6 +246,35 @@ export default function MainMenu() {
 
   // Let content determine height; no forced effective container height
 
+  // Calculate positions for SVG connecting lines
+  const generateSvgLines = () => {
+    if (!gridConfig.containerWidth || filteredMenu.length < 2) return null;
+
+    const size = Math.max(40, Math.floor(gridConfig.cellSize || 220));
+    const gap = gridConfig.gap;
+    const cols = gridConfig.cols;
+
+    // Calculate center positions for each item
+    const cellWidth = (gridConfig.containerWidth + gap) / cols - gap;
+    const itemTotalHeight = size + 60; // Circle + label + gap
+
+    const positions: { x: number; y: number }[] = [];
+
+    for (let i = 0; i < filteredMenu.length; i++) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+
+      const x = col * (cellWidth + gap) + cellWidth / 2;
+      const y = row * (itemTotalHeight + gap) + size / 2;
+
+      positions.push({ x, y });
+    }
+
+    return positions;
+  };
+
+  const svgPositions = generateSvgLines();
+
   return (
     <div
       ref={ref}
@@ -260,11 +282,114 @@ export default function MainMenu() {
         // Allow the container to grow to fit content (no fixed heights)
         paddingTop: padding,
         paddingBottom: padding,
-        background: "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)", // Warm cream gradient
+        background:
+          "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)", // Warm cream gradient
         position: "relative",
         overflow: "visible",
       }}
     >
+      {/* SVG Decorative Connecting Lines */}
+      {svgPositions && svgPositions.length >= 2 && (
+        <motion.svg
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.3 }}
+          style={{
+            position: "absolute",
+            top: padding,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: gridConfig.containerWidth,
+            height: gridConfig.containerHeight || "100%",
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        >
+          <defs>
+            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#D9A756" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#B8923F" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#D9A756" stopOpacity="0.3" />
+            </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Horizontal lines connecting items in same row */}
+          {svgPositions.map((pos, idx) => {
+            const nextInRow = svgPositions[idx + 1];
+            const isLastInRow = (idx + 1) % gridConfig.cols === 0;
+
+            if (!nextInRow || isLastInRow) return null;
+
+            return (
+              <motion.path
+                key={`h-${idx}`}
+                d={`M ${pos.x} ${pos.y} C ${pos.x + 40} ${pos.y - 15}, ${
+                  nextInRow.x - 40
+                } ${nextInRow.y - 15}, ${nextInRow.x} ${nextInRow.y}`}
+                stroke="url(#lineGradient)"
+                strokeWidth="2"
+                fill="none"
+                strokeLinecap="round"
+                filter="url(#glow)"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1.5, delay: 0.5 + idx * 0.1 }}
+              />
+            );
+          })}
+
+          {/* Vertical/diagonal lines connecting rows */}
+          {svgPositions.map((pos, idx) => {
+            const nextRowIdx = idx + gridConfig.cols;
+            const nextRowPos = svgPositions[nextRowIdx];
+
+            if (!nextRowPos) return null;
+
+            // Create elegant curved path between rows
+            const midY = (pos.y + nextRowPos.y) / 2;
+
+            return (
+              <motion.path
+                key={`v-${idx}`}
+                d={`M ${pos.x} ${pos.y} C ${pos.x} ${midY}, ${nextRowPos.x} ${midY}, ${nextRowPos.x} ${nextRowPos.y}`}
+                stroke="url(#lineGradient)"
+                strokeWidth="2"
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray="8 4"
+                filter="url(#glow)"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1.5, delay: 0.8 + idx * 0.1 }}
+              />
+            );
+          })}
+
+          {/* Decorative dots at connection points */}
+          {svgPositions.map((pos, idx) => (
+            <motion.circle
+              key={`dot-${idx}`}
+              cx={pos.x}
+              cy={pos.y}
+              r="4"
+              fill="#D9A756"
+              opacity="0.6"
+              filter="url(#glow)"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5, delay: 1 + idx * 0.05 }}
+            />
+          ))}
+        </motion.svg>
+      )}
+
       <div
         style={{
           // Use normal flow so height is determined by content
@@ -341,25 +466,31 @@ export default function MainMenu() {
                     transition={{ duration: 0.4 }}
                   />
                   {/* Overlay for depth */}
-                  <div style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "radial-gradient(circle, transparent 50%, rgba(0,0,0,0.3) 100%)",
-                    pointerEvents: "none"
-                  }} />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background:
+                        "radial-gradient(circle, transparent 50%, rgba(0,0,0,0.3) 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
                 </div>
               </div>
 
               {/* Elegant Text Label */}
               <div
                 style={{
-                  width: Math.min(size * 1.8, gridConfig.containerWidth || 9999), // Increased from 1.4
+                  width: Math.min(
+                    size * 1.8,
+                    gridConfig.containerWidth || 9999
+                  ), // Increased from 1.4
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   pointerEvents: "none",
                   marginTop: -5,
-                  overflow: "visible" // Explicitly allow overflow
+                  overflow: "visible", // Explicitly allow overflow
                 }}
               >
                 <DrawTextSVG
@@ -375,351 +506,314 @@ export default function MainMenu() {
       </div>
 
       {/* Premium Modal - Updated to match Home Page Popup Style */}
-      <AnimatePresence>
-        {selectedItem && (
-          <Dialog
-            open={!!selectedItem}
-            onClose={() => setSelectedItem(null)}
-            fullScreen
-            sx={{ zIndex: 14000 }}
-            PaperProps={{
-              sx: {
-                background: "rgba(253,248,243,0.95)", // Warm cream backdrop
-                boxShadow: "none",
-                overflow: "hidden", // We'll handle scrolling in the content
-              },
+      {selectedItem && (
+        <Dialog
+          open={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+          fullScreen
+          sx={{ zIndex: 14000 }}
+          PaperProps={{
+            sx: {
+              background: "rgba(253,248,243,0.95)", // Warm cream backdrop
+              boxShadow: "none",
+              overflow: "hidden", // We'll handle scrolling in the content
+            },
+          }}
+        >
+          {/* Close Button - Matching SpecialDisplay style */}
+          <button
+            onClick={() => setSelectedItem(null)}
+            aria-label="Close menu popup"
+            style={{
+              position: "fixed",
+              top: "28px",
+              right: "28px",
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              backdropFilter: "blur(4px)",
+              background: "rgba(106, 58, 30, 0.9)", // Brown background
+              border: "1px solid rgba(217, 167, 86, 0.6)", // Gold border
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(106,58,30,0.3)",
+              transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
+              zIndex: 14002,
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow =
+                "0 0 22px rgba(217, 167, 86, 0.45)";
+              (e.currentTarget as HTMLElement).style.background =
+                "rgba(106, 58, 30, 1)";
+              (e.currentTarget as HTMLElement).style.borderColor = "#d9a756";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow =
+                "0 4px 12px rgba(106,58,30,0.3)";
+              (e.currentTarget as HTMLElement).style.background =
+                "rgba(106, 58, 30, 0.9)";
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "rgba(217, 167, 86, 0.6)";
             }}
           >
-            {/* Close Button - Matching SpecialDisplay style */}
-            <button
-              onClick={() => setSelectedItem(null)}
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               style={{
-                position: "fixed",
-                top: "28px",
-                right: "28px",
-                width: "50px",
-                height: "50px",
-                borderRadius: "50%",
-                backdropFilter: "blur(4px)",
-                background: "rgba(106, 58, 30, 0.9)", // Brown background
-                border: "1px solid rgba(217, 167, 86, 0.6)", // Gold border
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(106,58,30,0.3)",
-                transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
-                zIndex: 14002,
+                transition: "0.35s",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 0 22px rgba(217, 167, 86, 0.45)";
-                (e.currentTarget as HTMLElement).style.background =
-                  "rgba(106, 58, 30, 1)";
-                (e.currentTarget as HTMLElement).style.borderColor = "#d9a756";
+                (e.currentTarget as SVGElement).style.transform =
+                  "rotate(90deg)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 4px 12px rgba(106,58,30,0.3)";
-                (e.currentTarget as HTMLElement).style.background =
-                  "rgba(106, 58, 30, 0.9)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(217, 167, 86, 0.6)";
+                (e.currentTarget as SVGElement).style.transform =
+                  "rotate(0deg)";
               }}
             >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  transition: "0.35s",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as SVGElement).style.transform =
-                    "rotate(90deg)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as SVGElement).style.transform =
-                    "rotate(0deg)";
-                }}
-              >
-                <path d="M18 6L6 18" />
-                <path d="M6 6l12 12" />
-              </svg>
-            </button>
+              <title>Close menu popup</title>
+              <path d="M18 6L6 18" />
+              <path d="M6 6l12 12" />
+            </svg>
+          </button>
 
-            <DialogContent
-              sx={{
-                p: 0,
-                background: "transparent",
+          <DialogContent
+            sx={{
+              p: 0,
+              background: "transparent",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-start",
+              height: "100%",
+              overflowY: "auto",
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                width: "100%",
+                minHeight: "100%",
                 display: "flex",
                 justifyContent: "center",
-                alignItems: "center",
-                height: "100%"
+                alignItems: "flex-start",
+                padding: "100px 16px 60px", // More top padding for close button on mobile
               }}
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  overflowY: "auto", // Allow scrolling if content is tall
-                  padding: "80px 20px 40px", // Top padding for close button
+              <Box
+                sx={{
+                  position: "relative",
+                  width: "min(1000px, 95vw)",
+                  bgcolor: "rgba(255, 253, 251, 0.98)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: { xs: "16px", md: "24px" },
+                  border: "1px solid rgba(106, 58, 30, 0.15)",
+                  boxShadow: "0 25px 50px -12px rgba(106, 58, 30, 0.25)",
+                  p: { xs: 2, sm: 3, md: 6 },
+                  maxHeight: "none",
                 }}
               >
+                {/* Category Header - Prominent and Sticky */}
                 <Box
                   sx={{
-                    position: "relative",
-                    width: "min(1000px, 95vw)",
-                    // No background on the container itself to keep the "overlay" feel,
-                    // or a very subtle one if needed for readability.
-                    // Let's add a subtle glass effect for the content area
-                    bgcolor: "rgba(255, 253, 251, 0.95)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: "24px",
-                    border: "1px solid rgba(106, 58, 30, 0.15)",
-                    boxShadow: "0 25px 50px -12px rgba(106, 58, 30, 0.25)",
-                    p: { xs: 3, md: 6 },
+                    position: "sticky",
+                    top: 0,
+                    bgcolor: "rgba(255, 253, 251, 0.98)",
+                    zIndex: 10,
+                    pb: 2,
+                    mb: 3,
+                    borderBottom: "2px solid rgba(217, 167, 86, 0.5)",
                   }}
                 >
-                  {/* Header */}
                   <Typography
                     variant="h3"
                     align="center"
                     sx={{
                       fontFamily: "'Cormorant Garamond', serif",
                       color: "#6A3A1E",
-                      mb: 5,
-                      fontWeight: 600,
-                      letterSpacing: "0.05em",
+                      fontWeight: 700,
+                      fontSize: { xs: "1.75rem", sm: "2rem", md: "2.5rem" },
+                      letterSpacing: "0.08em",
                       textTransform: "uppercase",
-                      borderBottom: "1px solid rgba(106, 58, 30, 0.2)",
-                      pb: 2,
-                      display: "inline-block",
-                      width: "100%"
+                      pt: 1,
                     }}
                   >
                     {selectedItem.name}
                   </Typography>
+                  <Typography
+                    variant="body2"
+                    align="center"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "rgba(106, 58, 30, 0.6)",
+                      fontSize: { xs: "0.8rem", md: "0.9rem" },
+                      mt: 0.5,
+                    }}
+                  >
+                    {selectedItem.menuItems?.length || 0} items
+                  </Typography>
+                </Box>
 
-                  {/* Menu Items List */}
-                  <AnimatePresence mode="wait">
-                    <Box
-                      key={pageIndex}
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                        gap: 3
-                      }}
-                    >
-                      {(
-                        selectedItem?.menuItems?.slice(
-                          pageIndex * pageSize,
-                          (pageIndex + 1) * pageSize
-                        ) || []
-                      ).map((mi: DisplayMenuItem, i: number) => (
-                        <motion.div
-                          key={`${pageIndex}-${i}`}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.05 }}
+                {/* Menu Items List - All Items (No Pagination) */}
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    gap: { xs: 2, md: 3 },
+                  }}
+                >
+                  {(selectedItem?.menuItems || []).map(
+                    (mi: DisplayMenuItem, i: number) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: Math.min(i * 0.03, 0.5) }}
+                      >
+                        <Box
+                          sx={{
+                            p: { xs: 2, md: 2.5 },
+                            height: "100%",
+                            borderRadius: "12px",
+                            background: "rgba(245, 235, 224, 0.6)",
+                            border: "1px solid rgba(106, 58, 30, 0.1)",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                              background: "rgba(217, 167, 86, 0.15)",
+                              borderColor: "rgba(106, 58, 30, 0.25)",
+                              transform: "translateY(-2px)",
+                            },
+                          }}
                         >
                           <Box
                             sx={{
-                              p: 2.5,
-                              height: "100%",
-                              borderRadius: "12px",
-                              background: "rgba(245, 235, 224, 0.6)",
-                              border: "1px solid rgba(106, 58, 30, 0.1)",
-                              transition: "all 0.3s ease",
-                              "&:hover": {
-                                background: "rgba(217, 167, 86, 0.15)",
-                                borderColor: "rgba(106, 58, 30, 0.25)",
-                                transform: "translateY(-2px)"
-                              },
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "baseline",
+                              mb: 1,
+                              flexWrap: "wrap",
+                              gap: 1,
                             }}
                           >
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 1 }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                fontFamily: "'Cormorant Garamond', serif",
+                                fontWeight: 700,
+                                color: "#4A2C17",
+                                fontSize: { xs: "1.1rem", md: "1.4rem" },
+                              }}
+                            >
+                              {mi.name}
+                            </Typography>
+                            {!mi.hasMeasurements && mi.price && (
                               <Typography
                                 variant="h6"
                                 sx={{
                                   fontFamily: "'Cormorant Garamond', serif",
+                                  color: "#8B5A2B",
                                   fontWeight: 700,
-                                  color: "#4A2C17", // Dark brown
-                                  fontSize: "1.4rem"
+                                  fontSize: { xs: "1rem", md: "1.2rem" },
                                 }}
                               >
-                                {mi.name}
+                                {mi.price}
                               </Typography>
-                              {!mi.hasMeasurements && mi.price && (
-                                <Typography
-                                  variant="h6"
-                                  sx={{
-                                    fontFamily: "'Cormorant Garamond', serif",
-                                    color: "#8B5A2B",
-                                    fontWeight: 700,
-                                    fontSize: "1.2rem"
-                                  }}
-                                >
-                                  {mi.price}
-                                </Typography>
-                              )}
-                            </Box>
-
-                            {mi.desc && (
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  color: "rgba(74, 44, 23, 0.8)",
-                                  fontFamily: "'Inter', sans-serif",
-                                  fontSize: "0.95rem",
-                                  lineHeight: 1.6,
-                                  mb: 2
-                                }}
-                              >
-                                {mi.desc}
-                              </Typography>
-                            )}
-
-                            {/* Measurements */}
-                            {mi.hasMeasurements && mi.measurements && (
-                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: "auto" }}>
-                                {mi.measurements
-                                  .filter((m) => m.price > 0)
-                                  .sort((a, b) => a.sortOrder - b.sortOrder)
-                                  .map((m, idx) => (
-                                    <Box
-                                      key={idx}
-                                      sx={{
-                                        px: 1.5,
-                                        py: 0.5,
-                                        borderRadius: "20px",
-                                        border: "1px solid rgba(106, 58, 30, 0.25)",
-                                        bgcolor: "rgba(217, 167, 86, 0.15)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 1
-                                      }}
-                                    >
-                                      <Typography variant="caption" sx={{ color: "#6A3A1E", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                                        {m.measurementTypeEntity?.name || m.measurementType?.name || "Size"}
-                                      </Typography>
-                                      <Box sx={{ width: 1, height: 12, bgcolor: "rgba(106, 58, 30, 0.25)" }} />
-                                      <Typography variant="caption" sx={{ color: "#4A2C17" }}>
-                                        ${m.price.toFixed(2)}
-                                      </Typography>
-                                    </Box>
-                                  ))}
-                              </Box>
                             )}
                           </Box>
-                        </motion.div>
-                      ))}
-                    </Box>
-                  </AnimatePresence>
 
-                  {/* Pagination */}
-                  {(selectedItem?.menuItems?.length || 0) > pageSize && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        mt: 6,
-                        position: "relative",
-                        width: "100%",
-                        minHeight: "60px"
-                      }}
-                    >
-                      {/* Left Arrow */}
-                      <IconButton
-                        onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
-                        disabled={pageIndex === 0}
-                        sx={{
-                          position: "absolute",
-                          left: 0,
-                          color: "#6A3A1E",
-                          opacity: pageIndex === 0 ? 0.3 : 1,
-                          border: "1px solid rgba(106, 58, 30, 0.3)",
-                          borderRadius: "12px",
-                          width: "48px",
-                          height: "48px",
-                          background: "rgba(217, 167, 86, 0.15)",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            background: "rgba(217, 167, 86, 0.3)",
-                            transform: "translateX(-2px)"
-                          }
-                        }}
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M15 18l-6-6 6-6" />
-                        </svg>
-                      </IconButton>
+                          {mi.desc && (
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "rgba(74, 44, 23, 0.8)",
+                                fontFamily: "'Inter', sans-serif",
+                                fontSize: { xs: "0.85rem", md: "0.95rem" },
+                                lineHeight: 1.6,
+                                mb: mi.hasMeasurements ? 2 : 0,
+                              }}
+                            >
+                              {mi.desc}
+                            </Typography>
+                          )}
 
-                      {/* Dots */}
-                      <Box sx={{ display: "flex", gap: 1.5 }}>
-                        {Array.from({ length: Math.ceil((selectedItem.menuItems.length) / pageSize) }).map((_, i) => (
-                          <motion.div
-                            key={i}
-                            onClick={() => setPageIndex(i)}
-                            animate={{
-                              width: pageIndex === i ? 24 : 10,
-                              backgroundColor: pageIndex === i ? "#6A3A1E" : "rgba(106, 58, 30, 0.25)"
-                            }}
-                            style={{
-                              height: 10,
-                              borderRadius: "10px",
-                              cursor: "pointer"
-                            }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          />
-                        ))}
-                      </Box>
-
-                      {/* Right Arrow */}
-                      <IconButton
-                        onClick={() => setPageIndex(Math.min(Math.ceil(selectedItem.menuItems.length / pageSize) - 1, pageIndex + 1))}
-                        disabled={pageIndex === Math.ceil(selectedItem.menuItems.length / pageSize) - 1}
-                        sx={{
-                          position: "absolute",
-                          right: 0,
-                          color: "#6A3A1E",
-                          opacity: pageIndex === Math.ceil(selectedItem.menuItems.length / pageSize) - 1 ? 0.3 : 1,
-                          border: "1px solid rgba(106, 58, 30, 0.3)",
-                          borderRadius: "12px",
-                          width: "48px",
-                          height: "48px",
-                          background: "rgba(217, 167, 86, 0.15)",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            background: "rgba(217, 167, 86, 0.3)",
-                            transform: "translateX(2px)"
-                          }
-                        }}
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18l6-6-6-6" />
-                        </svg>
-                      </IconButton>
-                    </Box>
+                          {/* Measurements */}
+                          {mi.hasMeasurements && mi.measurements && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 1,
+                                mt: "auto",
+                              }}
+                            >
+                              {mi.measurements
+                                .filter((m) => m.price > 0)
+                                .sort((a, b) => a.sortOrder - b.sortOrder)
+                                .map((m, idx) => (
+                                  <Box
+                                    key={idx}
+                                    sx={{
+                                      px: 1.5,
+                                      py: 0.5,
+                                      borderRadius: "20px",
+                                      border:
+                                        "1px solid rgba(106, 58, 30, 0.25)",
+                                      bgcolor: "rgba(217, 167, 86, 0.15)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        color: "#6A3A1E",
+                                        fontWeight: 600,
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.05em",
+                                      }}
+                                    >
+                                      {m.measurementTypeEntity?.name ||
+                                        m.measurementType?.name ||
+                                        "Size"}
+                                    </Typography>
+                                    <Box
+                                      sx={{
+                                        width: 1,
+                                        height: 12,
+                                        bgcolor: "rgba(106, 58, 30, 0.25)",
+                                      }}
+                                    />
+                                    <Typography
+                                      variant="caption"
+                                      sx={{ color: "#4A2C17" }}
+                                    >
+                                      ${m.price.toFixed(2)}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                            </Box>
+                          )}
+                        </Box>
+                      </motion.div>
+                    )
                   )}
                 </Box>
-              </motion.div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </AnimatePresence>
+              </Box>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

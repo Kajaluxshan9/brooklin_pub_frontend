@@ -18,14 +18,14 @@ const MainMenuPage = () => {
       {/* Hero Section - consistent with Landing Page */}
       <Box
         sx={{
-          minHeight: { xs: "40vh", sm: "50vh", md: "60vh" },
+          minHeight: { xs: "55vh", sm: "55vh", md: "60vh" },
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
           px: { xs: 2, sm: 4 },
-          pt: { xs: 8, sm: 6, md: 0 },
+          pt: { xs: 10, sm: 6, md: 0 },
           backgroundImage: `url(${BgImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
