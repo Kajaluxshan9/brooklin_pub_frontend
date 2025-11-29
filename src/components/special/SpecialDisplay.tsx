@@ -247,7 +247,7 @@ export default function CylinderMenuPopup() {
           position: "relative",
           touchAction: "none",
           userSelect: "none",
-          background: "#1a0a0f",
+          background: "#FDF8F3",
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -294,10 +294,10 @@ export default function CylinderMenuPopup() {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(circle at 20% 30%, rgba(139, 38, 53, 0.4) 0%, transparent 50%), " +
-              "radial-gradient(circle at 80% 70%, rgba(107, 62, 30, 0.35) 0%, transparent 50%), " +
-              "radial-gradient(circle at 50% 50%, rgba(74, 20, 25, 0.3) 0%, transparent 60%), " +
-              "linear-gradient(135deg, #2a1015 0%, #1a0a0f 50%, #2d1a10 100%)",
+              "radial-gradient(circle at 20% 30%, rgba(217, 167, 86, 0.15) 0%, transparent 50%), " +
+              "radial-gradient(circle at 80% 70%, rgba(139, 90, 43, 0.12) 0%, transparent 50%), " +
+              "radial-gradient(circle at 50% 50%, rgba(232, 213, 196, 0.4) 0%, transparent 60%), " +
+              "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
             zIndex: 1,
           }}
         />
@@ -312,7 +312,7 @@ export default function CylinderMenuPopup() {
             height: "400px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(220, 100, 80, 0.25) 0%, rgba(180, 60, 50, 0.1) 40%, transparent 70%)",
+              "radial-gradient(circle, rgba(217, 167, 86, 0.25) 0%, rgba(184, 134, 74, 0.1) 40%, transparent 70%)",
             filter: "blur(60px)",
             animation: "float1 20s ease-in-out infinite",
             zIndex: 2,
@@ -327,7 +327,7 @@ export default function CylinderMenuPopup() {
             height: "350px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(200, 120, 60, 0.22) 0%, rgba(160, 90, 40, 0.08) 40%, transparent 70%)",
+              "radial-gradient(circle, rgba(139, 90, 43, 0.2) 0%, rgba(106, 58, 30, 0.08) 40%, transparent 70%)",
             filter: "blur(70px)",
             animation: "float2 25s ease-in-out infinite",
             zIndex: 2,
@@ -342,7 +342,7 @@ export default function CylinderMenuPopup() {
             height: "300px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(160, 50, 70, 0.2) 0%, rgba(120, 30, 50, 0.08) 40%, transparent 70%)",
+              "radial-gradient(circle, rgba(217, 167, 86, 0.18) 0%, rgba(184, 134, 74, 0.06) 40%, transparent 70%)",
             filter: "blur(65px)",
             animation: "float3 22s ease-in-out infinite",
             zIndex: 2,
@@ -357,7 +357,7 @@ export default function CylinderMenuPopup() {
             height: "280px",
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(180, 80, 50, 0.18) 0%, rgba(140, 60, 30, 0.06) 40%, transparent 70%)",
+              "radial-gradient(circle, rgba(232, 213, 196, 0.35) 0%, rgba(245, 235, 224, 0.15) 40%, transparent 70%)",
             filter: "blur(55px)",
             animation: "float4 18s ease-in-out infinite",
             zIndex: 2,
@@ -370,7 +370,7 @@ export default function CylinderMenuPopup() {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse at center, transparent 0%, rgba(26, 10, 15, 0.4) 70%, rgba(26, 10, 15, 0.8) 100%)",
+              "radial-gradient(ellipse at center, transparent 0%, rgba(253, 248, 243, 0.3) 70%, rgba(253, 248, 243, 0.6) 100%)",
             zIndex: 3,
           }}
         />
@@ -381,7 +381,7 @@ export default function CylinderMenuPopup() {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.3) 100%)",
+              "radial-gradient(circle at center, transparent 40%, rgba(232, 213, 196, 0.25) 100%)",
             zIndex: 4,
             pointerEvents: "none",
           }}
@@ -396,17 +396,17 @@ export default function CylinderMenuPopup() {
             width: isCylinder
               ? `${cardWidth}px`
               : isTwo
-                ? isMobile
-                  ? "90%"
-                  : `${cardWidth * 2 + 16}px`
-                : "min(1100px, 92%)",
+              ? isMobile
+                ? "90%"
+                : `${cardWidth * 2 + 16}px`
+              : "min(1100px, 92%)",
             height: isCylinder
               ? `${cardHeight}px`
               : isTwo
-                ? isMobile
-                  ? "auto"
-                  : `${cardHeight}px`
-                : "auto",
+              ? isMobile
+                ? "auto"
+                : `${cardHeight}px`
+              : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
             marginTop: "60px",
@@ -464,8 +464,8 @@ export default function CylinderMenuPopup() {
                       ? "92%"
                       : `${cardWidth}px`
                     : isMobile
-                      ? "92%"
-                      : `${cardWidth}px`;
+                    ? "92%"
+                    : `${cardWidth}px`;
                   const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
                   return {
                     ...base,
@@ -482,11 +482,22 @@ export default function CylinderMenuPopup() {
                     fontSize: "1.1rem",
                     fontWeight: "700",
                     marginBottom: "0.2rem",
+                    color: "#fff",
+                    textShadow: "0 2px 8px rgba(0,0,0,0.8)",
                   }}
                 >
                   {card.title}
                 </h2>
-                <p style={{ fontSize: "0.9rem", opacity: 0.9 }}>{card.desc}</p>
+                <p
+                  style={{
+                    fontSize: "0.9rem",
+                    opacity: 0.95,
+                    color: "#fff",
+                    textShadow: "0 2px 6px rgba(0,0,0,0.7)",
+                  }}
+                >
+                  {card.desc}
+                </p>
               </motion.div>
             );
           })}
@@ -507,7 +518,7 @@ export default function CylinderMenuPopup() {
                   left: 0,
                   width: "100vw",
                   height: "100vh",
-                  background: "rgba(0,0,0,0.9)",
+                  background: "rgba(253,248,243,0.95)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -541,26 +552,26 @@ export default function CylinderMenuPopup() {
                       height: "50px",
                       borderRadius: "50%",
                       backdropFilter: "blur(14px)",
-                      background: "rgba(255,255,255,0.08)",
-                      border: "1px solid rgba(255,255,255,0.3)",
+                      background: "rgba(106, 58, 30, 0.9)",
+                      border: "1px solid rgba(217, 167, 86, 0.5)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      boxShadow: "0 0 0 rgba(255,255,255,0.4)",
+                      boxShadow: "0 4px 12px rgba(106,58,30,0.3)",
                       transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
                     }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLElement).style.boxShadow =
-                        "0 0 22px rgba(255,255,255,0.45)";
+                        "0 0 22px rgba(217,167,86,0.45)";
                       (e.currentTarget as HTMLElement).style.background =
-                        "rgba(255,255,255,0.16)";
+                        "rgba(106, 58, 30, 1)";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.boxShadow =
-                        "0 0 0 rgba(255,255,255,0.4)";
+                        "0 4px 12px rgba(106,58,30,0.3)";
                       (e.currentTarget as HTMLElement).style.background =
-                        "rgba(255,255,255,0.08)";
+                        "rgba(106, 58, 30, 0.9)";
                     }}
                   >
                     <svg
@@ -605,6 +616,6 @@ export default function CylinderMenuPopup() {
             document.body
           )}
       </div>
-    </div >
+    </div>
   );
 }

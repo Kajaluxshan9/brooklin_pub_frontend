@@ -76,7 +76,7 @@ button:focus-visible {
   --cream-light: #F3E3CC;
   --wine-red: #8A2A2A;
   --olive-green: #7C8B48;
-  --brown-gradient: linear-gradient(to top, #ffffff, #D9A756);
+  --brown-gradient: linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%);
 
   /* Typography - Premium Font System */
   --font-heading: "Cormorant Garamond", "Georgia", serif;

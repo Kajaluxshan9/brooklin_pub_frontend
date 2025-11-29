@@ -5,6 +5,8 @@ import {
   Link as MUILink,
   Container,
   IconButton,
+  Button,
+  Divider,
 } from "@mui/material";
 import { useApiWithCache } from "../../hooks/useApi";
 import { openingHoursService } from "../../services/opening-hours.service";
@@ -14,19 +16,34 @@ import EmailIcon from "@mui/icons-material/Email";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
+import { SvgIcon } from "@mui/material";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { motion } from "framer-motion";
 import moment from "moment-timezone";
+import { Link } from "react-router-dom";
 
 // Toronto timezone for accurate open/close status
 const TIMEZONE = "America/Toronto";
 
+// TikTok Icon Component
+const TikTokIcon = () => (
+  <SvgIcon viewBox="0 0 24 24" sx={{ fontSize: 22 }}>
+    <path
+      d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"
+      fill="currentColor"
+    />
+  </SvgIcon>
+);
+
 const Footer = () => {
   const quickLinks = [
-    { label: "Home", to: "/" },
-    { label: "About", to: "/about" },
-    { label: "Menu", to: "/menu" },
-    { label: "Specials", to: "/special/daily" },
-    { label: "Contact", to: "/contactus" },
+    { label: "Home", to: "/", icon: "🏠" },
+    { label: "Our Story", to: "/about", icon: "📖" },
+    { label: "Menu", to: "/menu", icon: "🍽️" },
+    { label: "Daily Specials", to: "/special/daily", icon: "⭐" },
+    { label: "Events", to: "/events", icon: "🎉" },
+    { label: "Contact Us", to: "/contactus", icon: "💬" },
   ];
 
   // Fetch opening hours from backend (cached for 5 mins)
@@ -224,15 +241,32 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        background: "linear-gradient(180deg, #FAF7F2 0%, #F5EFE6 100%)",
-        color: "#3D2914",
-        pt: { xs: 5, md: 6 },
-        pb: { xs: 3, md: 4 },
+        background: "linear-gradient(180deg, #6A3A1E 0%, #4A2C17 100%)",
+        color: "#F5EFE6",
         mt: "auto",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <Container maxWidth="lg">
-        {/* Main Footer Content */}
+      {/* Decorative Background Pattern */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.03,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D9A756' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Main Footer Content */}
+      <Container
+        maxWidth="lg"
+        sx={{ pt: { xs: 5, md: 6 }, pb: { xs: 4, md: 5 } }}
+      >
         <Box
           component={motion.div}
           variants={containerVariants}
@@ -244,24 +278,23 @@ const Footer = () => {
             gridTemplateColumns: {
               xs: "1fr",
               sm: "1fr 1fr",
-              md: "1fr 1.5fr 1fr",
+              lg: "1.2fr 1fr 1fr 1fr",
             },
             gap: { xs: 4, md: 5 },
-            mb: 4,
           }}
         >
-          {/* Brand + Contact Section */}
+          {/* Brand Section */}
           <Box
             component={motion.div}
             variants={itemVariants}
-            sx={{ textAlign: { xs: "center", md: "left" } }}
+            sx={{ textAlign: { xs: "center", lg: "left" } }}
           >
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1.5,
-                justifyContent: { xs: "center", md: "flex-start" },
+                gap: 2,
+                justifyContent: { xs: "center", lg: "flex-start" },
                 mb: 2.5,
               }}
             >
@@ -272,8 +305,9 @@ const Footer = () => {
                 src="/brooklinpub-logo.png"
                 alt="Brooklin Pub"
                 sx={{
-                  width: 60,
+                  width: 70,
                   height: "auto",
+                  filter: "brightness(1.1)",
                 }}
               />
               <Box>
@@ -282,9 +316,9 @@ const Footer = () => {
                   sx={{
                     fontFamily: '"Cormorant Garamond", Georgia, serif',
                     fontWeight: 700,
-                    letterSpacing: 0.5,
-                    color: "#3C1F0E",
-                    fontSize: "1.1rem",
+                    letterSpacing: 1,
+                    color: "#F5EFE6",
+                    fontSize: "1.3rem",
                     lineHeight: 1.2,
                   }}
                 >
@@ -293,9 +327,9 @@ const Footer = () => {
                 <Typography
                   sx={{
                     color: "#D9A756",
-                    fontSize: "0.7rem",
+                    fontSize: "0.8rem",
                     fontWeight: 600,
-                    letterSpacing: 1.5,
+                    letterSpacing: 2,
                     textTransform: "uppercase",
                   }}
                 >
@@ -304,167 +338,176 @@ const Footer = () => {
               </Box>
             </Box>
 
-            {/* Contact Info */}
             <Typography
               sx={{
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontWeight: 700,
-                fontSize: "1.1rem",
-                color: "#3C1F0E",
-                mb: 1.5,
-                mt: 2,
-                letterSpacing: 0.5,
+                color: "rgba(245, 239, 230, 0.8)",
+                fontSize: "0.9rem",
+                lineHeight: 1.7,
+                mb: 2.5,
+                maxWidth: 280,
+                mx: { xs: "auto", lg: 0 },
               }}
             >
-              CONTACT US
+              Your neighborhood pub serving delicious food, refreshing drinks,
+              and good times since the heart of Brooklin.
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box
-                component={motion.a}
-                href="https://maps.google.com/?q=15+Baldwin+St,+Whitby,+ON+L1M+1A2"
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ x: 3 }}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  justifyContent: { xs: "center", md: "flex-start" },
-                  textDecoration: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <LocationOnIcon sx={{ fontSize: 16, color: "#D9A756" }} />
-                <Typography
-                  sx={{
-                    color: "#6A3A1E",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    "&:hover": { color: "#D9A756" },
-                  }}
-                >
-                  15 Baldwin St, Whitby, ON
-                </Typography>
-              </Box>
-
-              <Box
-                component={motion.a}
-                href="tel:+19054253055"
-                whileHover={{ x: 3 }}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  justifyContent: { xs: "center", md: "flex-start" },
-                  textDecoration: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <PhoneIcon sx={{ fontSize: 16, color: "#D9A756" }} />
-                <Typography
-                  sx={{
-                    color: "#6A3A1E",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    "&:hover": { color: "#D9A756" },
-                  }}
-                >
-                  (905) 425-3055
-                </Typography>
-              </Box>
-
-              <Box
-                component={motion.a}
-                href="mailto:brooklinpub@gmail.com"
-                whileHover={{ x: 3 }}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  justifyContent: { xs: "center", md: "flex-start" },
-                  textDecoration: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <EmailIcon sx={{ fontSize: 16, color: "#D9A756" }} />
-                <Typography
-                  sx={{
-                    color: "#6A3A1E",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    "&:hover": { color: "#D9A756" },
-                  }}
-                >
-                  brooklinpub@gmail.com
-                </Typography>
-              </Box>
-            </Box>
 
             {/* Social Icons */}
             <Box
               sx={{
                 display: "flex",
-                gap: 1,
-                mt: 2.5,
-                justifyContent: { xs: "center", md: "flex-start" },
+                gap: 1.5,
+                justifyContent: { xs: "center", lg: "flex-start" },
               }}
             >
               <IconButton
                 component={motion.a}
                 href="https://facebook.com"
                 target="_blank"
-                whileHover={{ scale: 1.1, y: -2 }}
+                whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
-                  bgcolor: "#D9A756",
-                  color: "#fff",
-                  width: 36,
-                  height: 36,
-                  "&:hover": { bgcolor: "#6B3410" },
+                  bgcolor: "rgba(217, 167, 86, 0.15)",
+                  color: "#D9A756",
+                  width: 44,
+                  height: 44,
+                  border: "1px solid rgba(217, 167, 86, 0.3)",
+                  "&:hover": {
+                    bgcolor: "#D9A756",
+                    color: "#3C1F0E",
+                  },
                 }}
               >
-                <FacebookIcon sx={{ fontSize: 18 }} />
+                <FacebookIcon sx={{ fontSize: 22 }} />
               </IconButton>
               <IconButton
                 component={motion.a}
                 href="https://instagram.com"
                 target="_blank"
-                whileHover={{ scale: 1.1, y: -2 }}
+                whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
-                  bgcolor: "#D9A756",
-                  color: "#fff",
-                  width: 36,
-                  height: 36,
-                  "&:hover": { bgcolor: "#6B3410" },
+                  bgcolor: "rgba(217, 167, 86, 0.15)",
+                  color: "#D9A756",
+                  width: 44,
+                  height: 44,
+                  border: "1px solid rgba(217, 167, 86, 0.3)",
+                  "&:hover": {
+                    bgcolor: "#D9A756",
+                    color: "#3C1F0E",
+                  },
                 }}
               >
-                <InstagramIcon sx={{ fontSize: 18 }} />
+                <InstagramIcon sx={{ fontSize: 22 }} />
+              </IconButton>
+              <IconButton
+                component={motion.a}
+                href="https://tiktok.com"
+                target="_blank"
+                whileHover={{ scale: 1.15, y: -3 }}
+                whileTap={{ scale: 0.95 }}
+                sx={{
+                  bgcolor: "rgba(217, 167, 86, 0.15)",
+                  color: "#D9A756",
+                  width: 44,
+                  height: 44,
+                  border: "1px solid rgba(217, 167, 86, 0.3)",
+                  "&:hover": {
+                    bgcolor: "#D9A756",
+                    color: "#3C1F0E",
+                  },
+                }}
+              >
+                <TikTokIcon />
               </IconButton>
             </Box>
           </Box>
 
-          {/* Opening Hours Section - Center */}
+          {/* Quick Links Section */}
           <Box
             component={motion.div}
             variants={itemVariants}
-            sx={{
-              textAlign: "center",
-              px: { xs: 0, md: 3 },
-            }}
+            sx={{ textAlign: { xs: "center", sm: "left" } }}
           >
             <Typography
               sx={{
                 fontFamily: '"Cormorant Garamond", serif',
                 fontWeight: 700,
-                fontSize: "1.1rem",
-                color: "#3C1F0E",
-                mb: 0.5,
-                letterSpacing: 0.5,
+                fontSize: "1.15rem",
+                color: "#D9A756",
+                mb: 2.5,
+                letterSpacing: 1,
+                textTransform: "uppercase",
               }}
             >
-              OPENING HOURS
+              Explore
             </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.3,
+                alignItems: { xs: "center", sm: "flex-start" },
+              }}
+            >
+              {quickLinks.map((link) => (
+                <MUILink
+                  key={link.to}
+                  component={Link}
+                  to={link.to}
+                  underline="none"
+                  sx={{
+                    color: "rgba(245, 239, 230, 0.85)",
+                    fontSize: "0.95rem",
+                    fontWeight: 500,
+                    transition: "all 0.2s ease",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1,
+                    "&:hover": {
+                      color: "#D9A756",
+                      transform: "translateX(5px)",
+                    },
+                  }}
+                >
+                  <Box component="span" sx={{ fontSize: "0.85rem" }}>
+                    {link.icon}
+                  </Box>
+                  {link.label}
+                </MUILink>
+              ))}
+            </Box>
+          </Box>
+
+          {/* Opening Hours Section */}
+          <Box
+            component={motion.div}
+            variants={itemVariants}
+            sx={{ textAlign: { xs: "center", sm: "left" } }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                mb: 2.5,
+                justifyContent: { xs: "center", sm: "flex-start" },
+              }}
+            >
+              <AccessTimeIcon sx={{ fontSize: 20, color: "#D9A756" }} />
+              <Typography
+                sx={{
+                  fontFamily: '"Cormorant Garamond", serif',
+                  fontWeight: 700,
+                  fontSize: "1.15rem",
+                  color: "#D9A756",
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                }}
+              >
+                Hours
+              </Typography>
+            </Box>
 
             {/* Open/Closed Status Badge */}
             {openingHoursData && openingHoursData.length > 0 && (
@@ -477,22 +520,22 @@ const Footer = () => {
                   alignItems: "center",
                   gap: 0.8,
                   px: 2,
-                  py: 0.5,
+                  py: 0.6,
                   borderRadius: "20px",
                   bgcolor: currentStatus.isOpen
-                    ? "rgba(34, 139, 34, 0.1)"
-                    : "rgba(180, 83, 9, 0.1)",
+                    ? "rgba(34, 197, 94, 0.15)"
+                    : "rgba(239, 68, 68, 0.15)",
                   border: `1px solid ${
                     currentStatus.isOpen
-                      ? "rgba(34, 139, 34, 0.3)"
-                      : "rgba(180, 83, 9, 0.3)"
+                      ? "rgba(34, 197, 94, 0.4)"
+                      : "rgba(239, 68, 68, 0.4)"
                   }`,
                   mb: 2,
                 }}
               >
                 <motion.div
                   animate={{
-                    scale: currentStatus.isOpen ? [1, 1.2, 1] : 1,
+                    scale: currentStatus.isOpen ? [1, 1.3, 1] : 1,
                   }}
                   transition={{
                     duration: 1.5,
@@ -504,18 +547,15 @@ const Footer = () => {
                     height: 8,
                     borderRadius: "50%",
                     backgroundColor: currentStatus.isOpen
-                      ? "#228B22"
-                      : "#B45309",
-                    boxShadow: currentStatus.isOpen
-                      ? "0 0 8px rgba(34, 139, 34, 0.5)"
-                      : "0 0 8px rgba(180, 83, 9, 0.5)",
+                      ? "#22C55E"
+                      : "#EF4444",
                   }}
                 />
                 <Typography
                   sx={{
-                    fontSize: "0.75rem",
+                    fontSize: "0.8rem",
                     fontWeight: 700,
-                    color: currentStatus.isOpen ? "#228B22" : "#B45309",
+                    color: currentStatus.isOpen ? "#22C55E" : "#EF4444",
                     textTransform: "uppercase",
                     letterSpacing: 0.5,
                   }}
@@ -525,31 +565,21 @@ const Footer = () => {
               </Box>
             )}
 
-            {/* Hours List */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.8,
-                maxWidth: 320,
-                mx: "auto",
-              }}
-            >
+            {/* Hours List - Compact */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.6 }}>
               {sortedHours.length > 0 ? (
                 sortedHours.map((hours, index) => {
                   const isTodayRow = isToday(hours.dayOfWeek);
                   const dayName =
                     dayAbbr[hours.dayOfWeek.toLowerCase()] ||
                     hours.dayOfWeek.slice(0, 3).toUpperCase();
-                  // Check if day is closed (isOpen=false or isActive=false or no times set)
                   const isClosed =
                     !hours.isOpen ||
                     !hours.isActive ||
                     !hours.openTime ||
                     !hours.closeTime;
-                  // Check if overnight hours (logic available but hidden on public UI)
                   const timeStr = isClosed
-                    ? "CLOSED"
+                    ? "Closed"
                     : `${formatTime(hours.openTime!)} - ${formatTime(
                         hours.closeTime!
                       )}`;
@@ -557,86 +587,39 @@ const Footer = () => {
                   return (
                     <Box
                       key={hours.id || index}
-                      component={motion.div}
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      viewport={{ once: true }}
                       sx={{
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        py: 0.6,
-                        px: 1.5,
-                        borderRadius: "8px",
+                        justifyContent: { xs: "center", sm: "flex-start" },
+                        gap: 2,
+                        py: 0.4,
+                        px: isTodayRow ? 1 : 0,
+                        borderRadius: "6px",
                         bgcolor: isTodayRow
-                          ? "rgba(139, 69, 19, 0.08)"
+                          ? "rgba(217, 167, 86, 0.1)"
                           : "transparent",
-                        border: isTodayRow
-                          ? "1px solid rgba(139, 69, 19, 0.15)"
-                          : "1px solid transparent",
-                        transition: "all 0.2s ease",
                       }}
                     >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                      >
-                        <Typography
-                          sx={{
-                            fontSize: "0.85rem",
-                            fontWeight: isTodayRow ? 700 : 600,
-                            color: isTodayRow ? "#D9A756" : "#6A3A1E",
-                            minWidth: 40,
-                            letterSpacing: 0.5,
-                          }}
-                        >
-                          {dayName}
-                        </Typography>
-                        {isTodayRow && currentStatus.isOpen && (
-                          <Box
-                            component="span"
-                            sx={{
-                              fontSize: "0.65rem",
-                              fontWeight: 700,
-                              color: "#228B22",
-                              bgcolor: "rgba(34, 139, 34, 0.1)",
-                              px: 0.8,
-                              py: 0.2,
-                              borderRadius: "4px",
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            Today
-                          </Box>
-                        )}
-                        {isTodayRow && !currentStatus.isOpen && (
-                          <Box
-                            component="span"
-                            sx={{
-                              fontSize: "0.65rem",
-                              fontWeight: 700,
-                              color: "#B45309",
-                              bgcolor: "rgba(180, 83, 9, 0.1)",
-                              px: 0.8,
-                              py: 0.2,
-                              borderRadius: "4px",
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            Today
-                          </Box>
-                        )}
-                      </Box>
                       <Typography
                         sx={{
                           fontSize: "0.85rem",
-                          fontWeight: isTodayRow ? 600 : 500,
+                          fontWeight: isTodayRow ? 700 : 500,
+                          color: isTodayRow
+                            ? "#D9A756"
+                            : "rgba(245, 239, 230, 0.7)",
+                          minWidth: 40,
+                        }}
+                      >
+                        {dayName}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: "0.85rem",
+                          fontWeight: isTodayRow ? 600 : 400,
                           color: isClosed
-                            ? "#B45309"
+                            ? "rgba(239, 68, 68, 0.8)"
                             : isTodayRow
-                            ? "#3C1F0E"
-                            : "#6A3A1E",
-                          letterSpacing: 0.3,
+                            ? "#F5EFE6"
+                            : "rgba(245, 239, 230, 0.7)",
                         }}
                       >
                         {timeStr}
@@ -645,144 +628,168 @@ const Footer = () => {
                   );
                 })
               ) : (
-                // Fallback hours
-                <>
-                  {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map(
-                    (day) => (
-                      <Box
-                        key={day}
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          py: 0.5,
-                          px: 1.5,
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontSize: "0.85rem",
-                            fontWeight: 600,
-                            color: "#6A3A1E",
-                          }}
-                        >
-                          {day}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            fontSize: "0.85rem",
-                            fontWeight: 500,
-                            color: "#6A3A1E",
-                          }}
-                        >
-                          11 A.M. - 11 P.M.
-                        </Typography>
-                      </Box>
-                    )
-                  )}
-                </>
+                <Typography
+                  sx={{
+                    color: "rgba(245, 239, 230, 0.6)",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  Hours coming soon
+                </Typography>
               )}
             </Box>
           </Box>
 
-          {/* Quick Links Section */}
+          {/* Contact Section */}
           <Box
             component={motion.div}
             variants={itemVariants}
-            sx={{ textAlign: { xs: "center", md: "right" } }}
+            sx={{ textAlign: { xs: "center", sm: "left" } }}
           >
             <Typography
               sx={{
                 fontFamily: '"Cormorant Garamond", serif',
                 fontWeight: 700,
-                fontSize: "1.1rem",
-                color: "#3C1F0E",
-                mb: 2,
-                letterSpacing: 0.5,
+                fontSize: "1.15rem",
+                color: "#D9A756",
+                mb: 2.5,
+                letterSpacing: 1,
+                textTransform: "uppercase",
               }}
             >
-              QUICK LINKS
+              Get in Touch
             </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 1.2,
-                alignItems: { xs: "center", md: "flex-end" },
-              }}
-            >
-              {quickLinks.map((link, index) => (
-                <MUILink
-                  key={link.to}
-                  component={motion.a}
-                  {...({
-                    initial: { x: 10, opacity: 0 },
-                    whileInView: { x: 0, opacity: 1 },
-                    transition: { delay: index * 0.08 },
-                    whileHover: { x: -5 },
-                    viewport: { once: true },
-                  } as Record<string, unknown>)}
-                  href={link.to}
-                  onClick={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    window.location.href = link.to;
-                  }}
-                  underline="none"
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box
+                component={motion.a}
+                href="https://maps.google.com/?q=15+Baldwin+St,+Whitby,+ON+L1M+1A2"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ x: 5 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 1.5,
+                  justifyContent: { xs: "center", sm: "flex-start" },
+                  textDecoration: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <LocationOnIcon
+                  sx={{ fontSize: 20, color: "#D9A756", mt: 0.3 }}
+                />
+                <Box>
+                  <Typography
+                    sx={{
+                      color: "rgba(245, 239, 230, 0.9)",
+                      fontSize: "0.9rem",
+                      fontWeight: 500,
+                      "&:hover": { color: "#D9A756" },
+                    }}
+                  >
+                    15 Baldwin St
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: "rgba(245, 239, 230, 0.6)",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    Whitby, ON L1M 1A2
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                component={motion.a}
+                href="tel:+19054253055"
+                whileHover={{ x: 5 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  justifyContent: { xs: "center", sm: "flex-start" },
+                  textDecoration: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <PhoneIcon sx={{ fontSize: 20, color: "#D9A756" }} />
+                <Typography
                   sx={{
-                    color: "#6A3A1E",
+                    color: "rgba(245, 239, 230, 0.9)",
                     fontSize: "0.9rem",
                     fontWeight: 500,
-                    transition: "all 0.2s ease",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    "&:hover": {
-                      color: "#D9A756",
-                    },
-                    "&::before": {
-                      content: '""',
-                      width: 0,
-                      height: "2px",
-                      bgcolor: "#D9A756",
-                      transition: "width 0.2s ease",
-                      display: { xs: "none", md: "block" },
-                    },
-                    "&:hover::before": {
-                      width: 15,
-                      mr: 0.5,
-                    },
+                    "&:hover": { color: "#D9A756" },
                   }}
                 >
-                  {link.label}
-                </MUILink>
-              ))}
+                  (905) 425-3055
+                </Typography>
+              </Box>
+
+              <Box
+                component={motion.a}
+                href="mailto:brooklinpub@gmail.com"
+                whileHover={{ x: 5 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  justifyContent: { xs: "center", sm: "flex-start" },
+                  textDecoration: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <EmailIcon sx={{ fontSize: 20, color: "#D9A756" }} />
+                <Typography
+                  sx={{
+                    color: "rgba(245, 239, 230, 0.9)",
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
+                    "&:hover": { color: "#D9A756" },
+                  }}
+                >
+                  brooklinpub@gmail.com
+                </Typography>
+              </Box>
             </Box>
+
+            {/* CTA Button */}
+            <Button
+              component={Link}
+              to="/contactus"
+              variant="outlined"
+              endIcon={<ArrowForwardIcon />}
+              sx={{
+                mt: 3,
+                borderColor: "#D9A756",
+                color: "#D9A756",
+                borderRadius: "8px",
+                px: 2.5,
+                py: 1,
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                "&:hover": {
+                  bgcolor: "#D9A756",
+                  color: "#3C1F0E",
+                  borderColor: "#D9A756",
+                },
+              }}
+            >
+              Contact Us
+            </Button>
           </Box>
         </Box>
 
-        {/* Decorative Divider */}
-        <Box
+        {/* Bottom Section with Divider */}
+        <Divider
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            my: 3,
+            my: 4,
+            borderColor: "rgba(217, 167, 86, 0.2)",
           }}
-        >
-          <Box
-            sx={{ flex: 1, height: "1px", bgcolor: "rgba(139, 69, 19, 0.2)" }}
-          />
-          <Box
-            component="img"
-            src="/brooklinpub-logo.png"
-            alt=""
-            sx={{ width: 30, height: "auto", opacity: 0.3 }}
-          />
-          <Box
-            sx={{ flex: 1, height: "1px", bgcolor: "rgba(139, 69, 19, 0.2)" }}
-          />
-        </Box>
+        />
 
-        {/* Copyright */}
+        {/* Copyright & Credits */}
         <Box
           component={motion.div}
           initial={{ opacity: 0 }}
@@ -791,25 +798,30 @@ const Footer = () => {
           transition={{ duration: 0.5 }}
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: { xs: "column", md: "row" },
             justifyContent: "space-between",
             alignItems: "center",
-            gap: 1.5,
-            textAlign: "center",
+            gap: 2,
           }}
         >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              component="img"
+              src="/brooklinpub-logo.png"
+              alt=""
+              sx={{ width: 24, height: "auto", opacity: 0.5 }}
+            />
+            <Typography
+              sx={{ color: "rgba(245, 239, 230, 0.5)", fontSize: "0.85rem" }}
+            >
+              © {new Date().getFullYear()} Brooklin Pub & Grill. All rights
+              reserved.
+            </Typography>
+          </Box>
           <Typography
-            variant="caption"
-            sx={{ color: "#8B7355", fontWeight: 500, fontSize: "0.75rem" }}
+            sx={{ color: "rgba(245, 239, 230, 0.4)", fontSize: "0.8rem" }}
           >
-            © {new Date().getFullYear()} Brooklin Pub & Grill. All rights
-            reserved.
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{ color: "#A69583", fontSize: "0.75rem" }}
-          >
-            Designed by{" "}
+            Crafted with ♥ by{" "}
             <MUILink
               href="#"
               underline="hover"

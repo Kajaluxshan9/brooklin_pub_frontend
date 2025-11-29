@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import Nav from "../components/common/Nav";
 import MainMenu from "../components/menu/MainMenu";
 import Footer from "../components/common/Footer";
@@ -9,15 +8,6 @@ import { motion } from "framer-motion";
 import BgImage from "../assets/images/hero-bg.jpg";
 
 const MainMenuPage = () => {
-  const [isMobile, setIsMobile] = useState<boolean>(
-    typeof window !== "undefined" ? window.innerWidth < 768 : false
-  );
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
 
   return (
     <div>
@@ -28,13 +18,14 @@ const MainMenuPage = () => {
       {/* Hero Section - consistent with Landing Page */}
       <Box
         sx={{
-          minHeight: { xs: "50vh", md: "60vh" },
+          minHeight: { xs: "40vh", sm: "50vh", md: "60vh" },
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
           px: { xs: 2, sm: 4 },
+          pt: { xs: 8, sm: 6, md: 0 },
           backgroundImage: `url(${BgImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -103,8 +94,8 @@ const MainMenuPage = () => {
             sx={{
               margin: 0,
               color: "#F3E3CC",
-              fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4rem" },
-              letterSpacing: { xs: 2, md: 4 },
+              fontSize: { xs: "2rem", sm: "3rem", md: "4rem" },
+              letterSpacing: { xs: 1, sm: 2, md: 4 },
               textTransform: "uppercase",
               fontWeight: 700,
               fontFamily: "'Cormorant Garamond', 'Georgia', serif",
@@ -121,13 +112,13 @@ const MainMenuPage = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             sx={{
-              mt: 2,
+              mt: { xs: 1.5, md: 2 },
               color: "rgba(243, 227, 204, 0.9)",
-              fontSize: { xs: "1rem", md: "1.2rem" },
+              fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
               fontFamily: "'Inter', sans-serif",
               fontWeight: 400,
-              letterSpacing: 1,
-              maxWidth: 600,
+              letterSpacing: { xs: 0.5, md: 1 },
+              maxWidth: { xs: "90%", md: 600 },
               px: 2,
               textShadow: "1px 1px 4px rgba(0,0,0,0.3)",
             }}

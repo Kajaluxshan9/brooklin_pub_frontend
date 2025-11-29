@@ -245,13 +245,14 @@ const ContactUs = () => {
       {/* Hero Section - consistent with other pages */}
       <Box
         sx={{
-          minHeight: { xs: "50vh", md: "60vh" },
+          minHeight: { xs: "40vh", sm: "50vh", md: "60vh" },
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
           px: { xs: 2, sm: 4 },
+          pt: { xs: 8, sm: 6, md: 0 },
           backgroundImage: `url(${ContactBg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -320,8 +321,8 @@ const ContactUs = () => {
             sx={{
               margin: 0,
               color: "#F3E3CC",
-              fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4rem" },
-              letterSpacing: { xs: 2, md: 4 },
+              fontSize: { xs: "2rem", sm: "3rem", md: "4rem" },
+              letterSpacing: { xs: 1, sm: 2, md: 4 },
               textTransform: "uppercase",
               fontWeight: 700,
               fontFamily: "'Cormorant Garamond', 'Georgia', serif",
@@ -338,13 +339,13 @@ const ContactUs = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             sx={{
-              mt: 2,
+              mt: { xs: 1.5, md: 2 },
               color: "rgba(243, 227, 204, 0.9)",
-              fontSize: { xs: "1rem", md: "1.2rem" },
+              fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
               fontFamily: "'Inter', sans-serif",
               fontWeight: 400,
-              letterSpacing: 1,
-              maxWidth: 600,
+              letterSpacing: { xs: 0.5, md: 1 },
+              maxWidth: { xs: "90%", md: 600 },
               px: 2,
               textShadow: "1px 1px 4px rgba(0,0,0,0.3)",
             }}
@@ -374,7 +375,8 @@ const ContactUs = () => {
         sx={{
           background: "linear-gradient(180deg, #F3E3CC 0%, #E8D4B8 100%)",
           minHeight: "100vh",
-          py: { xs: 6, md: 10 },
+          py: { xs: 4, sm: 6, md: 10 },
+          pb: { xs: 12, md: 10 },
         }}
       >
         {/* Main Content Container */}
@@ -384,14 +386,14 @@ const ContactUs = () => {
             zIndex: 1,
             maxWidth: 1400,
             mx: "auto",
-            px: { xs: 2, sm: 3, md: 4 },
+            px: { xs: 1.5, sm: 3, md: 4 },
           }}
         >
           <Box
             sx={{
               display: "grid",
               gridTemplateColumns: { xs: "1fr", lg: "1fr 1.2fr" },
-              gap: { xs: 4, md: 5 },
+              gap: { xs: 3, sm: 4, md: 5 },
             }}
           >
             {/* Left Side - Combined Contact Information Container */}
@@ -404,8 +406,8 @@ const ContactUs = () => {
                 sx={{
                   bgcolor: "rgba(255,255,255,0.95)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: 4,
-                  p: { xs: 2.5, md: 3 },
+                  borderRadius: { xs: 3, md: 4 },
+                  p: { xs: 2, sm: 2.5, md: 3 },
                   boxShadow: "0 8px 32px rgba(106,58,30,0.12)",
                   border: "2px solid rgba(217,167,86,0.3)",
                   transition: "all 0.3s ease",
@@ -486,7 +488,9 @@ const ContactUs = () => {
                         mt: 0.5,
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <PhoneIcon sx={{ color: "#D9A756", fontSize: 20 }} />
                         <Typography
                           sx={{
@@ -498,7 +502,9 @@ const ContactUs = () => {
                           (905) 655-3513
                         </Typography>
                       </Box>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <EmailIcon sx={{ color: "#D9A756", fontSize: 20 }} />
                         <Typography
                           sx={{
@@ -600,8 +606,8 @@ const ContactUs = () => {
                     "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
                   backdropFilter: "blur(12px)",
                   WebkitBackdropFilter: "blur(12px)",
-                  borderRadius: 4,
-                  p: { xs: 3, sm: 4, md: 5 },
+                  borderRadius: { xs: 3, md: 4 },
+                  p: { xs: 2.5, sm: 3, md: 5 },
                   boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
                   border: "1px solid rgba(255,255,255,0.18)",
                   // subtle inner highlight
@@ -621,6 +627,7 @@ const ContactUs = () => {
                     fontFamily: '"Cormorant Garamond", serif',
                     fontWeight: 800,
                     color: "#3C1F0E",
+                    fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
                     mb: 1,
                     textAlign: "center",
                   }}
@@ -690,7 +697,9 @@ const ContactUs = () => {
                             borderWidth: 2,
                           },
                         },
-                        "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                        "& .MuiInputLabel-root.Mui-focused": {
+                          color: "#6A3A1E",
+                        },
                       }}
                     />
 
@@ -710,7 +719,9 @@ const ContactUs = () => {
                             borderWidth: 2,
                           },
                         },
-                        "& .MuiInputLabel-root.Mui-focused": { color: "#6A3A1E" },
+                        "& .MuiInputLabel-root.Mui-focused": {
+                          color: "#6A3A1E",
+                        },
                       }}
                     />
                   </Box>
@@ -886,8 +897,8 @@ const ContactUs = () => {
                             {count === 1
                               ? "Guest"
                               : count === "10+"
-                                ? " Guests (Large Party)"
-                                : "Guests"}
+                              ? " Guests (Large Party)"
+                              : "Guests"}
                           </MenuItem>
                         ))}
                       </TextField>
@@ -897,7 +908,9 @@ const ContactUs = () => {
                   <TextField
                     fullWidth
                     label={
-                      isReservation ? "Special Requests / Notes" : "Your Message"
+                      isReservation
+                        ? "Special Requests / Notes"
+                        : "Your Message"
                     }
                     name="message"
                     value={formData.message}
@@ -966,12 +979,12 @@ const ContactUs = () => {
           >
             <Box
               sx={{
-                mt: { xs: 4, md: 6 },
-                borderRadius: 4,
+                mt: { xs: 3, sm: 4, md: 6 },
+                borderRadius: { xs: 3, md: 4 },
                 overflow: "hidden",
                 boxShadow: "0 12px 48px rgba(106,58,30,0.15)",
                 border: "3px solid #D9A756",
-                height: { xs: 300, sm: 400, md: 500 },
+                height: { xs: 250, sm: 350, md: 500 },
               }}
             >
               <iframe

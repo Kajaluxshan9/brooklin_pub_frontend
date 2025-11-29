@@ -30,8 +30,8 @@ const theme = createTheme({
       dark: "#B8923F",
     },
     background: {
-      default: "#FAF7F2", // warm cream
-      paper: "#FFFFFF",
+      default: "#FDF8F3", // warm cream
+      paper: "#FFFDFB",
     },
     text: {
       primary: "#3C1F0E", // --brown-dark for main text

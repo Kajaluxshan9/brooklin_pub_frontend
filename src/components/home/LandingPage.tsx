@@ -19,8 +19,15 @@ const LandingPage = () => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const tinyRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const radius = 800;
-  const spacing = 250;
+  // Responsive radius and spacing based on viewport
+  const getResponsiveValues = () => {
+    if (typeof window === "undefined") return { radius: 800, spacing: 250 };
+    const width = window.innerWidth;
+    if (width < 480) return { radius: 300, spacing: 150 };
+    if (width < 768) return { radius: 400, spacing: 180 };
+    if (width < 1024) return { radius: 600, spacing: 200 };
+    return { radius: 800, spacing: 250 };
+  };
 
   const shuffleArray = (arr: string[]) => {
     const copy = [...arr];
@@ -37,6 +44,7 @@ const LandingPage = () => {
     document.documentElement.style.overflowX = "hidden";
     const cards = cardsRef.current;
     const total = cards.length;
+    const { radius, spacing } = getResponsiveValues();
 
     // Main spiral cards
     cards.forEach((card, i) => {
@@ -92,15 +100,16 @@ const LandingPage = () => {
       });
     }, 5000);
 
-    // Tiny floating images spread all over the component container
+    // Tiny floating images - reduce count on mobile for performance
     const tinyElements = tinyRefs.current;
+    const isMobile = window.innerWidth < 768;
     tinyElements.forEach((el) => {
       if (!el || !containerRef.current) return;
 
       const vw = containerRef.current.clientWidth || window.innerWidth;
       const vh = containerRef.current.clientHeight || window.innerHeight;
-      const count = 50; // number of tiny images
-      const imgSize = 20;
+      const count = isMobile ? 20 : 50; // Fewer particles on mobile
+      const imgSize = isMobile ? 15 : 20;
 
       el!.innerHTML = ""; // clear previous tiny images
       for (let j = 0; j < count; j++) {
@@ -109,7 +118,9 @@ const LandingPage = () => {
         imgEl.style.width = `${imgSize}px`;
         imgEl.style.height = `${imgSize}px`;
         imgEl.style.borderRadius = "50%";
-        imgEl.style.background = `url(${images[j % images.length]}) center/cover no-repeat`;
+        imgEl.style.background = `url(${
+          images[j % images.length]
+        }) center/cover no-repeat`;
         imgEl.style.position = "absolute";
 
         // random position constrained to container bounds
@@ -120,11 +131,15 @@ const LandingPage = () => {
 
         el!.appendChild(imgEl);
 
-        // random floating animation
+        // random floating animation - slower on mobile for performance
         gsap.to(imgEl, {
-          x: "+=" + (Math.random() * 100 - 50),
-          y: "+=" + (Math.random() * 100 - 50),
-          duration: 5 + Math.random() * 5,
+          x:
+            "+=" +
+            (Math.random() * (isMobile ? 50 : 100) - (isMobile ? 25 : 50)),
+          y:
+            "+=" +
+            (Math.random() * (isMobile ? 50 : 100) - (isMobile ? 25 : 50)),
+          duration: (isMobile ? 8 : 5) + Math.random() * 5,
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
@@ -146,7 +161,8 @@ const LandingPage = () => {
         perspective: "1500px",
         width: "100%",
         height: "100vh",
-        background: "var(--brown-gradient)",
+        background:
+          "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
         overflow: "hidden",
         position: "relative",
       }}
@@ -192,13 +208,13 @@ const LandingPage = () => {
           width: "100%",
           height: "100%",
           background:
-            "linear-gradient(180deg, rgba(60,31,14,0.6) 0%, rgba(106,58,30,0.5) 100%)",
+            "linear-gradient(180deg, rgba(139,90,43,0.4) 0%, rgba(184,130,70,0.35) 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           zIndex: 10,
           textAlign: "center",
-          color: "#F3E3CC",
+          color: "#4A2C17",
           padding: "20px",
         }}
       >
@@ -210,7 +226,7 @@ const LandingPage = () => {
             lineHeight: 1.2,
             fontFamily: '"Cormorant Garamond", Georgia, serif',
             letterSpacing: "0.05em",
-            textShadow: "0 2px 12px rgba(60,31,14,0.5)",
+            textShadow: "0 2px 12px rgba(255,255,255,0.3)",
           }}
         >
           Step into the Brooklin Pub
@@ -220,12 +236,25 @@ const LandingPage = () => {
       <style>{`
         .tiny-img { pointer-events: none; }
         @media (max-width: 1024px) { .spiral-card { max-width: 500px; } }
-        @media (max-width: 768px) { .spiral-card { max-width: 400px; } }
-        @media (max-width: 480px) { .spiral-card { max-width: 320px; } }
+        @media (max-width: 768px) { .spiral-card { max-width: 350px; } }
+        @media (max-width: 480px) { .spiral-card { max-width: 280px; } }
 
-        .landing-heading { padding: 0; box-sizing: border-box; }
+        .landing-heading {
+          padding: 0;
+          box-sizing: border-box;
+          max-width: 90%;
+        }
+        @media (max-width: 768px) {
+          .landing-heading {
+            font-size: clamp(1.6rem, 6vw, 2.5rem) !important;
+            padding: 0 16px;
+          }
+        }
         @media (max-width: 480px) {
-          .landing-heading { padding: 150px; }
+          .landing-heading {
+            font-size: clamp(1.4rem, 7vw, 2rem) !important;
+            padding: 0 12px;
+          }
         }
       `}</style>
     </div>

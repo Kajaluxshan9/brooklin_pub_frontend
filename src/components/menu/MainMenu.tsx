@@ -260,7 +260,7 @@ export default function MainMenu() {
         // Allow the container to grow to fit content (no fixed heights)
         paddingTop: padding,
         paddingBottom: padding,
-        background: "linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%)", // Deep rich brown/black gradient
+        background: "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)", // Warm cream gradient
         position: "relative",
         overflow: "visible",
       }}
@@ -313,7 +313,7 @@ export default function MainMenu() {
                   borderRadius: "50%",
                   padding: "6px",
                   background: "linear-gradient(145deg, #d9a756, #8a5a2a)", // Gold gradient border
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                  boxShadow: "0 10px 30px rgba(106,58,30,0.25)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -325,7 +325,7 @@ export default function MainMenu() {
                     height: "100%",
                     borderRadius: "50%",
                     overflow: "hidden",
-                    border: "2px solid #1a0f0a", // Inner dark border
+                    border: "2px solid #F5EBE0", // Light cream inner border
                     position: "relative",
                   }}
                 >
@@ -365,7 +365,7 @@ export default function MainMenu() {
                 <DrawTextSVG
                   text={item.name}
                   width={size * 1.5} // Increased from 1.2
-                  stroke="#d9a756" // Gold text
+                  stroke="#6A3A1E" // Brown text for light theme
                   scale={1.1}
                 />
               </div>
@@ -384,7 +384,7 @@ export default function MainMenu() {
             sx={{ zIndex: 14000 }}
             PaperProps={{
               sx: {
-                background: "rgba(0,0,0,0.9)", // Dark backdrop like SpecialDisplay
+                background: "rgba(253,248,243,0.95)", // Warm cream backdrop
                 boxShadow: "none",
                 overflow: "hidden", // We'll handle scrolling in the content
               },
@@ -401,13 +401,13 @@ export default function MainMenu() {
                 height: "50px",
                 borderRadius: "50%",
                 backdropFilter: "blur(4px)",
-                background: "rgba(92, 64, 51, 0.8)", // Brown background
+                background: "rgba(106, 58, 30, 0.9)", // Brown background
                 border: "1px solid rgba(217, 167, 86, 0.6)", // Gold border
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                boxShadow: "0 4px 12px rgba(106,58,30,0.3)",
                 transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
                 zIndex: 14002,
               }}
@@ -415,14 +415,14 @@ export default function MainMenu() {
                 (e.currentTarget as HTMLElement).style.boxShadow =
                   "0 0 22px rgba(217, 167, 86, 0.45)";
                 (e.currentTarget as HTMLElement).style.background =
-                  "rgba(92, 64, 51, 1)";
+                  "rgba(106, 58, 30, 1)";
                 (e.currentTarget as HTMLElement).style.borderColor = "#d9a756";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 4px 12px rgba(0,0,0,0.3)";
+                  "0 4px 12px rgba(106,58,30,0.3)";
                 (e.currentTarget as HTMLElement).style.background =
-                  "rgba(92, 64, 51, 0.8)";
+                  "rgba(106, 58, 30, 0.9)";
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(217, 167, 86, 0.6)";
               }}
             >
@@ -481,14 +481,14 @@ export default function MainMenu() {
                   sx={{
                     position: "relative",
                     width: "min(1000px, 95vw)",
-                    // No background on the container itself to keep the "overlay" feel, 
+                    // No background on the container itself to keep the "overlay" feel,
                     // or a very subtle one if needed for readability.
                     // Let's add a subtle glass effect for the content area
-                    bgcolor: "rgba(18, 10, 8, 0.8)",
+                    bgcolor: "rgba(255, 253, 251, 0.95)",
                     backdropFilter: "blur(10px)",
                     borderRadius: "24px",
-                    border: "1px solid rgba(217, 167, 86, 0.2)",
-                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                    border: "1px solid rgba(106, 58, 30, 0.15)",
+                    boxShadow: "0 25px 50px -12px rgba(106, 58, 30, 0.25)",
                     p: { xs: 3, md: 6 },
                   }}
                 >
@@ -498,12 +498,12 @@ export default function MainMenu() {
                     align="center"
                     sx={{
                       fontFamily: "'Cormorant Garamond', serif",
-                      color: "#d9a756",
+                      color: "#6A3A1E",
                       mb: 5,
                       fontWeight: 600,
                       letterSpacing: "0.05em",
                       textTransform: "uppercase",
-                      borderBottom: "1px solid rgba(217, 167, 86, 0.2)",
+                      borderBottom: "1px solid rgba(106, 58, 30, 0.2)",
                       pb: 2,
                       display: "inline-block",
                       width: "100%"
@@ -539,12 +539,12 @@ export default function MainMenu() {
                               p: 2.5,
                               height: "100%",
                               borderRadius: "12px",
-                              background: "rgba(255, 255, 255, 0.03)",
-                              border: "1px solid rgba(255, 255, 255, 0.05)",
+                              background: "rgba(245, 235, 224, 0.6)",
+                              border: "1px solid rgba(106, 58, 30, 0.1)",
                               transition: "all 0.3s ease",
                               "&:hover": {
-                                background: "rgba(217, 167, 86, 0.08)",
-                                borderColor: "rgba(217, 167, 86, 0.3)",
+                                background: "rgba(217, 167, 86, 0.15)",
+                                borderColor: "rgba(106, 58, 30, 0.25)",
                                 transform: "translateY(-2px)"
                               },
                             }}
@@ -555,7 +555,7 @@ export default function MainMenu() {
                                 sx={{
                                   fontFamily: "'Cormorant Garamond', serif",
                                   fontWeight: 700,
-                                  color: "#f3e3cc", // Cream light
+                                  color: "#4A2C17", // Dark brown
                                   fontSize: "1.4rem"
                                 }}
                               >
@@ -566,7 +566,7 @@ export default function MainMenu() {
                                   variant="h6"
                                   sx={{
                                     fontFamily: "'Cormorant Garamond', serif",
-                                    color: "#d9a756",
+                                    color: "#8B5A2B",
                                     fontWeight: 700,
                                     fontSize: "1.2rem"
                                   }}
@@ -580,7 +580,7 @@ export default function MainMenu() {
                               <Typography
                                 variant="body2"
                                 sx={{
-                                  color: "rgba(255, 255, 255, 0.7)",
+                                  color: "rgba(74, 44, 23, 0.8)",
                                   fontFamily: "'Inter', sans-serif",
                                   fontSize: "0.95rem",
                                   lineHeight: 1.6,
@@ -604,18 +604,18 @@ export default function MainMenu() {
                                         px: 1.5,
                                         py: 0.5,
                                         borderRadius: "20px",
-                                        border: "1px solid rgba(217, 167, 86, 0.3)",
-                                        bgcolor: "rgba(217, 167, 86, 0.1)",
+                                        border: "1px solid rgba(106, 58, 30, 0.25)",
+                                        bgcolor: "rgba(217, 167, 86, 0.15)",
                                         display: "flex",
                                         alignItems: "center",
                                         gap: 1
                                       }}
                                     >
-                                      <Typography variant="caption" sx={{ color: "#d9a756", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                      <Typography variant="caption" sx={{ color: "#6A3A1E", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                                         {m.measurementTypeEntity?.name || m.measurementType?.name || "Size"}
                                       </Typography>
-                                      <Box sx={{ width: 1, height: 12, bgcolor: "rgba(217, 167, 86, 0.3)" }} />
-                                      <Typography variant="caption" sx={{ color: "#f3e3cc" }}>
+                                      <Box sx={{ width: 1, height: 12, bgcolor: "rgba(106, 58, 30, 0.25)" }} />
+                                      <Typography variant="caption" sx={{ color: "#4A2C17" }}>
                                         ${m.price.toFixed(2)}
                                       </Typography>
                                     </Box>
@@ -648,16 +648,16 @@ export default function MainMenu() {
                         sx={{
                           position: "absolute",
                           left: 0,
-                          color: "#d9a756",
+                          color: "#6A3A1E",
                           opacity: pageIndex === 0 ? 0.3 : 1,
-                          border: "1px solid rgba(217, 167, 86, 0.5)",
+                          border: "1px solid rgba(106, 58, 30, 0.3)",
                           borderRadius: "12px",
                           width: "48px",
                           height: "48px",
-                          background: "rgba(217, 167, 86, 0.1)",
+                          background: "rgba(217, 167, 86, 0.15)",
                           transition: "all 0.3s ease",
                           "&:hover": {
-                            background: "rgba(217, 167, 86, 0.2)",
+                            background: "rgba(217, 167, 86, 0.3)",
                             transform: "translateX(-2px)"
                           }
                         }}
@@ -675,7 +675,7 @@ export default function MainMenu() {
                             onClick={() => setPageIndex(i)}
                             animate={{
                               width: pageIndex === i ? 24 : 10,
-                              backgroundColor: pageIndex === i ? "#d9a756" : "rgba(217, 167, 86, 0.3)"
+                              backgroundColor: pageIndex === i ? "#6A3A1E" : "rgba(106, 58, 30, 0.25)"
                             }}
                             style={{
                               height: 10,
@@ -694,16 +694,16 @@ export default function MainMenu() {
                         sx={{
                           position: "absolute",
                           right: 0,
-                          color: "#d9a756",
+                          color: "#6A3A1E",
                           opacity: pageIndex === Math.ceil(selectedItem.menuItems.length / pageSize) - 1 ? 0.3 : 1,
-                          border: "1px solid rgba(217, 167, 86, 0.5)",
+                          border: "1px solid rgba(106, 58, 30, 0.3)",
                           borderRadius: "12px",
                           width: "48px",
                           height: "48px",
-                          background: "rgba(217, 167, 86, 0.1)",
+                          background: "rgba(217, 167, 86, 0.15)",
                           transition: "all 0.3s ease",
                           "&:hover": {
-                            background: "rgba(217, 167, 86, 0.2)",
+                            background: "rgba(217, 167, 86, 0.3)",
                             transform: "translateX(2px)"
                           }
                         }}

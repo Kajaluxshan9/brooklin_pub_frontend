@@ -237,7 +237,7 @@ function GalleryRow({
         <Typography
           variant="h6"
           sx={{
-            color: "#5D4037",
+            color: "#6A3A1E",
             maxWidth: "600px",
             fontStyle: "italic",
             fontWeight: 400,
@@ -313,14 +313,16 @@ export default function Gallery() {
       .filter((category) => category.isActive)
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((category) => {
-        // Get images from stories in this category
+        // Get ALL images from stories in this category (not just first image)
         const images = (category.stories || [])
           .filter(
             (story) =>
               story.isActive && story.imageUrls && story.imageUrls.length > 0
           )
           .sort((a, b) => a.sortOrder - b.sortOrder)
-          .map((story) => getImageUrl(story.imageUrls[0]) || "");
+          .flatMap((story) =>
+            story.imageUrls.map((url) => getImageUrl(url) || "").filter(Boolean)
+          );
 
         return {
           title: category.name,
@@ -377,14 +379,15 @@ export default function Gallery() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#F3E3CC",
+          background:
+            "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
           minHeight: 200,
         }}
       >
         <Typography
           sx={{
             fontFamily: '"Cormorant Garamond", Georgia, serif',
-            color: "#6A3A1E",
+            color: "#3C1F0E",
             fontSize: "1.2rem",
           }}
         >
@@ -409,7 +412,8 @@ export default function Gallery() {
         display: "flex",
         flexDirection: "column",
         gap: { xs: 2, md: 6 },
-        backgroundColor: "#F3E3CC",
+        background:
+          "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
         minHeight: isMobile ? "100vh" : "auto",
       }}
     >

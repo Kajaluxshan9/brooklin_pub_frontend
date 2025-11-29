@@ -174,9 +174,12 @@ export default function AboutUs() {
               height: isMobile ? 8 : 12,
               borderRadius: "50%",
               backgroundColor:
-                idx === pageIndex ? "white" : "rgba(255,255,255,0.5)",
+                idx === pageIndex ? "#FFFDFB" : "rgba(255,253,251,0.6)",
               cursor: "pointer",
-              border: "1px solid rgba(0,0,0,0.2)",
+              border: "1px solid rgba(106,58,30,0.3)",
+              boxShadow:
+                idx === pageIndex ? "0 2px 8px rgba(106,58,30,0.3)" : "none",
+              transition: "all 0.3s ease",
             }}
           />
         ))}

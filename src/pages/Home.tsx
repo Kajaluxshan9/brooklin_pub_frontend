@@ -7,7 +7,7 @@ import { Box, Typography } from "@mui/material";
 import BgImage from "../assets/images/hero-bg.jpg";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useApiWithCache } from "../hooks/useApi";
@@ -21,6 +21,9 @@ interface PopupCard {
   popupImg: string;
   type: string;
 }
+
+// Session storage key for popup visibility
+const POPUP_SESSION_KEY = "brooklin_popup_shown";
 
 // Get current day of week in lowercase
 const getCurrentDayOfWeek = (): DayOfWeek => {
@@ -91,11 +94,24 @@ const Home = () => {
 
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [slideshowIndex, setSlideshowIndex] = useState(0);
+  const hasCheckedSession = useRef(false);
 
+  // Show popup only once per session (on page refresh)
   useEffect(() => {
+    // Only check once to prevent multiple triggers
+    if (hasCheckedSession.current) return;
+
     if (popupCards.length > 0) {
-      setShowSlideshow(true);
-      setSlideshowIndex(0);
+      // Check if popup was already shown in this session
+      const popupAlreadyShown = sessionStorage.getItem(POPUP_SESSION_KEY);
+
+      if (!popupAlreadyShown) {
+        setShowSlideshow(true);
+        setSlideshowIndex(0);
+        // Mark popup as shown for this session
+        sessionStorage.setItem(POPUP_SESSION_KEY, "true");
+      }
+      hasCheckedSession.current = true;
     }
   }, [popupCards.length]);
 
@@ -127,7 +143,7 @@ const Home = () => {
                 width: "100vw",
                 height: "100vh",
                 background:
-                  "linear-gradient(135deg, rgba(60,31,14,0.97) 0%, rgba(106,58,30,0.95) 100%)",
+                  "linear-gradient(135deg, rgba(253,248,243,0.97) 0%, rgba(245,235,224,0.95) 50%, rgba(232,213,196,0.97) 100%)",
                 backdropFilter: "blur(8px)",
                 display: "flex",
                 alignItems: "center",
@@ -144,8 +160,8 @@ const Home = () => {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundImage: `radial-gradient(circle at 20% 30%, rgba(217,167,86,0.15) 0%, transparent 40%),
-                                  radial-gradient(circle at 80% 70%, rgba(217,167,86,0.1) 0%, transparent 40%)`,
+                  backgroundImage: `radial-gradient(circle at 20% 30%, rgba(217,167,86,0.2) 0%, transparent 40%),
+                                  radial-gradient(circle at 80% 70%, rgba(139,90,43,0.15) 0%, transparent 40%)`,
                   pointerEvents: "none",
                 }}
               />
@@ -158,97 +174,64 @@ const Home = () => {
                 transition={{ type: "spring", stiffness: 100, damping: 18 }}
                 style={{
                   position: "relative",
-                  width: "min(1000px, 90vw)",
-                  maxHeight: "85vh",
+                  width: "min(1000px, 92vw)",
+                  maxHeight: "90vh",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  background: "rgba(255,255,255,0.05)",
+                  background:
+                    "linear-gradient(180deg, #FFFDFB 0%, #FAF7F2 100%)",
                   borderRadius: "24px",
-                  border: "1px solid rgba(217,167,86,0.3)",
-                  padding: "24px",
-                  boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+                  border: "2px solid rgba(217,167,86,0.4)",
+                  padding: "20px",
+                  boxShadow:
+                    "0 24px 80px rgba(106,58,30,0.25), 0 8px 32px rgba(0,0,0,0.15)",
                 }}
               >
-                {/* Header with title and close */}
-                <div
+                {/* Close button - top right corner */}
+                <button
+                  onClick={() => setShowSlideshow(false)}
+                  aria-label="Close popup"
                   style={{
-                    width: "100%",
+                    position: "absolute",
+                    top: "12px",
+                    right: "12px",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    background: "rgba(106,58,30,0.1)",
+                    border: "1px solid rgba(106,58,30,0.2)",
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
-                    marginBottom: "16px",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    zIndex: 10,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(106,58,30,0.2)";
+                    e.currentTarget.style.transform = "rotate(90deg)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(106,58,30,0.1)";
+                    e.currentTarget.style.transform = "rotate(0deg)";
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#6A3A1E"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
                   >
-                    <div
-                      style={{
-                        width: "4px",
-                        height: "32px",
-                        background: "#D9A756",
-                        borderRadius: "2px",
-                      }}
-                    />
-                    <h2
-                      style={{
-                        margin: 0,
-                        fontFamily: '"Cormorant Garamond", Georgia, serif',
-                        fontSize: "clamp(1.3rem, 3vw, 1.8rem)",
-                        fontWeight: 700,
-                        color: "#F3E3CC",
-                        letterSpacing: "0.03em",
-                      }}
-                    >
-                      Today's Special
-                    </h2>
-                  </div>
+                    <path d="M18 6L6 18" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </button>
 
-                  <button
-                    onClick={() => setShowSlideshow(false)}
-                    style={{
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "50%",
-                      background: "rgba(217,167,86,0.15)",
-                      border: "1px solid rgba(217,167,86,0.4)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(217,167,86,0.3)";
-                      e.currentTarget.style.transform = "rotate(90deg)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(217,167,86,0.15)";
-                      e.currentTarget.style.transform = "rotate(0deg)";
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#D9A756"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    >
-                      <path d="M18 6L6 18" />
-                      <path d="M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Image container */}
+                {/* Image container - takes up most of the space */}
                 <div
                   style={{
                     position: "relative",
@@ -258,6 +241,7 @@ const Home = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    padding: "8px",
                   }}
                 >
                   <img
@@ -265,10 +249,10 @@ const Home = () => {
                     alt={popupCards[slideshowIndex].title}
                     style={{
                       maxWidth: "100%",
-                      maxHeight: "calc(85vh - 160px)",
+                      maxHeight: "calc(90vh - 140px)",
                       objectFit: "contain",
                       borderRadius: "16px",
-                      boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+                      boxShadow: "0 8px 32px rgba(106,58,30,0.2)",
                     }}
                   />
                 </div>
@@ -280,13 +264,14 @@ const Home = () => {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    marginTop: "20px",
-                    paddingTop: "16px",
-                    borderTop: "1px solid rgba(217,167,86,0.2)",
+                    marginTop: "12px",
+                    paddingTop: "12px",
+                    borderTop: "1px solid rgba(217,167,86,0.25)",
                   }}
                 >
                   {/* Left arrow */}
                   <button
+                    aria-label="Previous slide"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSlideshowIndex(
@@ -294,12 +279,12 @@ const Home = () => {
                       );
                     }}
                     style={{
-                      width: "48px",
-                      height: "48px",
+                      width: "44px",
+                      height: "44px",
                       borderRadius: "12px",
-                      background: "rgba(217,167,86,0.1)",
+                      background: "rgba(217,167,86,0.15)",
                       border: "1px solid rgba(217,167,86,0.3)",
-                      color: "#D9A756",
+                      color: "#6A3A1E",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
@@ -307,19 +292,19 @@ const Home = () => {
                       transition: "all 0.3s ease",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(217,167,86,0.25)";
+                      e.currentTarget.style.background = "rgba(217,167,86,0.3)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(217,167,86,0.1)";
+                      e.currentTarget.style.background =
+                        "rgba(217,167,86,0.15)";
                     }}
                   >
                     <svg
-                      width="20"
-                      height="20"
+                      width="18"
+                      height="18"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#D9A756"
+                      stroke="#6A3A1E"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     >
@@ -340,8 +325,8 @@ const Home = () => {
                         margin: "0 0 8px 0",
                         fontFamily: '"Cormorant Garamond", Georgia, serif',
                         fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
-                        fontWeight: 600,
-                        color: "#F3E3CC",
+                        fontWeight: 700,
+                        color: "#4A2C17",
                       }}
                     >
                       {popupCards[slideshowIndex].title}
@@ -359,6 +344,7 @@ const Home = () => {
                         {popupCards.map((_, idx) => (
                           <button
                             key={idx}
+                            aria-label={`Go to slide ${idx + 1}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               setSlideshowIndex(idx);
@@ -370,7 +356,7 @@ const Home = () => {
                               background:
                                 idx === slideshowIndex
                                   ? "#D9A756"
-                                  : "rgba(217,167,86,0.3)",
+                                  : "rgba(106,58,30,0.25)",
                               border: "none",
                               cursor: "pointer",
                               transition: "all 0.3s ease",
@@ -383,17 +369,18 @@ const Home = () => {
 
                   {/* Right arrow */}
                   <button
+                    aria-label="Next slide"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSlideshowIndex((i) => (i + 1) % popupCards.length);
                     }}
                     style={{
-                      width: "48px",
-                      height: "48px",
+                      width: "44px",
+                      height: "44px",
                       borderRadius: "12px",
-                      background: "rgba(217,167,86,0.1)",
+                      background: "rgba(217,167,86,0.15)",
                       border: "1px solid rgba(217,167,86,0.3)",
-                      color: "#D9A756",
+                      color: "#6A3A1E",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
@@ -401,19 +388,19 @@ const Home = () => {
                       transition: "all 0.3s ease",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(217,167,86,0.25)";
+                      e.currentTarget.style.background = "rgba(217,167,86,0.3)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(217,167,86,0.1)";
+                      e.currentTarget.style.background =
+                        "rgba(217,167,86,0.15)";
                     }}
                   >
                     <svg
-                      width="20"
-                      height="20"
+                      width="18"
+                      height="18"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#D9A756"
+                      stroke="#6A3A1E"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     >
@@ -450,7 +437,8 @@ const Home = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            background:
+              "linear-gradient(135deg, rgba(26,13,10,0.85) 0%, rgba(60,31,14,0.75) 50%, rgba(26,13,10,0.85) 100%)",
           },
         }}
       >
@@ -459,7 +447,7 @@ const Home = () => {
           fontWeight={700}
           sx={{
             fontSize: { xs: "1.8rem", sm: "2.5rem", md: "3rem" },
-            color: "#fff",
+            color: "#F3E3CC",
             textShadow: "2px 2px 8px rgba(0,0,0,0.5)",
             position: "relative",
             zIndex: 1,
@@ -475,7 +463,7 @@ const Home = () => {
           sx={{
             maxWidth: "700px",
             fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
-            color: "rgba(255,255,255,0.9)",
+            color: "rgba(243,227,204,0.9)",
             textShadow: "1px 1px 4px rgba(0,0,0,0.5)",
             position: "relative",
             zIndex: 1,
