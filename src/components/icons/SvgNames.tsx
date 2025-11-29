@@ -28,13 +28,13 @@ export function DrawTextSVG({
   const finalWidth = width ?? (isSmall ? 160 : isTablet ? 230 : 300);
   const finalScale = scale ?? (isSmall ? 0.65 : isTablet ? 0.85 : 1);
 
-  // Estimate viewBox based on text length
-  const estimatedWidth = Math.max(400, text.length * 40);
-  const viewBoxHeight = 120;
+  // Estimate viewBox based on text length - increased multiplier for cursive font
+  const estimatedWidth = Math.max(400, text.length * 70);
+  const viewBoxHeight = 160; // Increased height slightly to avoid vertical clipping of swashes
 
   // Calculate approximate path length for the text stroke animation
   // This is an estimation based on character count and font size
-  const estimatedPathLength = text.length * 60;
+  const estimatedPathLength = text.length * 80;
 
   return (
     <motion.svg

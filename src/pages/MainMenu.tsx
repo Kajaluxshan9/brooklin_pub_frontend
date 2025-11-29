@@ -152,12 +152,12 @@ const MainMenuPage = () => {
       </Box>
 
       <MainMenu />
-      <div
+      {/* <div
         style={{
           height: isMobile ? 180 : 50,
           backgroundColor: "var(--wine-red)",
         }}
-      ></div>
+      ></div> */}
       <Footer />
     </div>
   );

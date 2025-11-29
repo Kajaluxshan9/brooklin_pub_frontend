@@ -238,7 +238,7 @@ export default function CylinderMenuPopup() {
           width: "100vw",
           height: mobile
             ? "clamp(350px, 70vh, 900px)"
-            : "clamp(600px, 100vh, 1200px)", // bigger for desktop
+            : "clamp(600px, 100vh, 1200px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -247,8 +247,7 @@ export default function CylinderMenuPopup() {
           position: "relative",
           touchAction: "none",
           userSelect: "none",
-          background:
-            "linear-gradient(180deg, rgba(138,42,42,0.95) 0%, rgba(106,58,30,0.9) 100%)",
+          background: "#1a0a0f",
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -263,6 +262,131 @@ export default function CylinderMenuPopup() {
           setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
         }}
       >
+        {/* Animated Background Layers */}
+        <style>
+          {`
+            @keyframes float1 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              33% { transform: translate(15%, 20%) scale(1.1); }
+              66% { transform: translate(-10%, 15%) scale(0.95); }
+            }
+            @keyframes float2 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              33% { transform: translate(-20%, -15%) scale(1.05); }
+              66% { transform: translate(10%, -10%) scale(0.9); }
+            }
+            @keyframes float3 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              33% { transform: translate(20%, -10%) scale(0.95); }
+              66% { transform: translate(-15%, 20%) scale(1.1); }
+            }
+            @keyframes float4 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              33% { transform: translate(-10%, 25%) scale(1.05); }
+              66% { transform: translate(15%, -15%) scale(0.9); }
+            }
+          `}
+        </style>
+
+        {/* Base Mesh Gradient */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at 20% 30%, rgba(139, 38, 53, 0.4) 0%, transparent 50%), " +
+              "radial-gradient(circle at 80% 70%, rgba(107, 62, 30, 0.35) 0%, transparent 50%), " +
+              "radial-gradient(circle at 50% 50%, rgba(74, 20, 25, 0.3) 0%, transparent 60%), " +
+              "linear-gradient(135deg, #2a1015 0%, #1a0a0f 50%, #2d1a10 100%)",
+            zIndex: 1,
+          }}
+        />
+
+        {/* Floating Orbs with Blur */}
+        <div
+          style={{
+            position: "absolute",
+            top: "10%",
+            left: "15%",
+            width: "400px",
+            height: "400px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(220, 100, 80, 0.25) 0%, rgba(180, 60, 50, 0.1) 40%, transparent 70%)",
+            filter: "blur(60px)",
+            animation: "float1 20s ease-in-out infinite",
+            zIndex: 2,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "60%",
+            right: "10%",
+            width: "350px",
+            height: "350px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(200, 120, 60, 0.22) 0%, rgba(160, 90, 40, 0.08) 40%, transparent 70%)",
+            filter: "blur(70px)",
+            animation: "float2 25s ease-in-out infinite",
+            zIndex: 2,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "15%",
+            left: "25%",
+            width: "300px",
+            height: "300px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(160, 50, 70, 0.2) 0%, rgba(120, 30, 50, 0.08) 40%, transparent 70%)",
+            filter: "blur(65px)",
+            animation: "float3 22s ease-in-out infinite",
+            zIndex: 2,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "30%",
+            right: "30%",
+            width: "280px",
+            height: "280px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(180, 80, 50, 0.18) 0%, rgba(140, 60, 30, 0.06) 40%, transparent 70%)",
+            filter: "blur(55px)",
+            animation: "float4 18s ease-in-out infinite",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Radial Overlay for Depth */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse at center, transparent 0%, rgba(26, 10, 15, 0.4) 70%, rgba(26, 10, 15, 0.8) 100%)",
+            zIndex: 3,
+          }}
+        />
+
+        {/* Subtle Vignette */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.3) 100%)",
+            zIndex: 4,
+            pointerEvents: "none",
+          }}
+        />
+
         {/* Cylinder */}
         <motion.div
           ref={containerRef}
@@ -272,17 +396,17 @@ export default function CylinderMenuPopup() {
             width: isCylinder
               ? `${cardWidth}px`
               : isTwo
-              ? isMobile
-                ? "90%"
-                : `${cardWidth * 2 + 16}px`
-              : "min(1100px, 92%)",
+                ? isMobile
+                  ? "90%"
+                  : `${cardWidth * 2 + 16}px`
+                : "min(1100px, 92%)",
             height: isCylinder
               ? `${cardHeight}px`
               : isTwo
-              ? isMobile
-                ? "auto"
-                : `${cardHeight}px`
-              : "auto",
+                ? isMobile
+                  ? "auto"
+                  : `${cardHeight}px`
+                : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
             marginTop: "60px",
@@ -293,6 +417,7 @@ export default function CylinderMenuPopup() {
             gap: isTwo ? "1rem" : undefined,
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 10,
           }}
         >
           {/* Selection is now controlled by the Nav's /special/<type> route. */}
@@ -339,8 +464,8 @@ export default function CylinderMenuPopup() {
                       ? "92%"
                       : `${cardWidth}px`
                     : isMobile
-                    ? "92%"
-                    : `${cardWidth}px`;
+                      ? "92%"
+                      : `${cardWidth}px`;
                   const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
                   return {
                     ...base,
@@ -480,6 +605,6 @@ export default function CylinderMenuPopup() {
             document.body
           )}
       </div>
-    </div>
+    </div >
   );
 }

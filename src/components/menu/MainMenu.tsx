@@ -2,8 +2,6 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import {
   motion,
-  useScroll,
-  useTransform,
   AnimatePresence,
 } from "framer-motion";
 import { DrawTextSVG } from "../icons/SvgNames";
@@ -22,7 +20,6 @@ import type {
 } from "../../types/api.types";
 
 export default function MainMenu() {
-  const pathRef = useRef<SVGPathElement | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
   const [pageIndex, setPageIndex] = useState<number>(0);
   const pageSize = 6;
@@ -36,7 +33,9 @@ export default function MainMenu() {
   const { data: menuItems } = useApiWithCache<MenuItem[]>(
     "all-menu-items",
     () => menuService.getAllMenuItems()
-  ); // Type definitions matching the UI structure
+  );
+
+  // Type definitions matching the UI structure
   type DisplayMenuItem = {
     name: string;
     desc: string;
@@ -56,31 +55,7 @@ export default function MainMenu() {
   };
 
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1000;
-  const containerHeight = 4000;
   const padding = 36;
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end end"],
-  });
-
-  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const left = 0;
-  const right = screenWidth;
-  const centerX = screenWidth / 2;
-
-  const getCurvedPath = (h: number) => `
-    M${left} 0
-    C${right * 0.25} ${h * 0.1},
-     ${right * 0.75} ${h * 0.2},
-     ${right} ${h * 0.3}
-    S${left} ${h * 0.45},
-     ${right} ${h * 0.6}
-    S${left} ${h * 0.75},
-     ${right} ${h * 0.9}
-    S${centerX} ${h * 0.97},
-     ${centerX} ${h}
-  `;
 
   const [gridConfig, setGridConfig] = useState<{
     cols: number;
@@ -92,9 +67,6 @@ export default function MainMenu() {
   }>({ cols: 1, rows: 1, cellSize: 120, gap: 18, containerWidth: 0 });
 
   const [selectedItem, setSelectedItem] = useState<MenuEntry | null>(null);
-
-  const clamp = (val: number, a: number, b: number) =>
-    Math.max(a, Math.min(val, b));
 
   // Transform backend data to UI format
   const transformedMenuData = useMemo((): MenuEntry[] => {
@@ -108,7 +80,6 @@ export default function MainMenu() {
           .filter((item) => item.categoryId === category.id && item.isAvailable)
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map((item) => {
-            // Don't show price if item has measurements - those will be shown from measurement records
             let priceDisplay = "";
             if (!item.hasMeasurements && item.price != null && item.price > 0) {
               priceDisplay = `$${item.price.toFixed(2)}`;
@@ -125,7 +96,6 @@ export default function MainMenu() {
             } as DisplayMenuItem;
           });
 
-        // Generate a simple SVG path for the category name
         const generateNamePath = (name: string): string => {
           const baseY = 20;
           const charWidth = 15;
@@ -149,7 +119,7 @@ export default function MainMenu() {
           primaryCategoryId: category.primaryCategoryId,
         } as MenuEntry;
       })
-      .filter((entry) => entry.menuItems.length > 0); // Only show categories with items
+      .filter((entry) => entry.menuItems.length > 0);
   }, [categories, menuItems]);
 
   // Lock body scroll when popup is open
@@ -200,97 +170,34 @@ export default function MainMenu() {
     );
   }, [transformedMenuData, selectedPrimaryCategoryId]);
 
-  // Generate grid-based points (replaces path-based random placement)
+  // Generate grid-based points
   useEffect(() => {
     const generateGridPoints = () => {
       const numPoints = filteredMenu.length;
       const sw =
         (typeof window !== "undefined" ? window.innerWidth : screenWidth) ||
         screenWidth;
-      const newPoints: { x: number; y: number; size: number }[] = [];
 
-      // Decide columns based on viewport: single-column layout for mobile
       const isMobileLocal = sw < 768;
-      // On mobile show a single column, otherwise try up to 3 columns
       const desiredCols = isMobileLocal ? 1 : 3;
       const cols = Math.min(desiredCols, Math.max(1, numPoints));
       const rows = Math.ceil(numPoints / cols);
 
-      // compute widths/heights based on computed rows/cols so grid scales with item count
       const usableWidth = Math.max(300, sw - padding * 2);
       const cellWidth = usableWidth / cols;
 
-      // size caps
       const maxSizeDesktop = 260;
       const maxSizeMobile = 160;
       const maxAllowed = isMobileLocal ? maxSizeMobile : maxSizeDesktop;
 
-      // compute a compact container height derived from rows so page height adapts to item count
-      const gap = Math.max(12, Math.round(cellWidth * 0.06));
+      const gap = Math.max(24, Math.round(cellWidth * 0.08)); // Increased gap for elegance
       const approxCell = Math.floor(
         Math.max(40, Math.min(cellWidth * 0.78, maxAllowed))
       );
-      const estimatedRowsHeight = rows * (approxCell + gap + 16); // 16px extra for labels/padding
-      const containerHeightUsed = Math.max(
-        estimatedRowsHeight + padding * 2,
-        380
-      );
+      // Calculate exact height needed for the grid items
+      const estimatedRowsHeight = rows * approxCell + (rows - 1) * gap;
+      const containerHeightUsed = estimatedRowsHeight + padding * 2 + 120; // Add space for text labels
 
-      // Single item -> center it and make it large
-      if (numPoints === 1) {
-        const swCenter = sw / 2;
-        const availWidth = sw - padding * 2;
-        const availHeight = containerHeightUsed - padding * 2;
-        const fullSize = Math.max(140, Math.min(availWidth, availHeight));
-        const finalX = clamp(
-          swCenter,
-          padding + fullSize / 2,
-          sw - padding - fullSize / 2
-        );
-        const finalY = clamp(
-          containerHeightUsed / 2,
-          padding + fullSize / 2,
-          containerHeightUsed - padding - fullSize / 2
-        );
-        newPoints.push({ x: finalX, y: finalY, size: fullSize });
-      } else {
-        // distribute rows evenly through available container height (respecting padding)
-        const availableHeight = Math.max(
-          300,
-          containerHeightUsed - padding * 2
-        );
-        const rowGap = Math.floor(availableHeight / (rows + 1));
-
-        for (let i = 0; i < numPoints; i++) {
-          const col = i % cols;
-          const row = Math.floor(i / cols);
-
-          // center of the cell (x based on columns, y spreads across rows using rowGap)
-          const cx = padding + cellWidth * col + cellWidth / 2;
-          const cy = padding + rowGap * (row + 1);
-
-          // size scales with available cell space; reduce size when many items exist
-          const sizeFromWidth = Math.floor(cellWidth * 0.78);
-          const sizeFromHeight = Math.floor(rowGap * 0.7);
-          // reduce scale slightly when many rows to avoid overlap
-          const densityFactor = Math.max(0.5, 1 - (rows - 1) * 0.08);
-          let size = Math.floor(
-            Math.min(sizeFromWidth, sizeFromHeight) * densityFactor
-          );
-          size = Math.max(40, Math.min(size, maxAllowed));
-
-          const finalX = clamp(cx, padding + size / 2, sw - padding - size / 2);
-          const finalY = clamp(
-            cy,
-            padding + size / 2,
-            containerHeightUsed - padding - size / 2
-          );
-
-          newPoints.push({ x: finalX, y: finalY, size });
-        }
-      }
-
-      // also expose computed grid config so rendering can use a CSS grid
       const containerWidth = Math.min(
         sw - padding * 2,
         Math.round(cellWidth * cols + gap * (cols - 1))
@@ -314,9 +221,7 @@ export default function MainMenu() {
     };
   }, [filteredMenu.length, screenWidth]);
 
-  // mobile-detection removed; previously used for popup layout
-
-  // Inject Google Fonts link for the Inspiration family (only once)
+  // Inject Google Fonts
   useEffect(() => {
     if (typeof document === "undefined") return;
     if (document.getElementById("fonts-inspiration-preconnect")) return;
@@ -337,127 +242,48 @@ export default function MainMenu() {
     const sheet = document.createElement("link");
     sheet.rel = "stylesheet";
     sheet.href =
-      "https://fonts.googleapis.com/css2?family=Corinthia&family=Carattere&family=Cedarville+Cursive&family=Great+Vibes&family=Inspiration&family=Momo+Signature&family=Moon+Dance&display=swap";
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Great+Vibes&display=swap";
     sheet.id = "fonts-inspiration-stylesheet";
     document.head.appendChild(sheet);
 
     return () => {
-      // keep links during the session; do not remove on unmount
+      // keep links
     };
   }, []);
 
-  // Ensure the sticky heading sits below any site nav bar. We measure common
-  // nav/header elements and offset the heading so it doesn't get hidden.
-  const [, setHeaderOffset] = useState<number>(0);
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const selectors = [
-      "nav",
-      "header",
-      "#nav",
-      ".nav",
-      ".Nav",
-      ".navbar",
-      ".nav-bar",
-    ];
-    const measure = () => {
-      let h = 0;
-      for (const sel of selectors) {
-        const el = document.querySelector(sel) as HTMLElement | null;
-        if (el && el.offsetHeight) {
-          h = Math.max(h, el.offsetHeight);
-        }
-      }
-
-      // ensure a minimum top offset of 100px across all devices so the heading
-      // never sits under small navbars and is consistently positioned.
-      const buffer = 8;
-      const minTop = 100;
-      setHeaderOffset(Math.max(h + buffer, minTop));
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  // No empty-cell allocation needed: show every menu item.
-  const effectiveContainerHeight =
-    gridConfig.containerHeight ?? containerHeight;
+  // Let content determine height; no forced effective container height
 
   return (
     <div
       ref={ref}
       style={{
-        height: effectiveContainerHeight,
-        background: "var(--wine-red)",
+        // Allow the container to grow to fit content (no fixed heights)
+        paddingTop: padding,
+        paddingBottom: padding,
+        background: "linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%)", // Deep rich brown/black gradient
         position: "relative",
         overflow: "visible",
       }}
     >
-      <svg
-        width="100%"
-        height={effectiveContainerHeight}
-        viewBox={`0 0 ${screenWidth} ${effectiveContainerHeight}`}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          position: "sticky",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          overflow: "visible",
-        }}
-      >
-        <motion.path
-          ref={pathRef}
-          d={getCurvedPath(effectiveContainerHeight)}
-          stroke="white"
-          strokeWidth="6"
-          fill="none"
-          strokeLinecap="round"
-          style={{ pathLength }}
-        />
-      </svg>
-      {/* Grid-aligned layout: centered container whose width depends on item count */}
       <div
         style={{
-          position: "absolute",
-          // start a little below the top padding and spread to bottom padding
-          top: padding,
-          left: "50%",
-          transform: "translateX(-50%)",
+          // Use normal flow so height is determined by content
+          position: "relative",
+          margin: "0 auto",
           width: gridConfig.containerWidth ? gridConfig.containerWidth : "90%",
-          // make the grid fill the available container height so rows distribute evenly
-          height: gridConfig.containerHeight
-            ? gridConfig.containerHeight - padding * 2
-            : effectiveContainerHeight - padding * 2,
           display: "grid",
           gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
-          // rows should split the full height equally
-          gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+          gridTemplateRows: `repeat(${gridConfig.rows}, auto)`,
           gap: `${gridConfig.gap}px`,
           justifyContent: "center",
-          alignContent: "stretch",
+          justifyItems: "center",
+          alignContent: "start",
           zIndex: 10,
-          paddingBottom: 100,
         }}
       >
         {filteredMenu.map((item: MenuEntry, idx: number) => {
-          // compute per-row height and choose item size so it fits comfortably in the row
-          const availableHeight =
-            effectiveContainerHeight -
-            padding * 2 -
-            gridConfig.gap * (gridConfig.rows - 1);
-          const rowHeight =
-            gridConfig.rows > 0
-              ? Math.floor(availableHeight / gridConfig.rows)
-              : availableHeight;
-          const size = Math.min(
-            gridConfig.cellSize || 220,
-            Math.max(40, Math.floor(rowHeight * 0.78))
-          );
-
-          // Render every item (no empty cells)
+          // Use configured cellSize as a stable basis for item size
+          const size = Math.max(40, Math.floor(gridConfig.cellSize || 220));
 
           return (
             <motion.div
@@ -471,364 +297,429 @@ export default function MainMenu() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "10px",
+                gap: "16px",
                 cursor: "pointer",
+                position: "relative",
               }}
-              whileHover={{
-                filter: "brightness(1.03)",
-              }}
-              transition={{ type: "spring", stiffness: 200, damping: 18 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              {/* image circle wrapper */}
+              {/* Image Container with Premium Border */}
               <div
                 style={{
                   width: size,
                   height: size,
                   borderRadius: "50%",
-                  overflow: "hidden",
+                  padding: "6px",
+                  background: "linear-gradient(145deg, #d9a756, #8a5a2a)", // Gold gradient border
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  background: "#111",
-                  border: "4px solid white",
-                  boxShadow: "0 12px 30px rgba(0,0,0,0.7)",
                 }}
               >
-                <motion.img
-                  src={item.mainImage}
-                  alt={item.name}
+                <div
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    border: "2px solid #1a0f0a", // Inner dark border
+                    position: "relative",
                   }}
-                  whileHover={{ filter: "brightness(1.08) contrast(1.05)" }}
-                  transition={{ duration: 0.25 }}
-                />
+                >
+                  <motion.img
+                    src={item.mainImage}
+                    alt={item.name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.4 }}
+                  />
+                  {/* Overlay for depth */}
+                  <div style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "radial-gradient(circle, transparent 50%, rgba(0,0,0,0.3) 100%)",
+                    pointerEvents: "none"
+                  }} />
+                </div>
               </div>
 
-              {/* svg name under the image */}
+              {/* Elegant Text Label */}
               <div
                 style={{
-                  width: Math.min(
-                    size * 1.1,
-                    gridConfig.containerWidth || 9999
-                  ),
+                  width: Math.min(size * 1.8, gridConfig.containerWidth || 9999), // Increased from 1.4
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   pointerEvents: "none",
+                  marginTop: -5,
+                  overflow: "visible" // Explicitly allow overflow
                 }}
               >
                 <DrawTextSVG
                   text={item.name}
-                  width={size}
-                  stroke="white"
-                  scale={1.2}
+                  width={size * 1.5} // Increased from 1.2
+                  stroke="#d9a756" // Gold text
+                  scale={1.1}
                 />
               </div>
             </motion.div>
           );
         })}
       </div>
-      {/* Popup/modal for submenu - show all images for the menu item (images only) */}
-      {selectedItem && (
-        <>
+
+      {/* Premium Modal - Updated to match Home Page Popup Style */}
+      <AnimatePresence>
+        {selectedItem && (
           <Dialog
             open={!!selectedItem}
             onClose={() => setSelectedItem(null)}
-            maxWidth="lg"
+            fullScreen
             sx={{ zIndex: 14000 }}
-            BackdropProps={{
-              sx: { zIndex: 13990, backgroundColor: "rgba(0,0,0,0.45)" },
-            }}
             PaperProps={{
               sx: {
-                background: "transparent",
+                background: "rgba(0,0,0,0.9)", // Dark backdrop like SpecialDisplay
                 boxShadow: "none",
-                overflow: "visible",
-                zIndex: 14001,
+                overflow: "hidden", // We'll handle scrolling in the content
               },
             }}
           >
-            <DialogContent
-              sx={{
-                p: 2,
+            {/* Close Button - Matching SpecialDisplay style */}
+            <button
+              onClick={() => setSelectedItem(null)}
+              style={{
+                position: "fixed",
+                top: "28px",
+                right: "28px",
+                width: "50px",
+                height: "50px",
+                borderRadius: "50%",
+                backdropFilter: "blur(4px)",
+                background: "rgba(92, 64, 51, 0.8)", // Brown background
+                border: "1px solid rgba(217, 167, 86, 0.6)", // Gold border
                 display: "flex",
+                alignItems: "center",
                 justifyContent: "center",
-                background: "transparent",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
+                zIndex: 14002,
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow =
+                  "0 0 22px rgba(217, 167, 86, 0.45)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "rgba(92, 64, 51, 1)";
+                (e.currentTarget as HTMLElement).style.borderColor = "#d9a756";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow =
+                  "0 4px 12px rgba(0,0,0,0.3)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "rgba(92, 64, 51, 0.8)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(217, 167, 86, 0.6)";
               }}
             >
-              <Box
-                sx={{
-                  position: "relative",
-                  width: "min(920px, 96vw)",
-                  bgcolor: "background.paper",
-                  borderRadius: 2,
-                  boxShadow: 6,
-                  p: 2,
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  transition: "0.35s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as SVGElement).style.transform =
+                    "rotate(90deg)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as SVGElement).style.transform =
+                    "rotate(0deg)";
                 }}
               >
-                <IconButton
-                  aria-label="close"
-                  onClick={() => setSelectedItem(null)}
-                  size="large"
+                <path d="M18 6L6 18" />
+                <path d="M6 6l12 12" />
+              </svg>
+            </button>
+
+            <DialogContent
+              sx={{
+                p: 0,
+                background: "transparent",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%"
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflowY: "auto", // Allow scrolling if content is tall
+                  padding: "80px 20px 40px", // Top padding for close button
+                }}
+              >
+                <Box
                   sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
+                    position: "relative",
+                    width: "min(1000px, 95vw)",
+                    // No background on the container itself to keep the "overlay" feel, 
+                    // or a very subtle one if needed for readability.
+                    // Let's add a subtle glass effect for the content area
+                    bgcolor: "rgba(18, 10, 8, 0.8)",
+                    backdropFilter: "blur(10px)",
+                    borderRadius: "24px",
+                    border: "1px solid rgba(217, 167, 86, 0.2)",
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                    p: { xs: 3, md: 6 },
                   }}
                 >
-                  <span style={{ fontSize: 20, lineHeight: 1 }}>×</span>
-                </IconButton>
-
-                {/* List view: show menu items with measurements */}
-                <AnimatePresence mode="wait">
-                  <Box
-                    key={pageIndex}
-                    sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                  {/* Header */}
+                  <Typography
+                    variant="h3"
+                    align="center"
+                    sx={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      color: "#d9a756",
+                      mb: 5,
+                      fontWeight: 600,
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                      borderBottom: "1px solid rgba(217, 167, 86, 0.2)",
+                      pb: 2,
+                      display: "inline-block",
+                      width: "100%"
+                    }}
                   >
-                    {(
-                      selectedItem?.menuItems?.slice(
-                        pageIndex * pageSize,
-                        (pageIndex + 1) * pageSize
-                      ) || []
-                    ).map((mi: DisplayMenuItem, i: number) => (
-                      <motion.div
-                        key={`${pageIndex}-${i}`}
-                        layoutId={`item-${mi.name}-${i}`}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{
-                          delay: i * 0.05,
-                          duration: 0.3,
-                          ease: "easeOut",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "row",
-                            gap: 2,
-                            p: 2,
-                            borderRadius: 2,
-                            border: "1px solid rgba(0,0,0,0.08)",
-                            bgcolor: "background.paper",
-                            transition: "all 200ms ease",
-                            "&:hover": {
-                              bgcolor: "rgba(184, 115, 51, 0.05)",
-                              borderColor: "rgba(184, 115, 51, 0.3)",
-                            },
-                          }}
+                    {selectedItem.name}
+                  </Typography>
+
+                  {/* Menu Items List */}
+                  <AnimatePresence mode="wait">
+                    <Box
+                      key={pageIndex}
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                        gap: 3
+                      }}
+                    >
+                      {(
+                        selectedItem?.menuItems?.slice(
+                          pageIndex * pageSize,
+                          (pageIndex + 1) * pageSize
+                        ) || []
+                      ).map((mi: DisplayMenuItem, i: number) => (
+                        <motion.div
+                          key={`${pageIndex}-${i}`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
                         >
-                          {/* Item details - taking full width */}
                           <Box
                             sx={{
-                              flex: 1,
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 0.5,
+                              p: 2.5,
+                              height: "100%",
+                              borderRadius: "12px",
+                              background: "rgba(255, 255, 255, 0.03)",
+                              border: "1px solid rgba(255, 255, 255, 0.05)",
+                              transition: "all 0.3s ease",
+                              "&:hover": {
+                                background: "rgba(217, 167, 86, 0.08)",
+                                borderColor: "rgba(217, 167, 86, 0.3)",
+                                transform: "translateY(-2px)"
+                              },
                             }}
                           >
-                            <Typography
-                              variant="h6"
-                              sx={{ fontWeight: 700, color: "#1a1a1a" }}
-                            >
-                              {mi.name}
-                            </Typography>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 1 }}>
+                              <Typography
+                                variant="h6"
+                                sx={{
+                                  fontFamily: "'Cormorant Garamond', serif",
+                                  fontWeight: 700,
+                                  color: "#f3e3cc", // Cream light
+                                  fontSize: "1.4rem"
+                                }}
+                              >
+                                {mi.name}
+                              </Typography>
+                              {!mi.hasMeasurements && mi.price && (
+                                <Typography
+                                  variant="h6"
+                                  sx={{
+                                    fontFamily: "'Cormorant Garamond', serif",
+                                    color: "#d9a756",
+                                    fontWeight: 700,
+                                    fontSize: "1.2rem"
+                                  }}
+                                >
+                                  {mi.price}
+                                </Typography>
+                              )}
+                            </Box>
 
                             {mi.desc && (
                               <Typography
                                 variant="body2"
-                                sx={{ color: "#666", fontSize: "0.9rem" }}
+                                sx={{
+                                  color: "rgba(255, 255, 255, 0.7)",
+                                  fontFamily: "'Inter', sans-serif",
+                                  fontSize: "0.95rem",
+                                  lineHeight: 1.6,
+                                  mb: 2
+                                }}
                               >
                                 {mi.desc}
                               </Typography>
                             )}
 
-                            {/* Show measurements if available */}
-                            {mi.hasMeasurements &&
-                              mi.measurements &&
-                              mi.measurements.length > 0 ? (
-                              <Box
-                                sx={{
-                                  mt: 1,
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: 1.5,
-                                }}
-                              >
+                            {/* Measurements */}
+                            {mi.hasMeasurements && mi.measurements && (
+                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: "auto" }}>
                                 {mi.measurements
                                   .filter((m) => m.price > 0)
                                   .sort((a, b) => a.sortOrder - b.sortOrder)
-                                  .map((measurement, idx) => (
+                                  .map((m, idx) => (
                                     <Box
                                       key={idx}
                                       sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 0.5,
                                         px: 1.5,
                                         py: 0.5,
-                                        borderRadius: 1,
-                                        bgcolor: "rgba(184, 115, 51, 0.1)",
-                                        border:
-                                          "1px solid rgba(184, 115, 51, 0.2)",
+                                        borderRadius: "20px",
+                                        border: "1px solid rgba(217, 167, 86, 0.3)",
+                                        bgcolor: "rgba(217, 167, 86, 0.1)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1
                                       }}
                                     >
-                                      <Typography
-                                        variant="body2"
-                                        sx={{
-                                          fontWeight: 600,
-                                          color: "#b87333",
-                                        }}
-                                      >
-                                        {measurement.measurementTypeEntity
-                                          ?.name ||
-                                          measurement.measurementType?.name ||
-                                          "Size"}
+                                      <Typography variant="caption" sx={{ color: "#d9a756", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                        {m.measurementTypeEntity?.name || m.measurementType?.name || "Size"}
                                       </Typography>
-                                      <Typography
-                                        variant="body2"
-                                        sx={{ color: "#666" }}
-                                      >
-                                        ${measurement.price.toFixed(2)}
+                                      <Box sx={{ width: 1, height: 12, bgcolor: "rgba(217, 167, 86, 0.3)" }} />
+                                      <Typography variant="caption" sx={{ color: "#f3e3cc" }}>
+                                        ${m.price.toFixed(2)}
                                       </Typography>
                                     </Box>
                                   ))}
                               </Box>
-                            ) : mi.price ? (
-                              <Typography
-                                variant="body1"
-                                sx={{
-                                  fontWeight: 700,
-                                  color: "#b87333",
-                                  mt: 0.5,
-                                }}
-                              >
-                                {mi.price}
-                              </Typography>
-                            ) : null}
+                            )}
                           </Box>
-                        </Box>
-                      </motion.div>
-                    ))}
-                  </Box>
-                </AnimatePresence>
+                        </motion.div>
+                      ))}
+                    </Box>
+                  </AnimatePresence>
 
-                {(selectedItem?.menuItems?.length || 0) > pageSize &&
-                  (() => {
-                    const totalPages = Math.ceil(
-                      (selectedItem?.menuItems?.length || 0) / pageSize
-                    );
-
-                    const prevPage = Math.max(0, pageIndex - 1);
-                    const nextPage = Math.min(totalPages - 1, pageIndex + 1);
-
-                    return (
-                      <Box
+                  {/* Pagination */}
+                  {(selectedItem?.menuItems?.length || 0) > pageSize && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        mt: 6,
+                        position: "relative",
+                        width: "100%",
+                        minHeight: "60px"
+                      }}
+                    >
+                      {/* Left Arrow */}
+                      <IconButton
+                        onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
+                        disabled={pageIndex === 0}
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 2,
-                          mt: 2,
+                          position: "absolute",
+                          left: 0,
+                          color: "#d9a756",
+                          opacity: pageIndex === 0 ? 0.3 : 1,
+                          border: "1px solid rgba(217, 167, 86, 0.5)",
+                          borderRadius: "12px",
+                          width: "48px",
+                          height: "48px",
+                          background: "rgba(217, 167, 86, 0.1)",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            background: "rgba(217, 167, 86, 0.2)",
+                            transform: "translateX(-2px)"
+                          }
                         }}
                       >
-                        {/* LEFT ARROW */}
-                        <IconButton
-                          aria-label="previous page"
-                          onClick={() => setPageIndex(prevPage)}
-                          disabled={pageIndex === 0}
-                        >
-                          ‹
-                        </IconButton>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                      </IconButton>
 
-                        {/* DOTS */}
-                        <Box sx={{ display: "flex", gap: 1 }}>
-                          {/* PREVIOUS DOT */}
+                      {/* Dots */}
+                      <Box sx={{ display: "flex", gap: 1.5 }}>
+                        {Array.from({ length: Math.ceil((selectedItem.menuItems.length) / pageSize) }).map((_, i) => (
                           <motion.div
-                            onClick={() =>
-                              pageIndex > 0 && setPageIndex(prevPage)
-                            }
+                            key={i}
+                            onClick={() => setPageIndex(i)}
                             animate={{
-                              scale: pageIndex === 0 ? 0.5 : 0.7,
-                              opacity: pageIndex === 0 ? 0.3 : 1,
-                              backgroundColor:
-                                pageIndex === 0 ? "#bdbdbd" : "#757575",
+                              width: pageIndex === i ? 24 : 10,
+                              backgroundColor: pageIndex === i ? "#d9a756" : "rgba(217, 167, 86, 0.3)"
                             }}
-                            transition={{ duration: 0.25, ease: "easeOut" }}
                             style={{
-                              width: 10,
                               height: 10,
-                              borderRadius: "50%",
-                              cursor: pageIndex === 0 ? "default" : "pointer",
+                              borderRadius: "10px",
+                              cursor: "pointer"
                             }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
                           />
-
-                          {/* ACTIVE DOT */}
-                          <motion.div
-                            animate={{
-                              scale: 1.4,
-                              backgroundColor: "var(--wine-red)",
-                            }}
-                            transition={{ duration: 0.25, ease: "easeOut" }}
-                            style={{
-                              width: 12,
-                              height: 12,
-                              borderRadius: "50%",
-                            }}
-                          />
-
-                          {/* NEXT DOT */}
-                          <motion.div
-                            onClick={() =>
-                              pageIndex < totalPages - 1 &&
-                              setPageIndex(nextPage)
-                            }
-                            animate={{
-                              scale: pageIndex === totalPages - 1 ? 0.5 : 0.7,
-                              opacity: pageIndex === totalPages - 1 ? 0.3 : 1,
-                              backgroundColor:
-                                pageIndex === totalPages - 1
-                                  ? "#bdbdbd"
-                                  : "#757575",
-                            }}
-                            transition={{ duration: 0.25, ease: "easeOut" }}
-                            style={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "50%",
-                              cursor:
-                                pageIndex === totalPages - 1
-                                  ? "default"
-                                  : "pointer",
-                            }}
-                          />
-                        </Box>
-
-                        {/* RIGHT ARROW */}
-                        <IconButton
-                          aria-label="next page"
-                          onClick={() => setPageIndex(nextPage)}
-                          disabled={pageIndex === totalPages - 1}
-                        >
-                          ›
-                        </IconButton>
+                        ))}
                       </Box>
-                    );
-                  })()}
 
-                {/* Focused item: opening in a separate dialog (nested popup) */}
-                {/* Inline details panel removed; a nested Dialog is rendered below when focusedItem is set. */}
-
-                {/* Removed main image; thumbnails are shown in the grid above with pagination */}
-              </Box>
+                      {/* Right Arrow */}
+                      <IconButton
+                        onClick={() => setPageIndex(Math.min(Math.ceil(selectedItem.menuItems.length / pageSize) - 1, pageIndex + 1))}
+                        disabled={pageIndex === Math.ceil(selectedItem.menuItems.length / pageSize) - 1}
+                        sx={{
+                          position: "absolute",
+                          right: 0,
+                          color: "#d9a756",
+                          opacity: pageIndex === Math.ceil(selectedItem.menuItems.length / pageSize) - 1 ? 0.3 : 1,
+                          border: "1px solid rgba(217, 167, 86, 0.5)",
+                          borderRadius: "12px",
+                          width: "48px",
+                          height: "48px",
+                          background: "rgba(217, 167, 86, 0.1)",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            background: "rgba(217, 167, 86, 0.2)",
+                            transform: "translateX(2px)"
+                          }
+                        }}
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18l6-6-6-6" />
+                        </svg>
+                      </IconButton>
+                    </Box>
+                  )}
+                </Box>
+              </motion.div>
             </DialogContent>
           </Dialog>
-        </>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
