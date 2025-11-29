@@ -70,13 +70,7 @@ const getEventColor = (type: string): string => {
 };
 
 // Single Event Section Component with Scroll Effects
-const EventSection = ({
-  event,
-  index,
-}: {
-  event: Event;
-  index: number;
-}) => {
+const EventSection = ({ event, index }: { event: Event; index: number }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
@@ -103,18 +97,22 @@ const EventSection = ({
   );
 
   // Scale and opacity
-  const scale = useTransform(smoothProgress, [0, 0.3, 0.7, 1], [0.8, 1, 1, 0.8]);
-  const opacity = useTransform(
+  const scale = useTransform(
     smoothProgress,
-    [0, 0.2, 0.8, 1],
-    [0, 1, 1, 0]
+    [0, 0.3, 0.7, 1],
+    [0.8, 1, 1, 0.8]
   );
+  const opacity = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   // Image zoom effect
   const imageScale = useTransform(smoothProgress, [0, 0.5, 1], [1.2, 1, 1.2]);
 
   // Text reveal animations
-  const textY = useTransform(smoothProgress, [0, 0.3, 0.7, 1], [100, 0, 0, -100]);
+  const textY = useTransform(
+    smoothProgress,
+    [0, 0.3, 0.7, 1],
+    [100, 0, 0, -100]
+  );
   const textOpacity = useTransform(
     smoothProgress,
     [0, 0.3, 0.7, 1],
