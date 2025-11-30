@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import CottageRoundedIcon from "@mui/icons-material/CottageRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
 // Icons used inline elsewhere — legacy icons removed
 import AlternateEmailRoundedIcon from "@mui/icons-material/AlternateEmailRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
@@ -72,6 +73,12 @@ const Nav = () => {
     () => specialsService.getActiveSpecials()
   );
 
+  // Fetch all menu items from backend
+  const { data: menuItems } = useApiWithCache<any[]>(
+    "all-menu-items",
+    () => menuService.getAllMenuItems()
+  );
+
   // Filter specials that are currently visible (within display date range)
   const visibleSpecials = useMemo(() => {
     if (!specialsData) return [];
@@ -114,19 +121,20 @@ const Nav = () => {
   const navLinks: NavNode[] = [
     { label: "Home", path: "/" },
     { label: "About Us", path: "/about" },
+    { label: "Events", path: "/events" },
     {
       label: "Menu",
-      path: "/menu", // Default path when no dropdown items
+      path: undefined, // No navigation - dropdown only
       dropdown:
         primaryCategories && primaryCategories.length > 0
           ? primaryCategories
-              .filter((pc) => pc.isActive)
-              .sort((a, b) => a.sortOrder - b.sortOrder)
-              .map((pc) => ({
-                label: pc.name,
-                path: `/menu?category=${pc.id}`,
-                id: pc.id,
-              }))
+            .filter((pc) => pc.isActive)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((pc) => ({
+              label: pc.name,
+              path: `/menu?category=${pc.id}`,
+              id: pc.id,
+            }))
           : [],
     },
     {
@@ -139,6 +147,8 @@ const Nav = () => {
   // which top-level parent is open
   const [openParent, setOpenParent] = useState<string | null>(null);
   const [mobileOpenParent, setMobileOpenParent] = useState<string | null>(null);
+  // Track which category is expanded in the dropdown
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -300,25 +310,38 @@ const Nav = () => {
                 justifyContent: "center",
                 gap: 3,
                 position: "relative",
+                alignItems: "center",
               }}
             >
               {navLinks.map((link) => {
-                // If the link has children, check if any child's path matches current location
-                const isParentActive = link.dropdown
-                  ? link.dropdown.some(
-                      (item) =>
-                        item.path &&
-                        (item.path === "/"
-                          ? location.pathname === "/"
-                          : location.pathname.startsWith(item.path))
-                    )
-                  : false;
-
-                const isActive = link.path
+                // Determine active state: either the parent's own path matches or any child path matches
+                const parentPathMatch = link.path
                   ? link.path === "/"
                     ? location.pathname === "/"
                     : location.pathname.startsWith(link.path)
-                  : isParentActive;
+                  : false;
+
+                const childPathMatch = link.dropdown
+                  ? link.dropdown.some((item) => {
+                      if (!item.path) return false;
+                      try {
+                        // Parse the item's path to handle query params (e.g. /menu?category=...)
+                        const parsed = new URL(item.path, window.location.origin);
+                        // Match when pathname matches (or startsWith for nested routes)
+                        if (location.pathname.startsWith(parsed.pathname)) return true;
+                        // If the item's path included a search (query), also compare search strings
+                        if (parsed.search && location.pathname === parsed.pathname) {
+                          return location.search.startsWith(parsed.search);
+                        }
+                        return false;
+                      } catch (e) {
+                        // Fallback: plain startsWith if URL parsing fails
+                        return location.pathname.startsWith(item.path as string);
+                      }
+                    })
+                  : false;
+
+                const isActive = parentPathMatch || childPathMatch;
 
                 return link.dropdown ? (
                   <Box
@@ -327,23 +350,32 @@ const Nav = () => {
                     onMouseEnter={() => openParentNow(link.label)}
                     onMouseLeave={scheduleCloseParent}
                   >
-                    {/* Parent Button (underline stays when dropdown item page is active) */}
+                    {/* Parent Button (dropdown) — styled like other nav links; clickable if `path` exists */}
                     <Button
-                      component={Link}
-                      to={
-                        // Use explicit path if defined, otherwise prefer the first dropdown path
-                        link.path ||
-                        (link.dropdown && link.dropdown.length > 0
-                          ? link.dropdown[0].path || "/menu"
-                          : "/menu")
-                      }
-                      color="primary"
+                      component={link.path ? Link : undefined}
+                      to={link.path}
+                      onClick={(e: any) => {
+                        // If there's no path, prevent navigation on click and keep dropdown behavior
+                        if (!link.path) {
+                          e.preventDefault();
+                          openParentNow(link.label);
+                        } else {
+                          closeParentNow();
+                        }
+                      }}
                       sx={{
                         fontWeight: 500,
                         textTransform: "none",
                         color: isActive ? "#6A3A1E" : "primary.main",
                         position: "relative",
                         px: 0.5,
+                        cursor: link.path ? "pointer" : "default",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        fontSize: "0.875rem",
+                        lineHeight: 1.2,
+                        minHeight: 0,
+                        py: 0.5,
                         "&::after": {
                           content: '""',
                           position: "absolute",
@@ -357,7 +389,6 @@ const Nav = () => {
                         },
                         "&:hover::after": { width: "100%" },
                       }}
-                      onClick={closeParentNow}
                     >
                       {link.label}
                     </Button>
@@ -386,9 +417,11 @@ const Nav = () => {
                             "0 10px 30px rgba(0,0,0,0.12), 0 2px 10px rgba(0,0,0,0.06)",
                           padding: "10px 0",
                           listStyle: "none",
-                          minWidth: 230,
+                          minWidth: 280,
+                          maxWidth: 400,
+                          maxHeight: "70vh",
+                          overflowY: "auto",
                           zIndex: 2000,
-                          overflow: "hidden",
                           backdropFilter: "blur(12px)",
                           border: "1px solid rgba(255,255,255,0.45)",
                         }}
@@ -403,12 +436,6 @@ const Nav = () => {
                           return (
                             <motion.li
                               key={item.label}
-                              whileHover={{ x: 4 }}
-                              transition={{
-                                type: "spring",
-                                stiffness: 200,
-                                damping: 18,
-                              }}
                               style={{
                                 position: "relative",
                               }}
@@ -422,7 +449,6 @@ const Nav = () => {
                                   textTransform: "none",
                                   px: 3,
                                   py: 1.2,
-                                  minWidth: 230,
                                   color:
                                     isChildActive || isSelectedByQuery
                                       ? "#6A3A1E"
@@ -439,7 +465,7 @@ const Nav = () => {
                                 {/* Highlight left bar when active or selected by query */}
                                 {(isChildActive || isSelectedByQuery) && (
                                   <motion.span
-                                    layoutId="special-left-bar"
+                                    layoutId="menu-left-bar"
                                     style={{
                                       position: "absolute",
                                       left: 0,
@@ -474,7 +500,7 @@ const Nav = () => {
                   </Box>
                 ) : (
                   // Non dropdown links unchanged
-                  <Box key={link.path} sx={{ position: "relative" }}>
+                  <Box key={link.path} sx={{ position: "relative", display: 'flex', alignItems: 'center' }}>
                     <Button
                       component={Link}
                       to={link.path!}
@@ -483,6 +509,12 @@ const Nav = () => {
                         textTransform: "none",
                         color: isActive ? "#6A3A1E" : "primary.main",
                         position: "relative",
+                        lineHeight: 1.2,
+                        minHeight: 0,
+                        px: 1,
+                        py: 0.5,
+                        display: 'inline-flex',
+                        alignItems: 'center',
                         "&:hover": { color: "primary.dark" },
                       }}
                     >
@@ -755,10 +787,29 @@ const Nav = () => {
           <InfoOutlinedIcon fontSize="medium" />
         </Button>
 
-        {/* Menu */}
+        {/* Events */}
         <Button
           component={Link}
-          to="/menu"
+          to="/events"
+          disableRipple
+          sx={{
+            minWidth: 0,
+            color: location.pathname.startsWith("/events")
+              ? "#D9A756"
+              : "#6A3A1E",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 0,
+          }}
+        >
+          <CalendarMonthRoundedIcon fontSize="medium" />
+        </Button>
+
+        {/* Menu */}
+        <Button
+          onClick={() => setMobileOpenParent("Menu")}
           disableRipple
           sx={{
             minWidth: 0,
@@ -848,46 +899,50 @@ const Nav = () => {
             {mobileOpenParent &&
               navLinks
                 .find((n) => n.label === mobileOpenParent)
-                ?.dropdown?.map((d) => (
-                  <ListItemButton
-                    key={d.label}
-                    onClick={() => {
-                      const targetPath = d.path;
-                      setMobileOpenParent(null);
-                      // Navigate after closing dialog
-                      setTimeout(() => {
-                        if (targetPath) {
-                          navigate(targetPath);
-                        }
-                      }, 100);
-                    }}
-                    sx={{
-                      justifyContent: "center",
-                      py: 1.5,
-                      borderRadius: 2,
-                      mb: 0.5,
-                      "&:hover": {
-                        bgcolor: "rgba(217,167,86,0.15)",
-                      },
-                    }}
-                  >
-                    <ListItemText
-                      primary={d.label}
-                      primaryTypographyProps={{
-                        align: "center",
-                        sx: {
-                          fontFamily: '"Inter", sans-serif',
-                          fontWeight: 500,
-                          fontSize: "1rem",
-                          color:
-                            d.id && d.id === selectedCategory
-                              ? "#D9A756"
-                              : "#3C1F0E",
-                        },
-                      }}
-                    />
-                  </ListItemButton>
-                ))}
+                ?.dropdown?.map((d) => {
+                  const isSelectedByQuery = !!d.id && d.id === selectedCategory;
+
+                  return (
+                    <Box key={d.label}>
+                      <ListItemButton
+                        onClick={() => {
+                          const targetPath = d.path;
+                          setMobileOpenParent(null);
+                          setExpandedCategory(null);
+                          setTimeout(() => {
+                            if (targetPath) {
+                              navigate(targetPath);
+                            }
+                          }, 100);
+                        }}
+                        sx={{
+                          justifyContent: "center",
+                          py: 1.5,
+                          borderRadius: 2,
+                          mb: 0.5,
+                          "&:hover": {
+                            bgcolor: "rgba(217,167,86,0.15)",
+                          },
+                        }}
+                      >
+                        <ListItemText
+                          primary={d.label}
+                          primaryTypographyProps={{
+                            align: "center",
+                            sx: {
+                              fontFamily: '"Inter", sans-serif',
+                              fontWeight: 500,
+                              fontSize: "1rem",
+                              color: isSelectedByQuery
+                                ? "#D9A756"
+                                : "#3C1F0E",
+                            },
+                          }}
+                        />
+                      </ListItemButton>
+                    </Box>
+                  );
+                })}
           </List>
         </DialogContent>
       </Dialog>

@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { useApiWithCache } from "../../hooks/useApi";
 import { specialsService } from "../../services/specials.service";
 import { getImageUrl } from "../../services/api";
+import PopupCloseButton from "../menu/PopupCloseButton";
 import type { Special } from "../../types/api.types";
 
 // Card type used locally
@@ -102,6 +103,7 @@ export default function CylinderMenuPopup() {
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
   // Derived value for card sizing
   const mobile = screenWidth < 768;
+  const verticalGap = 60; // px - consistent gap above and below the cylinder container
   const cardWidth = mobile
     ? Math.max(120, Math.min(screenWidth * 0.6, 320)) // mobile
     : Math.max(180, Math.min(screenWidth * 0.3, 300)); // desktop
@@ -271,8 +273,8 @@ export default function CylinderMenuPopup() {
         style={{
           width: "100vw",
           height: mobile
-            ? "clamp(350px, 70vh, 900px)"
-            : "clamp(600px, 100vh, 1200px)",
+            ? `clamp(350px, calc(100vh - ${verticalGap * 2}px), 900px)`
+            : `clamp(600px, calc(100vh - ${verticalGap * 2}px), 1200px)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -282,6 +284,8 @@ export default function CylinderMenuPopup() {
           touchAction: "none",
           userSelect: "none",
           background: "#FAF7F2",
+          marginTop: `${verticalGap}px`,
+          marginBottom: `${verticalGap}px`,
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -366,7 +370,7 @@ export default function CylinderMenuPopup() {
         <motion.div
           onMouseEnter={() => setIsHoveringCylinder(true)}
           onMouseLeave={() => setIsHoveringCylinder(false)}
-          style={{
+            style={{
             rotateY: isCylinder ? angle : 0,
             transformStyle: isCylinder ? "preserve-3d" : "flat",
             width: isCylinder
@@ -385,7 +389,7 @@ export default function CylinderMenuPopup() {
                 : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
-            marginTop: "60px",
+            marginTop: 0,
             padding: isMobile ? "0 20px" : "0",
             display: isCylinder ? undefined : "flex",
             flexDirection: isTwo ? (isMobile ? "column" : "row") : "column",
@@ -539,65 +543,11 @@ export default function CylinderMenuPopup() {
                     alignItems: "center",
                   }}
                 >
-                  {/* Close Button */}
-                  <button
+                  <PopupCloseButton
                     onClick={() => setSelectedCard(null)}
-                    style={{
-                      position: "absolute",
-                      top: "28px",
-                      right: "28px",
-                      width: "50px",
-                      height: "50px",
-                      borderRadius: "50%",
-                      backdropFilter: "blur(14px)",
-                      background: "rgba(42, 26, 16, 0.15)",
-                      border: "1px solid rgba(42, 26, 16, 0.3)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      boxShadow: "0 0 0 rgba(42, 26, 16, 0.4)",
-                      transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
-                      zIndex: 10,
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.boxShadow =
-                        "0 0 22px rgba(42, 26, 16, 0.45)";
-                      (e.currentTarget as HTMLElement).style.background =
-                        "rgba(42, 26, 16, 0.25)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.boxShadow =
-                        "0 0 0 rgba(42, 26, 16, 0.4)";
-                      (e.currentTarget as HTMLElement).style.background =
-                        "rgba(42, 26, 16, 0.15)";
-                    }}
-                  >
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#2a1a10"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{
-                        transition: "0.35s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as SVGElement).style.transform =
-                          "rotate(90deg)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as SVGElement).style.transform =
-                          "rotate(0deg)";
-                      }}
-                    >
-                      <path d="M18 6L6 18" />
-                      <path d="M6 6l12 12" />
-                    </svg>
-                  </button>
+                    ariaLabel={`Close ${selectedCard?.title || "popup"}`}
+                    zIndex={14005}
+                  />
                   <img
                     src={selectedCard.popupImg}
                     alt={selectedCard.title}

@@ -6,8 +6,47 @@ import SocialMedia from "../components/common/SocialFloatingMenu";
 import { Box, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import BgImage from "../assets/images/hero-bg.jpg";
+import { useLocation } from "react-router-dom";
+import { useMemo } from "react";
+import { useApiWithCache } from "../hooks/useApi";
+import { menuService } from "../services/menu.service";
+import type { PrimaryCategory } from "../types/api.types";
 
 const MainMenuPage = () => {
+  const location = useLocation();
+
+  // Fetch primary categories from backend
+  const { data: primaryCategories } = useApiWithCache<PrimaryCategory[]>(
+    "primary-categories",
+    () => menuService.getPrimaryCategories()
+  );
+
+  // Get selected category from URL
+  const selectedCategoryId = useMemo(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      return params.get("category");
+    } catch {
+      return null;
+    }
+  }, [location.search]);
+
+  // Find the selected category name
+  const categoryName = useMemo(() => {
+    if (!selectedCategoryId || !primaryCategories) {
+      return "Our Menu";
+    }
+    const category = primaryCategories.find((pc) => pc.id === selectedCategoryId);
+    return category ? category.name : "Our Menu";
+  }, [selectedCategoryId, primaryCategories]);
+
+  // Dynamic subtitle based on category
+  const subtitle = useMemo(() => {
+    if (selectedCategoryId && categoryName !== "Our Menu") {
+      return `Explore our ${categoryName.toLowerCase()} selection`;
+    }
+    return "Fresh ingredients, timeless recipes, unforgettable flavors";
+  }, [selectedCategoryId, categoryName]);
 
   return (
     <div>
@@ -91,6 +130,7 @@ const MainMenuPage = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
+            key={categoryName} // Re-animate when category changes
             sx={{
               margin: 0,
               color: "#F3E3CC",
@@ -103,7 +143,7 @@ const MainMenuPage = () => {
               lineHeight: 1.2,
             }}
           >
-            Our Menu
+            {categoryName}
           </Typography>
 
           <Typography
@@ -111,6 +151,7 @@ const MainMenuPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
+            key={subtitle} // Re-animate when subtitle changes
             sx={{
               mt: { xs: 1.5, md: 2 },
               color: "rgba(243, 227, 204, 0.9)",
@@ -123,7 +164,7 @@ const MainMenuPage = () => {
               textShadow: "1px 1px 4px rgba(0,0,0,0.3)",
             }}
           >
-            Fresh ingredients, timeless recipes, unforgettable flavors
+            {subtitle}
           </Typography>
 
           {/* Decorative line below */}

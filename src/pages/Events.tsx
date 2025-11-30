@@ -3,9 +3,6 @@ import {
   Box,
   Typography,
   Chip,
-  Card,
-  CardMedia,
-  CardContent,
   Container,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,150 +82,84 @@ const getEventTypes = (events: Event[]): string[] => {
 const EventCard = ({ event, index }: { event: Event; index: number }) => {
   const [isHovered, setIsHovered] = useState(false);
   const color = getEventColor(event.type);
+  const isOdd = index % 2 === 1;
 
   return (
-    <motion.div
+    <Box
+      component={motion.div}
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
+      transition={{ duration: 0.6, delay: (index % 3) * 0.1 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      sx={{
+        width: "100%",
+        margin: "0 auto",
+      }}
     >
-      <Card
-        component={motion.div}
-        whileHover={{ y: -10, scale: 1.02 }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+      <Box
+        component={motion.section}
+        whileHover={{ y: -5 }}
         sx={{
-          height: "100%",
+          background: "#f6f6f6",
+          borderRadius: isOdd
+            ? "24px 24px 48px 24px"
+            : "24px 24px 24px 48px",
+          padding: isOdd
+            ? { xs: "88px 36px 36px", md: "48px 308px 48px 60px" }
+            : { xs: "88px 36px 36px", md: "48px 48px 48px 308px" },
+          margin: isOdd
+            ? { xs: "64px 0", md: "84px 0 84px 0" }
+            : { xs: "64px 0", md: "84px 0" },
+          marginLeft: isOdd ? { xs: 0, md: "0" } : { xs: 0, md: 0 },
           display: "flex",
-          flexDirection: "column",
-          borderRadius: { xs: "16px", md: "24px" },
-          overflow: "hidden",
-          background: "linear-gradient(135deg, #FFFDFB 0%, #FAF7F2 100%)",
-          border: `2px solid ${isHovered ? color : "rgba(217,167,86,0.3)"}`,
+          flexDirection: { xs: "column", md: "row" },
+          position: "relative",
           boxShadow: isHovered
-            ? `0 20px 60px ${color}40, 0 0 0 2px ${color}20`
-            : "0 8px 32px rgba(106,58,30,0.12)",
-          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-          cursor: "pointer",
+            ? `5px 0 0 0 ${color}40, -5px 0 0 0 ${color}40, 0 5px 0 0 ${color}40`
+            : "5px 0 0 0 rgba(204,204,204,0.3), -5px 0 0 0 rgba(204,204,204,0.3), 0 5px 0 0 rgba(204,204,204,0.3)",
+          transition: "all 0.4s ease",
         }}
       >
-        {/* Image Section */}
+        {/* Text Content */}
         <Box
           sx={{
-            position: "relative",
-            height: { xs: 180, sm: 220, md: 260 },
-            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            width: { xs: "100%", md: "auto" },
+            flex: 1,
           }}
         >
-          <CardMedia
-            component={motion.div}
-            animate={{ scale: isHovered ? 1.1 : 1 }}
-            transition={{ duration: 0.6 }}
-            sx={{
-              height: "100%",
-              backgroundImage: `url(${
-                event.imageUrls?.[0]
-                  ? getImageUrl(event.imageUrls[0])
-                  : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80"
-              })`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-
-          {/* Gradient Overlay */}
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              background: `linear-gradient(180deg, transparent 40%, rgba(26,13,10,0.85) 100%)`,
-            }}
-          />
-
           {/* Event Type Badge */}
           <Chip
             label={getEventTypeLabel(event.type)}
-            component={motion.div}
-            whileHover={{ scale: 1.1 }}
             sx={{
-              position: "absolute",
-              top: { xs: 12, md: 16 },
-              right: { xs: 12, md: 16 },
+              alignSelf: "flex-start",
               background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
               color: "#FFFDFB",
               fontFamily: '"Inter", sans-serif',
               fontWeight: 700,
-              fontSize: { xs: "0.7rem", md: "0.8rem" },
-              px: 1,
-              height: { xs: 28, md: 32 },
+              fontSize: { xs: "0.7rem", md: "0.75rem" },
+              px: 1.5,
+              height: { xs: 26, md: 28 },
               borderRadius: "20px",
-              border: "2px solid rgba(255,255,255,0.3)",
-              boxShadow: `0 4px 15px ${color}50`,
+              mb: 2,
               textTransform: "uppercase",
               letterSpacing: "0.05em",
             }}
           />
 
-          {/* Date Badge */}
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: { xs: 12, md: 16 },
-              left: { xs: 12, md: 16 },
-              display: "flex",
-              gap: 1,
-            }}
-          >
-            <Chip
-              icon={
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              }
-              label={formatEventDate(event.eventStartDate).split(",")[0]}
-              sx={{
-                background: "rgba(255,255,255,0.95)",
-                color: "#4A2C17",
-                fontFamily: '"Inter", sans-serif',
-                fontWeight: 600,
-                fontSize: { xs: "0.7rem", md: "0.8rem" },
-                height: { xs: 26, md: 30 },
-                "& .MuiChip-icon": { color: color, ml: 0.5 },
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              }}
-            />
-          </Box>
-        </Box>
-
-        {/* Content Section */}
-        <CardContent
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            p: { xs: 2, md: 3 },
-          }}
-        >
-          {/* Title */}
           <Typography
-            variant="h5"
+            variant="h3"
             sx={{
+              margin: 0,
               fontFamily: '"Cormorant Garamond", Georgia, serif',
               fontWeight: 700,
+              fontSize: { xs: "1.3rem", md: "1.5rem" },
+              maxWidth: "20ch",
               color: "#4A2C17",
-              fontSize: { xs: "1.3rem", sm: "1.5rem", md: "1.75rem" },
-              mb: 1,
+              mb: 2,
               lineHeight: 1.2,
             }}
           >
@@ -262,7 +193,7 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
                 variant="body2"
                 sx={{
                   fontFamily: '"Inter", sans-serif',
-                  fontSize: { xs: "0.8rem", md: "0.9rem" },
+                  fontSize: { xs: "0.75rem", md: "0.85rem" },
                 }}
               >
                 {formatEventDate(event.eventStartDate)}
@@ -291,7 +222,7 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
                 variant="body2"
                 sx={{
                   fontFamily: '"Inter", sans-serif',
-                  fontSize: { xs: "0.8rem", md: "0.9rem" },
+                  fontSize: { xs: "0.75rem", md: "0.85rem" },
                 }}
               >
                 {formatEventTime(event.eventStartDate)}
@@ -299,40 +230,47 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
             </Box>
           </Box>
 
-          {/* Description */}
           <Typography
-            variant="body2"
             sx={{
+              margin: "16px 0 0",
+              maxWidth: "36ch",
               fontFamily: '"Inter", sans-serif',
               color: "rgba(74,44,23,0.85)",
               fontSize: { xs: "0.85rem", md: "0.95rem" },
               lineHeight: 1.7,
-              flex: 1,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
             }}
           >
             {event.description}
           </Typography>
+        </Box>
 
-          {/* Bottom Accent Line */}
-          <Box
-            component={motion.div}
-            animate={{ scaleX: isHovered ? 1 : 0.3 }}
-            transition={{ duration: 0.3 }}
-            sx={{
-              height: 3,
-              background: `linear-gradient(90deg, ${color} 0%, transparent 100%)`,
-              mt: 2,
-              borderRadius: 2,
-              transformOrigin: "left",
-            }}
-          />
-        </CardContent>
-      </Card>
-    </motion.div>
+        {/* Visual/Image */}
+        <Box
+          component={motion.img}
+          animate={{ scale: isHovered ? 1.05 : 1 }}
+          transition={{ duration: 0.6 }}
+          src={
+            event.imageUrls?.[0]
+              ? getImageUrl(event.imageUrls[0])
+              : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80"
+          }
+          alt={event.title}
+          sx={{
+            width: { xs: "150px", md: "240px" },
+            height: { xs: "150px", md: "280px" },
+            position: "absolute",
+            top: { xs: "16px", md: "-24px" },
+            right: isOdd ? { xs: "16px", md: "24px" } : { xs: "16px", md: "auto" },
+            left: isOdd ? { xs: "auto", md: "auto" } : { xs: "auto", md: "24px" },
+            borderRadius: "24px",
+            boxShadow:
+              "1px 2px 6px rgba(255,255,255,0.25), 2px 6px 12px rgba(0,0,0,0.25)",
+            objectFit: "contain",
+            objectPosition: "center",
+          }}
+        />
+      </Box>
+    </Box>
   );
 };
 
@@ -527,9 +465,8 @@ const Events = () => {
                   fontWeight: 600,
                   fontSize: { xs: "0.8rem", md: "0.9rem" },
                   borderRadius: "25px",
-                  border: `2px solid ${
-                    selectedType === type ? "#D9A756" : "rgba(106,58,30,0.2)"
-                  }`,
+                  border: `2px solid ${selectedType === type ? "#D9A756" : "rgba(106,58,30,0.2)"
+                    }`,
                   boxShadow:
                     selectedType === type
                       ? "0 8px 25px rgba(217,167,86,0.4)"
@@ -588,8 +525,8 @@ const Events = () => {
               {selectedType === "all"
                 ? "Check back soon for upcoming events!"
                 : `No ${getEventTypeLabel(
-                    selectedType
-                  )} events scheduled. Try another category.`}
+                  selectedType
+                )} events scheduled. Try another category.`}
             </Typography>
           </Box>
         ) : (
@@ -602,19 +539,16 @@ const Events = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, 1fr)",
-                  lg: "repeat(3, 1fr)",
-                },
-                gap: { xs: 2, sm: 3, md: 4 },
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+                maxWidth: { xs: "100%", md: "920px" },
+                margin: "0 auto",
               }}
             >
               {displayableEvents.map((event, index) => (
-                <Box key={event.id}>
-                  <EventCard event={event} index={index} />
-                </Box>
+                <EventCard key={event.id} event={event} index={index} />
               ))}
             </Box>
           </AnimatePresence>

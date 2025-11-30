@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -118,30 +118,7 @@ export default function AboutUs() {
   };
 
   // Handle wheel event only when container is hovered (for desktop)
-  const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
-      // If component is visible and not all pages viewed, prevent default scroll and handle slide navigation
-      if (isFullyVisible && !allPagesViewed) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!scrollEnabled || !isHovering) return;
-
-        setScrollEnabled(false);
-        setDirection(randomDirection());
-
-        if (e.deltaY > 0) {
-          setPageIndex((prev) => (prev + 1) % pages.length);
-        } else {
-          setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
-        }
-
-        setTimeout(() => setScrollEnabled(true), 1000);
-      }
-      // If all pages viewed or not fully visible, allow normal page scrolling (don't prevent default)
-    },
-    [scrollEnabled, isHovering, allPagesViewed, isFullyVisible]
-  );
+  // We'll attach native (non-passive) listeners to the container element below
 
   const getVariants = (dir: string) => {
     switch (dir) {
@@ -178,52 +155,102 @@ export default function AboutUs() {
 
   // Touch swipe handling for mobile
   const touchStartY = useRef<number | null>(null);
+  // We'll attach native touch handlers to the container element below
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (isFullyVisible && !allPagesViewed) {
-      e.preventDefault();
-    }
-    touchStartY.current = e.touches[0].clientY;
-  };
+  // Refs to hold latest state for native listeners
+  const isFullyVisibleRef = useRef(isFullyVisible);
+  const allPagesViewedRef = useRef(allPagesViewed);
+  const scrollEnabledRef = useRef(scrollEnabled);
+  const isHoveringRef = useRef(isHovering);
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (isFullyVisible && !allPagesViewed) {
-      e.preventDefault();
+  useEffect(() => {
+    isFullyVisibleRef.current = isFullyVisible;
+  }, [isFullyVisible]);
+  useEffect(() => {
+    allPagesViewedRef.current = allPagesViewed;
+  }, [allPagesViewed]);
+  useEffect(() => {
+    scrollEnabledRef.current = scrollEnabled;
+  }, [scrollEnabled]);
+  useEffect(() => {
+    isHoveringRef.current = isHovering;
+  }, [isHovering]);
 
-      if (!scrollEnabled || touchStartY.current === null) return;
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-      const touchEndY = e.changedTouches[0].clientY;
-      const diff = touchStartY.current - touchEndY;
+    const wheelHandler = (e: WheelEvent) => {
+      if (isFullyVisibleRef.current && !allPagesViewedRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      // Require minimum swipe distance (50px)
-      if (Math.abs(diff) > 50) {
+        if (!scrollEnabledRef.current || !isHoveringRef.current) return;
+
         setScrollEnabled(false);
         setDirection(randomDirection());
 
-        if (diff > 0) {
-          // Swiped up - next page
+        if (e.deltaY > 0) {
           setPageIndex((prev) => (prev + 1) % pages.length);
         } else {
-          // Swiped down - previous page
           setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
         }
 
         setTimeout(() => setScrollEnabled(true), 1000);
       }
+    };
 
-      touchStartY.current = null;
-    }
-    // If all pages viewed or not fully visible, allow normal touch scrolling
-  };
+    const touchStartHandler = (e: TouchEvent) => {
+      if (isFullyVisibleRef.current && !allPagesViewedRef.current) {
+        e.preventDefault();
+      }
+      touchStartY.current = e.touches[0]?.clientY ?? null;
+    };
+
+    const touchEndHandler = (e: TouchEvent) => {
+      if (isFullyVisibleRef.current && !allPagesViewedRef.current) {
+        e.preventDefault();
+
+        if (!scrollEnabledRef.current || touchStartY.current === null) return;
+
+        const touchEndY = e.changedTouches[0]?.clientY ?? null;
+        if (touchEndY === null) return;
+        const diff = touchStartY.current - touchEndY;
+
+        if (Math.abs(diff) > 50) {
+          setScrollEnabled(false);
+          setDirection(randomDirection());
+
+          if (diff > 0) {
+            setPageIndex((prev) => (prev + 1) % pages.length);
+          } else {
+            setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
+          }
+
+          setTimeout(() => setScrollEnabled(true), 1000);
+        }
+
+        touchStartY.current = null;
+      }
+    };
+
+    el.addEventListener("wheel", wheelHandler, { passive: false });
+    el.addEventListener("touchstart", touchStartHandler, { passive: false });
+    el.addEventListener("touchend", touchEndHandler, { passive: false });
+
+    return () => {
+      el.removeEventListener("wheel", wheelHandler);
+      el.removeEventListener("touchstart", touchStartHandler);
+      el.removeEventListener("touchend", touchEndHandler);
+    };
+    // Intentionally do not include refs in deps — handlers read latest via refs
+  }, [pages.length]);
 
   return (
     <Box
       ref={containerRef}
-      onWheel={handleWheel}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
       sx={{
         height: "100vh",
         width: "100%",
