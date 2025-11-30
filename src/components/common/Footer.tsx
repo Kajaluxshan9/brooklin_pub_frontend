@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Box,
   Typography,
@@ -22,6 +22,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { motion } from "framer-motion";
 import moment from "moment-timezone";
 import { Link } from "react-router-dom";
+import gsap from "gsap";
 
 // Toronto timezone for accurate open/close status
 const TIMEZONE = "America/Toronto";
@@ -37,13 +38,103 @@ const TikTokIcon = () => (
 );
 
 const Footer = () => {
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  // Animate background shapes
+  useEffect(() => {
+    if (!bgRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const shapes = bgRef.current?.querySelectorAll(".footer-bg-shape");
+
+      if (shapes) {
+        shapes.forEach((shape, i) => {
+          // Floating movement
+          gsap.to(shape, {
+            x: "random(-50, 50)",
+            y: "random(-50, 50)",
+            rotation: "random(-90, 90)",
+            duration: "random(10, 18)",
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+
+          // Pulsing opacity
+          gsap.to(shape, {
+            opacity: "random(0.03, 0.08)",
+            duration: "random(4, 8)",
+            repeat: -1,
+            yoyo: true,
+            ease: "power1.inOut",
+            delay: i * 0.3,
+          });
+        });
+      }
+    }, bgRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Geometric shapes for footer background
+  const footerShapes = [
+    {
+      size: 180,
+      top: "5%",
+      left: "3%",
+      rotation: 45,
+      type: "square",
+      color: "#D9A756",
+    },
+    {
+      size: 120,
+      top: "60%",
+      left: "90%",
+      rotation: 0,
+      type: "circle",
+      color: "#B08030",
+    },
+    {
+      size: 150,
+      top: "25%",
+      left: "80%",
+      rotation: 30,
+      type: "square",
+      color: "#D9A756",
+    },
+    {
+      size: 100,
+      top: "75%",
+      left: "10%",
+      rotation: 60,
+      type: "circle",
+      color: "#B08030",
+    },
+    {
+      size: 140,
+      top: "45%",
+      left: "95%",
+      rotation: 15,
+      type: "square",
+      color: "#D9A756",
+    },
+    {
+      size: 90,
+      top: "10%",
+      left: "60%",
+      rotation: 75,
+      type: "circle",
+      color: "#B08030",
+    },
+  ];
+
   const quickLinks = [
-    { label: "Home", to: "/", icon: "🏠" },
-    { label: "Our Story", to: "/about", icon: "📖" },
-    { label: "Menu", to: "/menu", icon: "🍽️" },
-    { label: "Daily Specials", to: "/special/daily", icon: "⭐" },
-    { label: "Events", to: "/events", icon: "🎉" },
-    { label: "Contact Us", to: "/contactus", icon: "💬" },
+    { label: "Home", to: "/", icon: "→" },
+    { label: "Our Story", to: "/about", icon: "→" },
+    { label: "Menu", to: "/menu", icon: "→" },
+    { label: "Daily Specials", to: "/special/daily", icon: "→" },
+    { label: "Events", to: "/events", icon: "→" },
+    { label: "Contact Us", to: "/contactus", icon: "→" },
   ];
 
   // Fetch opening hours from backend (cached for 5 mins)
@@ -248,19 +339,38 @@ const Footer = () => {
         overflow: "hidden",
       }}
     >
-      {/* Decorative Background Pattern */}
+      {/* Animated Geometric Background */}
       <Box
+        ref={bgRef}
         sx={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          opacity: 0.03,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D9A756' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          overflow: "hidden",
           pointerEvents: "none",
         }}
-      />
+      >
+        {footerShapes.map((shape, i) => (
+          <Box
+            key={`footer-shape-${i}`}
+            className="footer-bg-shape"
+            sx={{
+              position: "absolute",
+              width: shape.size,
+              height: shape.size,
+              top: shape.top,
+              left: shape.left,
+              borderRadius: shape.type === "circle" ? "50%" : "20%",
+              border: `2px solid ${shape.color}`,
+              background: `${shape.color}10`,
+              transform: `rotate(${shape.rotation}deg)`,
+              opacity: 0.05,
+            }}
+          />
+        ))}
+      </Box>
 
       {/* Main Footer Content */}
       <Container
@@ -365,6 +475,7 @@ const Footer = () => {
                 href="https://www.facebook.com/brooklinpub"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit our Facebook page"
                 whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
@@ -386,6 +497,7 @@ const Footer = () => {
                 href="https://www.instagram.com/brooklinpubngrill/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit our Instagram page"
                 whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{
@@ -407,6 +519,7 @@ const Footer = () => {
                 href="https://www.tiktok.com/@brooklinpubngrill"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit our TikTok page"
                 whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 sx={{

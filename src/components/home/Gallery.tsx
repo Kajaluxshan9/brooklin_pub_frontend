@@ -1,6 +1,7 @@
 import { useState, useRef, useLayoutEffect, useEffect, useMemo } from "react";
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { motion, useInView, useMotionValue, useTransform } from "framer-motion";
+import { gsap } from "gsap";
 import { useApiWithCache } from "../../hooks/useApi";
 import { storiesService } from "../../services/stories.service";
 import { getImageUrl } from "../../services/api";
@@ -31,14 +32,38 @@ function GalleryRow({
 }: GalleryRowProps) {
   const loopImages = [...images, ...images, ...images, ...images];
   const rowRef = useRef<HTMLDivElement | null>(null);
+  const titleRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [cycleCount, setCycleCount] = useState(0);
-  const [dragStart, setDragStart] = useState(0);
+  const [_dragStart, _setDragStart] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const x = useMotionValue(0);
   const opacity = useTransform(x, [-100, 0, 100], [0.5, 1, 0.5]);
+  const isRowInView = useInView(titleRef, { once: true, margin: "-100px" });
+
+  // GSAP animation for title
+  useEffect(() => {
+    if (isRowInView && titleRef.current && !isMobile) {
+      gsap.fromTo(
+        titleRef.current,
+        {
+          opacity: 0,
+          x: rowIndex % 2 === 0 ? -80 : 80,
+          rotateY: rowIndex % 2 === 0 ? -15 : 15,
+        },
+        {
+          opacity: 1,
+          x: 0,
+          rotateY: 0,
+          duration: 1,
+          ease: "power3.out",
+          delay: 0.2,
+        }
+      );
+    }
+  }, [isRowInView, rowIndex, isMobile]);
 
   // Measure width for desktop carousel
   useLayoutEffect(() => {
@@ -86,12 +111,15 @@ function GalleryRow({
     const threshold = 50;
     if (info.offset.x > threshold && currentImageIndex > 0) {
       setCurrentImageIndex((prev) => prev - 1);
-    } else if (info.offset.x < -threshold && currentImageIndex < images.length - 1) {
+    } else if (
+      info.offset.x < -threshold &&
+      currentImageIndex < images.length - 1
+    ) {
       setCurrentImageIndex((prev) => prev + 1);
     }
   };
 
-  // Mobile Layout with enhanced design
+  // Mobile Layout with enhanced premium design
   if (isMobile) {
     return (
       <Box
@@ -107,34 +135,66 @@ function GalleryRow({
           gap: 3,
         }}
       >
-        {/* Glassmorphic Title Card */}
+        {/* Premium Glassmorphic Title Card */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
-          animate={isActive ? { scale: 1, opacity: 1 } : { scale: 0.9, opacity: 0.3 }}
+          animate={
+            isActive ? { scale: 1, opacity: 1 } : { scale: 0.9, opacity: 0.3 }
+          }
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Box
             sx={{
-              background: "rgba(255, 255, 255, 0.7)",
-              backdropFilter: "blur(20px)",
-              borderRadius: 4,
-              p: 3,
-              border: "1px solid rgba(217, 167, 86, 0.2)",
-              boxShadow: "0 8px 32px rgba(60, 31, 14, 0.1)",
+              background:
+                "linear-gradient(145deg, rgba(255,253,251,0.95) 0%, rgba(253,248,243,0.9) 100%)",
+              backdropFilter: "blur(25px)",
+              borderRadius: 5,
+              p: 4,
+              border: "1px solid rgba(217,167,86,0.25)",
+              boxShadow:
+                "0 15px 50px rgba(60,31,14,0.12), 0 5px 20px rgba(217,167,86,0.1)",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: "3px",
+                background:
+                  "linear-gradient(90deg, transparent, #D9A756, transparent)",
+              },
             }}
           >
+            {/* Decorative Element */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: -20,
+                right: -20,
+                width: 80,
+                height: 80,
+                background:
+                  "radial-gradient(circle, rgba(217,167,86,0.15) 0%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
             <Typography
               variant="h4"
               component="h2"
               sx={{
                 fontWeight: 800,
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
-                background: "linear-gradient(135deg, #3C1F0E 0%, #6A3A1E 100%)",
+                background:
+                  "linear-gradient(135deg, #4A2C17 0%, #6A3A1E 50%, #D9A756 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                mb: 1.5,
+                backgroundClip: "text",
+                mb: 2,
                 letterSpacing: "-0.02em",
-                fontSize: "1.75rem",
+                fontSize: "1.9rem",
+                position: "relative",
               }}
             >
               {title}
@@ -145,8 +205,9 @@ function GalleryRow({
                 color: "#6A3A1E",
                 fontStyle: "italic",
                 fontWeight: 400,
-                lineHeight: 1.6,
+                lineHeight: 1.7,
                 fontSize: "0.95rem",
+                opacity: 0.9,
               }}
             >
               {description}
@@ -154,14 +215,17 @@ function GalleryRow({
           </Box>
         </motion.div>
 
-        {/* Enhanced Image Container with swipe */}
+        {/* Enhanced Premium Image Container with swipe */}
         <Box
           sx={{
             position: "relative",
             width: "100%",
-            height: 280,
-            borderRadius: 4,
+            height: 300,
+            borderRadius: 5,
             overflow: "hidden",
+            boxShadow:
+              "0 20px 60px rgba(60,31,14,0.2), 0 8px 25px rgba(217,167,86,0.1)",
+            border: "2px solid rgba(255,253,251,0.8)",
           }}
         >
           {images.map((src, idx) => (
@@ -199,33 +263,76 @@ function GalleryRow({
                   opacity: opacity.get(),
                 }}
               />
-              {/* Gradient overlay */}
+              {/* Premium Gradient overlay */}
               <Box
                 sx={{
                   position: "absolute",
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  height: "40%",
-                  background: "linear-gradient(to top, rgba(0,0,0,0.3), transparent)",
+                  height: "50%",
+                  background:
+                    "linear-gradient(to top, rgba(74,44,23,0.4), transparent)",
+                  pointerEvents: "none",
+                }}
+              />
+              {/* Top gradient */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: "30%",
+                  background:
+                    "linear-gradient(to bottom, rgba(217,167,86,0.15), transparent)",
                   pointerEvents: "none",
                 }}
               />
             </motion.div>
           ))}
+
+          {/* Image Counter Badge */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 16,
+              right: 16,
+              background: "rgba(255,253,251,0.9)",
+              backdropFilter: "blur(10px)",
+              px: 2,
+              py: 0.75,
+              borderRadius: 3,
+              border: "1px solid rgba(217,167,86,0.3)",
+              boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: "#4A2C17",
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              {currentImageIndex + 1} / {images.length}
+            </Typography>
+          </Box>
         </Box>
 
-        {/* Enhanced dots indicator with glassmorphism */}
+        {/* Enhanced premium dots indicator */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
             gap: 1.5,
-            p: 2,
-            background: "rgba(255, 255, 255, 0.5)",
-            backdropFilter: "blur(10px)",
-            borderRadius: 3,
-            border: "1px solid rgba(217, 167, 86, 0.15)",
+            p: 2.5,
+            background:
+              "linear-gradient(145deg, rgba(255,253,251,0.9) 0%, rgba(253,248,243,0.85) 100%)",
+            backdropFilter: "blur(15px)",
+            borderRadius: 4,
+            border: "1px solid rgba(217,167,86,0.2)",
+            boxShadow: "0 8px 25px rgba(60,31,14,0.08)",
           }}
         >
           {images.map((_, idx) => (
@@ -233,18 +340,25 @@ function GalleryRow({
               key={idx}
               component={motion.div}
               animate={{
-                scale: currentImageIndex === idx ? 1.4 : 1,
-                backgroundColor: currentImageIndex === idx ? "#D9A756" : "rgba(217,167,86,0.3)",
+                scale: currentImageIndex === idx ? 1.3 : 1,
+                backgroundColor:
+                  currentImageIndex === idx
+                    ? "#D9A756"
+                    : "rgba(217,167,86,0.25)",
               }}
               whileHover={{ scale: 1.2 }}
-              transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+              transition={{ duration: 0.3, type: "spring", stiffness: 350 }}
               onClick={() => setCurrentImageIndex(idx)}
               sx={{
-                width: currentImageIndex === idx ? 10 : 8,
-                height: currentImageIndex === idx ? 10 : 8,
+                width: currentImageIndex === idx ? 12 : 8,
+                height: currentImageIndex === idx ? 12 : 8,
                 borderRadius: "50%",
                 cursor: "pointer",
-                boxShadow: currentImageIndex === idx ? "0 2px 8px rgba(217,167,86,0.4)" : "none",
+                boxShadow:
+                  currentImageIndex === idx
+                    ? "0 3px 12px rgba(217,167,86,0.5)"
+                    : "none",
+                transition: "width 0.3s, height 0.3s",
               }}
             />
           ))}
@@ -253,136 +367,201 @@ function GalleryRow({
     );
   }
 
-  // Enhanced Desktop Layout with parallax
+  // Enhanced Premium Desktop Layout with parallax
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, y: 80 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, delay: rowIndex * 0.15, ease: "easeOut" }}
+      transition={{ duration: 0.8, delay: rowIndex * 0.1 }}
       sx={{
         position: "relative",
         overflow: "hidden",
         width: "100vw",
-        mb: 12,
+        mb: 14,
         display: "flex",
         flexDirection: "column",
-        gap: 4,
+        gap: 5,
       }}
     >
-      {/* Decorative background element */}
+      {/* Enhanced Decorative background element */}
       <Box
         component={motion.div}
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 0.15, scale: 1 }}
+        initial={{ opacity: 0, scale: 0.6 }}
+        whileInView={{ opacity: 0.2, scale: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 1.2, delay: rowIndex * 0.1 }}
+        transition={{ duration: 1.5, delay: rowIndex * 0.1 }}
         sx={{
           position: "absolute",
           top: "50%",
-          left: rowIndex % 2 === 0 ? "-10%" : "auto",
-          right: rowIndex % 2 !== 0 ? "-10%" : "auto",
+          left: rowIndex % 2 === 0 ? "-8%" : "auto",
+          right: rowIndex % 2 !== 0 ? "-8%" : "auto",
           transform: "translateY(-50%)",
-          width: 400,
-          height: 400,
+          width: 500,
+          height: 500,
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${rowIndex % 2 === 0 ? "#D9A756" : "#B08030"} 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${
+            rowIndex % 2 === 0 ? "#D9A756" : "#B08030"
+          } 0%, transparent 60%)`,
+          pointerEvents: "none",
+          zIndex: 0,
+          filter: "blur(60px)",
+        }}
+      />
+
+      {/* Secondary decorative circles */}
+      <Box
+        component={motion.div}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        sx={{
+          position: "absolute",
+          top: "20%",
+          left: rowIndex % 2 === 0 ? "5%" : "auto",
+          right: rowIndex % 2 !== 0 ? "5%" : "auto",
+          width: 200,
+          height: 200,
+          border: "1px solid rgba(217,167,86,0.15)",
+          borderRadius: "50%",
           pointerEvents: "none",
           zIndex: 0,
         }}
       />
 
-      {/* Enhanced Title Section with glassmorphism */}
+      {/* Premium Title Section with glassmorphism */}
       <Box
+        ref={titleRef}
         sx={{
-          px: { xs: 3, md: 8, lg: 12 },
+          px: { xs: 3, md: 8, lg: 14 },
           maxWidth: "1400px",
           mx: "auto",
           width: "100%",
           textAlign: rowIndex % 2 !== 0 ? "right" : "left",
           position: "relative",
           zIndex: 1,
+          opacity: 0,
+          perspective: "1000px",
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, x: rowIndex % 2 === 0 ? -50 : 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.2 }}
+        <Box
+          sx={{
+            display: "inline-block",
+            background:
+              "linear-gradient(145deg, rgba(255,253,251,0.95) 0%, rgba(253,248,243,0.9) 100%)",
+            backdropFilter: "blur(25px)",
+            borderRadius: 5,
+            p: 5,
+            border: "1px solid rgba(217,167,86,0.25)",
+            boxShadow:
+              "0 20px 60px rgba(60,31,14,0.12), 0 8px 25px rgba(217,167,86,0.08)",
+            position: "relative",
+            overflow: "hidden",
+            maxWidth: "650px",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: rowIndex % 2 === 0 ? 0 : "auto",
+              right: rowIndex % 2 !== 0 ? 0 : "auto",
+              width: rowIndex % 2 === 0 ? "4px" : "4px",
+              height: "100%",
+              background: "linear-gradient(180deg, #D9A756, #B08030, #D9A756)",
+              borderRadius: rowIndex % 2 === 0 ? "4px 0 0 4px" : "0 4px 4px 0",
+            },
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              bottom: -50,
+              right: rowIndex % 2 === 0 ? -50 : "auto",
+              left: rowIndex % 2 !== 0 ? -50 : "auto",
+              width: 150,
+              height: 150,
+              background:
+                "radial-gradient(circle, rgba(217,167,86,0.1) 0%, transparent 70%)",
+              pointerEvents: "none",
+            },
+          }}
         >
-          <Box
+          {/* Decorative Number */}
+          <Typography
             sx={{
-              display: "inline-block",
-              background: "rgba(255, 255, 255, 0.8)",
-              backdropFilter: "blur(20px)",
-              borderRadius: 4,
-              p: 4,
-              border: "1px solid rgba(217, 167, 86, 0.25)",
-              boxShadow: "0 8px 32px rgba(60, 31, 14, 0.12)",
-              position: "relative",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: -2,
-                left: -2,
-                right: -2,
-                bottom: -2,
-                background: "linear-gradient(135deg, #D9A756, #B08030)",
-                borderRadius: 4,
-                opacity: 0,
-                transition: "opacity 0.3s ease",
-                zIndex: -1,
-              },
-              "&:hover::before": {
-                opacity: 0.1,
-              },
+              position: "absolute",
+              top: 10,
+              left: rowIndex % 2 === 0 ? "auto" : 20,
+              right: rowIndex % 2 === 0 ? 20 : "auto",
+              fontSize: "5rem",
+              fontWeight: 900,
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              color: "rgba(217,167,86,0.08)",
+              lineHeight: 1,
+              pointerEvents: "none",
             }}
           >
-            <Typography
-              variant="h2"
-              component="h2"
-              sx={{
-                fontWeight: 900,
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                background: "linear-gradient(135deg, #3C1F0E 0%, #6A3A1E 50%, #D9A756 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                mb: 2,
-                letterSpacing: "-0.03em",
-                fontSize: { md: "2.5rem", lg: "3rem" },
-              }}
-            >
-              {title}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                color: "#6A3A1E",
-                maxWidth: "600px",
-                fontStyle: "italic",
-                fontWeight: 400,
-                lineHeight: 1.7,
-                ml: rowIndex % 2 !== 0 ? "auto" : 0,
-                fontSize: "1.1rem",
-              }}
-            >
-              {description}
-            </Typography>
-          </Box>
-        </motion.div>
+            0{rowIndex + 1}
+          </Typography>
+
+          <Typography
+            variant="h2"
+            component="h2"
+            sx={{
+              fontWeight: 800,
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              background:
+                "linear-gradient(135deg, #4A2C17 0%, #6A3A1E 50%, #D9A756 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              mb: 2.5,
+              letterSpacing: "-0.03em",
+              fontSize: { md: "2.8rem", lg: "3.2rem" },
+              lineHeight: 1.1,
+              position: "relative",
+            }}
+          >
+            {title}
+          </Typography>
+
+          {/* Decorative Divider */}
+          <Box
+            sx={{
+              width: 60,
+              height: 3,
+              background: "linear-gradient(90deg, #D9A756, transparent)",
+              borderRadius: 2,
+              mb: 2.5,
+              ml: rowIndex % 2 !== 0 ? "auto" : 0,
+            }}
+          />
+
+          <Typography
+            variant="h6"
+            sx={{
+              color: "#6A3A1E",
+              maxWidth: "550px",
+              fontStyle: "italic",
+              fontWeight: 400,
+              lineHeight: 1.8,
+              ml: rowIndex % 2 !== 0 ? "auto" : 0,
+              fontSize: "1.1rem",
+              opacity: 0.9,
+            }}
+          >
+            {description}
+          </Typography>
+        </Box>
       </Box>
 
-      {/* Enhanced Carousel with depth and parallax */}
+      {/* Premium Carousel with depth and parallax */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <motion.div
           ref={rowRef}
           style={{
             display: "flex",
-            gap: 32,
+            gap: 40,
             width: "max-content",
-            paddingLeft: 24,
-            paddingRight: 24,
+            paddingLeft: 32,
+            paddingRight: 32,
           }}
           animate={{
             x: rowIndex % 2 === 0 ? [-width, 0] : [0, -width],
@@ -390,7 +569,7 @@ function GalleryRow({
           transition={{
             repeat: Infinity,
             repeatType: "loop",
-            duration: 50,
+            duration: 55,
             ease: "linear",
           }}
         >
@@ -398,30 +577,31 @@ function GalleryRow({
             <motion.div
               key={idx}
               whileHover={{
-                scale: 1.05,
-                y: -12,
-                rotateY: 5,
-                rotateX: -2,
+                scale: 1.06,
+                y: -15,
+                rotateY: 8,
+                rotateX: -3,
               }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 20,
+                stiffness: 280,
+                damping: 22,
               }}
               style={{
                 flexShrink: 0,
-                perspective: 1000,
+                perspective: 1200,
               }}
             >
               <Box
                 sx={{
                   position: "relative",
-                  width: { sm: "45vw", md: "32vw", lg: "26vw" },
-                  height: { sm: 300, md: 380, lg: 450 },
-                  borderRadius: 4,
+                  width: { sm: "42vw", md: "30vw", lg: "25vw" },
+                  height: { sm: 320, md: 400, lg: 480 },
+                  borderRadius: 5,
                   overflow: "hidden",
-                  // boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-                  border: "2px solid rgba(255, 255, 255, 0.8)",
+                  boxShadow:
+                    "0 25px 70px rgba(60,31,14,0.18), 0 10px 30px rgba(217,167,86,0.12)",
+                  border: "3px solid rgba(255,253,251,0.9)",
                   "&::before": {
                     content: '""',
                     position: "absolute",
@@ -429,9 +609,22 @@ function GalleryRow({
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: "linear-gradient(135deg, rgba(217,167,86,0.1) 0%, transparent 50%)",
+                    background:
+                      "linear-gradient(135deg, rgba(217,167,86,0.12) 0%, transparent 40%, rgba(74,44,23,0.1) 100%)",
                     pointerEvents: "none",
                     zIndex: 1,
+                  },
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "50%",
+                    background:
+                      "linear-gradient(180deg, rgba(255,253,251,0.15) 0%, transparent 100%)",
+                    pointerEvents: "none",
+                    zIndex: 2,
                   },
                 }}
               >
@@ -445,9 +638,9 @@ function GalleryRow({
                     height: "100%",
                     objectFit: "cover",
                     userSelect: "none",
-                    transition: "transform 0.6s ease",
+                    transition: "transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
                     "&:hover": {
-                      transform: "scale(1.08)",
+                      transform: "scale(1.1)",
                     },
                   }}
                 />
@@ -462,11 +655,33 @@ function GalleryRow({
 
 export default function Gallery() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const [activeRowIndex, setActiveRowIndex] = useState(0);
   const [isGalleryComplete, setIsGalleryComplete] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isInView = useInView(containerRef, { once: false, margin: "-20%" });
+  const isHeaderInView = useInView(headerRef, { once: true, margin: "-50px" });
+
+  // GSAP animation for header
+  useEffect(() => {
+    if (isHeaderInView && headerRef.current) {
+      gsap.fromTo(
+        headerRef.current.querySelectorAll(".gallery-header-element"),
+        {
+          opacity: 0,
+          y: 40,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power3.out",
+        }
+      );
+    }
+  }, [isHeaderInView]);
 
   // Fetch story categories with their stories from backend
   const { data: categoriesData, loading } = useApiWithCache<StoryCategory[]>(
@@ -534,43 +749,76 @@ export default function Gallery() {
     }
   };
 
-  // Loading state with premium design
+  // Premium loading state
   if (loading) {
     return (
       <Box
         sx={{
           width: "100vw",
-          py: { xs: 8, md: 12 },
+          py: { xs: 10, md: 14 },
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
-          minHeight: 300,
+          gap: 3,
+          background:
+            "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
+          minHeight: 400,
           position: "relative",
           overflow: "hidden",
         }}
       >
-        {/* Animated loading indicator */}
-        <motion.div
-          animate={{
-            rotate: 360,
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "linear",
+        {/* Premium animated loading indicator */}
+        <Box sx={{ position: "relative", width: 80, height: 80 }}>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            style={{
+              position: "absolute",
+              inset: 0,
+            }}
+          >
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                border: "3px solid rgba(217,167,86,0.15)",
+                borderTop: "3px solid #D9A756",
+                borderRadius: "50%",
+              }}
+            />
+          </motion.div>
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            style={{
+              position: "absolute",
+              inset: 10,
+            }}
+          >
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                border: "2px solid rgba(176,128,48,0.15)",
+                borderBottom: "2px solid #B08030",
+                borderRadius: "50%",
+              }}
+            />
+          </motion.div>
+        </Box>
+        <Typography
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.9rem",
+            color: "#6A3A1E",
+            fontWeight: 500,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
           }}
         >
-          <Box
-            sx={{
-              width: 60,
-              height: 60,
-              border: "4px solid rgba(217, 167, 86, 0.2)",
-              borderTop: "4px solid #D9A756",
-              borderRadius: "50%",
-            }}
-          />
-        </motion.div>
+          Loading Gallery
+        </Typography>
       </Box>
     );
   }
@@ -585,11 +833,12 @@ export default function Gallery() {
       sx={{
         width: "100vw",
         overflowX: "hidden",
-        py: { xs: 8, md: 12 },
+        py: { xs: 10, md: 14 },
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 3, md: 8 },
-        background: "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
+        gap: { xs: 4, md: 6 },
+        background:
+          "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 35%, #E8D5C4 65%, #F5EBE0 85%, #FDF8F3 100%)",
         minHeight: isMobile ? "100vh" : "auto",
         position: "relative",
       }}
@@ -608,17 +857,17 @@ export default function Gallery() {
               transform: translate(-30px, 30px) rotate(240deg);
             }
           }
-          
+
           .gallery-shape {
             animation: floatGallery 30s ease-in-out infinite;
             will-change: transform;
           }
-          
+
           .gallery-shape:nth-child(2n) {
             animation-duration: 35s;
             animation-delay: -8s;
           }
-          
+
           .gallery-shape:nth-child(3n) {
             animation-duration: 40s;
             animation-delay: -16s;
@@ -626,7 +875,7 @@ export default function Gallery() {
         `}
       </style>
 
-      {/* Animated geometric background */}
+      {/* Premium animated geometric background */}
       <Box
         sx={{
           position: "absolute",
@@ -639,23 +888,144 @@ export default function Gallery() {
           overflow: "hidden",
         }}
       >
-        {[...Array(10)].map((_, i) => (
+        {[...Array(15)].map((_, i) => (
           <Box
             key={i}
             className="gallery-shape"
             sx={{
               position: "absolute",
-              width: i % 3 === 0 ? 120 : i % 3 === 1 ? 80 : 60,
-              height: i % 3 === 0 ? 120 : i % 3 === 1 ? 80 : 60,
-              borderRadius: i % 2 === 0 ? "50%" : "20%",
-              border: `2px solid ${i % 2 === 0 ? "#D9A756" : "#B08030"}`,
-              background: i % 3 === 0 ? `${i % 2 === 0 ? "#D9A756" : "#B08030"}15` : "transparent",
-              left: `${(i * 27 + 8) % 85}%`,
-              top: `${(i * 19 + 10) % 80}%`,
-              opacity: 0.08,
+              width: i % 3 === 0 ? 140 : i % 3 === 1 ? 90 : 60,
+              height: i % 3 === 0 ? 140 : i % 3 === 1 ? 90 : 60,
+              borderRadius: i % 2 === 0 ? "50%" : "25%",
+              border: `1.5px solid ${i % 2 === 0 ? "#D9A756" : "#B08030"}`,
+              background:
+                i % 4 === 0
+                  ? `${i % 2 === 0 ? "#D9A756" : "#B08030"}12`
+                  : "transparent",
+              left: `${(i * 23 + 5) % 90}%`,
+              top: `${(i * 17 + 8) % 85}%`,
+              opacity: 0.06,
             }}
           />
         ))}
+      </Box>
+
+      {/* Premium Section Header */}
+      <Box
+        ref={headerRef}
+        sx={{
+          textAlign: "center",
+          mb: { xs: 4, md: 8 },
+          px: 3,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Decorative Top Element */}
+        <Box
+          className="gallery-header-element"
+          sx={{
+            width: 100,
+            height: 3,
+            background:
+              "linear-gradient(90deg, transparent, #D9A756, transparent)",
+            mx: "auto",
+            mb: 3,
+            position: "relative",
+            opacity: 0,
+            "&::before, &::after": {
+              content: '""',
+              position: "absolute",
+              width: "12px",
+              height: "12px",
+              borderRadius: "50%",
+              background: "#D9A756",
+              top: "50%",
+              transform: "translateY(-50%)",
+              boxShadow: "0 0 15px rgba(217,167,86,0.5)",
+            },
+            "&::before": { left: -6 },
+            "&::after": { right: -6 },
+          }}
+        />
+
+        <Typography
+          className="gallery-header-element"
+          variant="overline"
+          sx={{
+            color: "#D9A756",
+            letterSpacing: "0.5em",
+            fontSize: { xs: "0.75rem", md: "0.85rem" },
+            fontFamily: '"Inter", sans-serif',
+            fontWeight: 700,
+            mb: 2,
+            display: "block",
+            textTransform: "uppercase",
+            opacity: 0,
+            "&::before, &::after": {
+              content: '"◆"',
+              position: "relative",
+              mx: 2,
+              opacity: 0.5,
+              fontSize: "0.6em",
+            },
+          }}
+        >
+          Our Story
+        </Typography>
+
+        <Typography
+          className="gallery-header-element"
+          variant="h2"
+          sx={{
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.5rem" },
+            fontWeight: 700,
+            color: "#4A2C17",
+            mb: 3,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+            background: "linear-gradient(180deg, #4A2C17 0%, #6A3A1E 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            textShadow: "none",
+            opacity: 0,
+          }}
+        >
+          A Glimpse Inside
+        </Typography>
+
+        <Typography
+          className="gallery-header-element"
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: { xs: "1rem", md: "1.1rem" },
+            color: "#6A3A1E",
+            maxWidth: 600,
+            mx: "auto",
+            lineHeight: 1.8,
+            fontWeight: 400,
+            opacity: 0,
+          }}
+        >
+          Discover the warmth, character, and memories that make The Brooklin
+          Pub a cherished gathering place
+        </Typography>
+
+        {/* Bottom Decorative Divider */}
+        <Box
+          className="gallery-header-element"
+          sx={{
+            width: 200,
+            height: 1,
+            background:
+              "linear-gradient(90deg, transparent, rgba(217,167,86,0.4), transparent)",
+            mx: "auto",
+            mt: 4,
+            opacity: 0,
+          }}
+        />
       </Box>
 
       {/* Gallery Rows */}
@@ -677,7 +1047,7 @@ export default function Gallery() {
         ))}
       </Box>
 
-      {/* Enhanced progress indicator for mobile */}
+      {/* Enhanced premium progress indicator for mobile */}
       {isMobile && !isGalleryComplete && galleryRows.length > 1 && (
         <Box
           component={motion.div}
@@ -691,12 +1061,14 @@ export default function Gallery() {
             display: "flex",
             gap: 1.5,
             zIndex: 1000,
-            background: "rgba(255, 255, 255, 0.9)",
-            backdropFilter: "blur(20px)",
-            p: 2,
-            borderRadius: 4,
-            border: "1px solid rgba(217, 167, 86, 0.3)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+            background:
+              "linear-gradient(145deg, rgba(255,253,251,0.95) 0%, rgba(253,248,243,0.9) 100%)",
+            backdropFilter: "blur(25px)",
+            p: 2.5,
+            borderRadius: 5,
+            border: "1px solid rgba(217,167,86,0.3)",
+            boxShadow:
+              "0 15px 50px rgba(0,0,0,0.15), 0 5px 20px rgba(217,167,86,0.1)",
           }}
         >
           {galleryRows.map((_, idx) => (
@@ -704,15 +1076,18 @@ export default function Gallery() {
               key={idx}
               component={motion.div}
               animate={{
-                width: idx === activeRowIndex ? 32 : 10,
+                width: idx === activeRowIndex ? 36 : 10,
                 backgroundColor:
-                  idx <= activeRowIndex ? "#D9A756" : "rgba(217,167,86,0.25)",
+                  idx <= activeRowIndex ? "#D9A756" : "rgba(217,167,86,0.2)",
               }}
-              transition={{ duration: 0.4, type: "spring", stiffness: 300 }}
+              transition={{ duration: 0.4, type: "spring", stiffness: 350 }}
               sx={{
                 height: 10,
                 borderRadius: 5,
-                boxShadow: idx === activeRowIndex ? "0 2px 8px rgba(217,167,86,0.4)" : "none",
+                boxShadow:
+                  idx === activeRowIndex
+                    ? "0 3px 12px rgba(217,167,86,0.5)"
+                    : "none",
               }}
             />
           ))}

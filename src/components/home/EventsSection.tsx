@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { gsap } from "gsap";
 import { useApiWithCache } from "../../hooks/useApi";
 import { eventsService } from "../../services/events.service";
 import { getImageUrl } from "../../services/api";
@@ -70,38 +71,84 @@ const getEventColor = (type: string): string => {
 };
 
 // Expandable Card Component
-const EventCard = ({ event }: { event: Event }) => {
+const EventCard = ({ event, index }: { event: Event; index: number }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   const color = getEventColor(event.type);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(cardRef, { once: true, margin: "-50px" });
+
+  useEffect(() => {
+    if (isInView && cardRef.current) {
+      gsap.fromTo(
+        cardRef.current,
+        {
+          opacity: 0,
+          y: 60,
+          rotateY: -15,
+          scale: 0.9,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotateY: 0,
+          scale: 1,
+          duration: 0.8,
+          delay: index * 0.15,
+          ease: "power3.out",
+        }
+      );
+    }
+  }, [isInView, index]);
 
   return (
     <>
       {/* Desktop Version - Hover to Expand */}
       <Box
+        ref={cardRef}
         sx={{
           display: { xs: "none", sm: "flex" },
           position: "relative",
           cursor: "pointer",
-          width: "300px",
+          width: "320px",
           flexDirection: "column",
+          perspective: "1000px",
+          opacity: 0,
         }}
         onMouseEnter={() => setIsExpanded(true)}
         onMouseLeave={() => setIsExpanded(false)}
       >
+        {/* Glow Effect Behind Card */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "10%",
+            left: "5%",
+            right: "5%",
+            bottom: "0%",
+            background: `radial-gradient(ellipse at center, ${color}30 0%, transparent 70%)`,
+            filter: "blur(30px)",
+            opacity: isExpanded ? 0.8 : 0.4,
+            transition: "opacity 0.5s ease",
+            pointerEvents: "none",
+            zIndex: -1,
+          }}
+        />
+
         {/* Event Image */}
         <Box
           sx={{
             position: "relative",
             width: "100%",
-            height: "300px",
-            borderRadius: "10px",
+            height: "340px",
+            borderRadius: "20px",
             overflow: "hidden",
-            boxShadow: "0 10px 30px rgba(106,58,30,0.2)",
-            transition: "all 0.4s ease",
+            boxShadow: `0 15px 40px rgba(106,58,30,0.2), 0 5px 15px ${color}20`,
+            transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+            border: `1px solid ${color}20`,
             ...(isExpanded && {
-              boxShadow: "0 15px 40px rgba(106,58,30,0.3)",
-              transform: "translateY(-5px)",
+              boxShadow: `0 25px 60px rgba(106,58,30,0.35), 0 10px 25px ${color}30`,
+              transform: "translateY(-8px) scale(1.02)",
             }),
           }}
         >
@@ -110,16 +157,16 @@ const EventCard = ({ event }: { event: Event }) => {
             sx={{
               position: "absolute",
               inset: 0,
-              backgroundImage: `url(${event.imageUrls?.[0]
-                ? getImageUrl(event.imageUrls[0])
-                : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&q=80"
-                })`,
-              backgroundSize: "contain",
+              backgroundImage: `url(${
+                event.imageUrls?.[0]
+                  ? getImageUrl(event.imageUrls[0])
+                  : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&q=80"
+              })`,
+              backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center",
-              backgroundColor: "rgba(245,245,245,0.6)",
-              transition: "transform 0.4s ease",
-              transform: isExpanded ? "scale(1.05)" : "scale(1)",
+              transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+              transform: isExpanded ? "scale(1.1)" : "scale(1)",
             }}
           />
 
@@ -128,13 +175,97 @@ const EventCard = ({ event }: { event: Event }) => {
             sx={{
               position: "absolute",
               inset: 0,
-              background: `linear-gradient(135deg, 
-                ${color}20 0%, 
-                ${color}40 100%)`,
-              opacity: isExpanded ? 0.6 : 0.3,
-              transition: "opacity 0.4s",
+              background: `linear-gradient(180deg,
+                transparent 0%,
+                ${color}10 40%,
+                rgba(74,44,23,0.85) 100%)`,
+              opacity: isExpanded ? 1 : 0.9,
+              transition: "opacity 0.5s",
             }}
           />
+
+          {/* Event Type Badge - Floating */}
+          <Box
+            component={motion.div}
+            animate={{
+              y: isExpanded ? -5 : 0,
+              scale: isExpanded ? 1.05 : 1,
+            }}
+            sx={{
+              position: "absolute",
+              top: 20,
+              right: 20,
+              background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
+              color: "#FFFDFB",
+              padding: "8px 18px",
+              borderRadius: "25px",
+              fontFamily: '"Inter", sans-serif',
+              fontSize: "0.7rem",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              boxShadow: `0 8px 20px ${color}50`,
+              backdropFilter: "blur(10px)",
+              border: `1px solid ${color}60`,
+            }}
+          >
+            {getEventTypeLabel(event.type)}
+          </Box>
+
+          {/* Bottom Content Overlay */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: "25px",
+              background:
+                "linear-gradient(0deg, rgba(74,44,23,0.95) 0%, transparent 100%)",
+            }}
+          >
+            {/* Date Badge */}
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                background: "rgba(255,253,251,0.15)",
+                backdropFilter: "blur(10px)",
+                padding: "6px 14px",
+                borderRadius: "20px",
+                mb: 2,
+                border: "1px solid rgba(255,253,251,0.2)",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  color: "#FFFDFB",
+                  fontFamily: '"Inter", sans-serif',
+                  letterSpacing: "0.03em",
+                }}
+              >
+                📅 {formatEventDate(event.eventStartDate)} •{" "}
+                {formatEventTime(event.eventStartDate)}
+              </Typography>
+            </Box>
+
+            {/* Title */}
+            <Typography
+              sx={{
+                fontSize: "1.4rem",
+                fontWeight: 800,
+                color: "#FFFDFB",
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                lineHeight: 1.2,
+                textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+              }}
+            >
+              {event.title}
+            </Typography>
+          </Box>
         </Box>
 
         {/* Details Container - Expands on Hover */}
@@ -144,70 +275,35 @@ const EventCard = ({ event }: { event: Event }) => {
             height: isExpanded ? "auto" : "0px",
             opacity: isExpanded ? 1 : 0,
           }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           sx={{
             overflow: "hidden",
-            background: "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 100%)",
-            borderRadius: "0 0 10px 10px",
-            boxShadow: "0 10px 30px rgba(106,58,30,0.2)",
+            background: "linear-gradient(135deg, #FFFDFB 0%, #FDF8F3 100%)",
+            borderRadius: "0 0 20px 20px",
+            boxShadow: "0 15px 40px rgba(106,58,30,0.2)",
             mt: isExpanded ? 1 : 0,
-            transition: "margin-top 0.4s ease",
+            transition: "margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+            border: `1px solid ${color}15`,
+            borderTop: "none",
           }}
         >
           <Box
             sx={{
-              padding: "20px",
+              padding: "24px",
               display: "flex",
               flexDirection: "column",
               gap: 2,
             }}
           >
-            {/* Date & Time */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <Typography
-                sx={{
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                  color: "#6A3A1E",
-                  fontFamily: '"Inter", sans-serif',
-                }}
-              >
-                📅 {formatEventDate(event.eventStartDate)}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                  color: "#6A3A1E",
-                  fontFamily: '"Inter", sans-serif',
-                }}
-              >
-                🕐 {formatEventTime(event.eventStartDate)}
-              </Typography>
-            </Box>
-
-            {/* Title */}
-            <Typography
-              sx={{
-                fontSize: "1.2rem",
-                fontWeight: 800,
-                color: "#4A2C17",
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                lineHeight: 1.2,
-              }}
-            >
-              {event.title}
-            </Typography>
-
             {/* Description */}
             <Typography
               sx={{
                 margin: 0,
                 padding: 0,
-                fontSize: "0.9rem",
+                fontSize: "0.95rem",
                 color: "#6A3A1E",
                 fontFamily: '"Inter", sans-serif',
-                lineHeight: 1.5,
+                lineHeight: 1.7,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
@@ -222,27 +318,47 @@ const EventCard = ({ event }: { event: Event }) => {
             <Button
               onClick={() => navigate("/events")}
               sx={{
-                marginTop: "10px",
-                display: "inline-block",
+                marginTop: "8px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
                 textDecoration: "none",
                 fontWeight: 700,
                 color: "#FFFDFB",
-                padding: "10px 20px",
+                padding: "12px 28px",
                 border: "none",
                 fontFamily: '"Inter", sans-serif',
                 fontSize: "0.85rem",
                 textTransform: "uppercase",
+                letterSpacing: "0.08em",
                 background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
                 borderRadius: "30px",
-                transition: "all 0.3s",
-                boxShadow: `0 5px 15px ${color}40`,
+                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                boxShadow: `0 8px 20px ${color}40`,
+                position: "relative",
+                overflow: "hidden",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: "-100%",
+                  width: "100%",
+                  height: "100%",
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                  transition: "left 0.5s",
+                },
                 "&:hover": {
-                  transform: "translateY(-2px)",
-                  boxShadow: `0 8px 20px ${color}60`,
+                  transform: "translateY(-3px)",
+                  boxShadow: `0 12px 30px ${color}60`,
+                  "&::before": {
+                    left: "100%",
+                  },
                 },
               }}
             >
-              Read More
+              Learn More →
             </Button>
           </Box>
         </Box>
@@ -250,24 +366,43 @@ const EventCard = ({ event }: { event: Event }) => {
 
       {/* Mobile Version - All Details Visible */}
       <Box
+        component={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
         sx={{
           display: { xs: "flex", sm: "none" },
           flexDirection: "column",
           width: "100%",
           maxWidth: "400px",
-          background: "linear-gradient(135deg, #FFFDFB 0%, #FDF8F3 100%)",
-          borderRadius: "15px",
+          background: "linear-gradient(145deg, #FFFDFB 0%, #FDF8F3 100%)",
+          borderRadius: "24px",
           overflow: "hidden",
-          boxShadow: "0 15px 40px rgba(106,58,30,0.25)",
-          border: "1px solid rgba(217,167,86,0.2)",
+          boxShadow: `0 20px 50px rgba(106,58,30,0.2), 0 10px 25px ${color}15`,
+          border: `1px solid ${color}20`,
+          position: "relative",
         }}
       >
+        {/* Decorative Corner Accent */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: -30,
+            right: -30,
+            width: "100px",
+            height: "100px",
+            background: `radial-gradient(circle, ${color}20 0%, transparent 70%)`,
+            pointerEvents: "none",
+          }}
+        />
+
         {/* Event Image */}
         <Box
           sx={{
             position: "relative",
             width: "100%",
-            height: "220px",
+            height: "240px",
             overflow: "hidden",
           }}
         >
@@ -275,14 +410,14 @@ const EventCard = ({ event }: { event: Event }) => {
             sx={{
               position: "absolute",
               inset: 0,
-              backgroundImage: `url(${event.imageUrls?.[0]
-                ? getImageUrl(event.imageUrls[0])
-                : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&q=80"
-                })`,
-              backgroundSize: "contain",
+              backgroundImage: `url(${
+                event.imageUrls?.[0]
+                  ? getImageUrl(event.imageUrls[0])
+                  : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&q=80"
+              })`,
+              backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center",
-              backgroundColor: "rgba(245,245,245,0.6)",
             }}
           />
 
@@ -291,9 +426,10 @@ const EventCard = ({ event }: { event: Event }) => {
             sx={{
               position: "absolute",
               inset: 0,
-              background: `linear-gradient(135deg, 
-                ${color}15 0%, 
-                ${color}30 100%)`,
+              background: `linear-gradient(180deg,
+                transparent 0%,
+                ${color}10 50%,
+                rgba(74,44,23,0.7) 100%)`,
             }}
           />
 
@@ -301,28 +437,66 @@ const EventCard = ({ event }: { event: Event }) => {
           <Box
             sx={{
               position: "absolute",
-              top: 15,
-              right: 15,
+              top: 18,
+              right: 18,
               background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
               color: "#FFFDFB",
-              padding: "6px 14px",
-              borderRadius: "20px",
+              padding: "8px 16px",
+              borderRadius: "25px",
               fontFamily: '"Inter", sans-serif',
-              fontSize: "0.75rem",
-              fontWeight: 700,
+              fontSize: "0.7rem",
+              fontWeight: 800,
               textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              boxShadow: `0 4px 12px ${color}50`,
+              letterSpacing: "0.08em",
+              boxShadow: `0 6px 15px ${color}50`,
             }}
           >
             {getEventTypeLabel(event.type)}
+          </Box>
+
+          {/* Date Overlay at Bottom */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: "20px",
+              background:
+                "linear-gradient(0deg, rgba(74,44,23,0.9) 0%, transparent 100%)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                background: "rgba(255,253,251,0.15)",
+                backdropFilter: "blur(10px)",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid rgba(255,253,251,0.2)",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "0.8rem",
+                  fontWeight: 700,
+                  color: "#FFFDFB",
+                  fontFamily: '"Inter", sans-serif',
+                }}
+              >
+                📅 {formatEventDate(event.eventStartDate)} • 🕐{" "}
+                {formatEventTime(event.eventStartDate)}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
         {/* Event Details */}
         <Box
           sx={{
-            padding: "20px",
+            padding: "24px",
             display: "flex",
             flexDirection: "column",
             gap: 2,
@@ -331,52 +505,25 @@ const EventCard = ({ event }: { event: Event }) => {
           {/* Title */}
           <Typography
             sx={{
-              fontSize: "1.4rem",
+              fontSize: "1.5rem",
               fontWeight: 800,
               color: "#4A2C17",
               fontFamily: '"Cormorant Garamond", Georgia, serif',
               lineHeight: 1.2,
-              mb: 1,
             }}
           >
             {event.title}
           </Typography>
 
-          {/* Date & Time Row */}
+          {/* Decorative Divider */}
           <Box
             sx={{
-              display: "flex",
-              gap: 2,
-              flexWrap: "wrap",
-              pb: 1,
-              borderBottom: `2px solid ${color}30`,
+              width: "60px",
+              height: "3px",
+              background: `linear-gradient(90deg, ${color}, transparent)`,
+              borderRadius: "2px",
             }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography
-                sx={{
-                  fontSize: "0.9rem",
-                  fontWeight: 700,
-                  color: color,
-                  fontFamily: '"Inter", sans-serif',
-                }}
-              >
-                📅 {formatEventDate(event.eventStartDate)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography
-                sx={{
-                  fontSize: "0.9rem",
-                  fontWeight: 700,
-                  color: color,
-                  fontFamily: '"Inter", sans-serif',
-                }}
-              >
-                🕐 {formatEventTime(event.eventStartDate)}
-              </Typography>
-            </Box>
-          </Box>
+          />
 
           {/* Description */}
           <Typography
@@ -384,11 +531,11 @@ const EventCard = ({ event }: { event: Event }) => {
               fontSize: "0.95rem",
               color: "#6A3A1E",
               fontFamily: '"Inter", sans-serif',
-              lineHeight: 1.6,
+              lineHeight: 1.7,
               overflow: "hidden",
               textOverflow: "ellipsis",
               display: "-webkit-box",
-              WebkitLineClamp: 4,
+              WebkitLineClamp: 3,
               WebkitBoxOrient: "vertical",
             }}
           >
@@ -399,35 +546,36 @@ const EventCard = ({ event }: { event: Event }) => {
           <Button
             onClick={() => navigate("/events")}
             sx={{
-              marginTop: "8px",
+              marginTop: "12px",
               width: "100%",
               fontWeight: 700,
               color: "#FFFDFB",
-              padding: "12px 24px",
+              padding: "14px 28px",
               border: "none",
               fontFamily: '"Inter", sans-serif',
               fontSize: "0.9rem",
               textTransform: "uppercase",
+              letterSpacing: "0.08em",
               background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
               borderRadius: "30px",
-              transition: "all 0.3s",
-              boxShadow: `0 6px 18px ${color}40`,
+              transition: "all 0.4s ease",
+              boxShadow: `0 10px 25px ${color}40`,
               "&:active": {
-                transform: "scale(0.98)",
-                boxShadow: `0 4px 12px ${color}50`,
+                transform: "scale(0.97)",
+                boxShadow: `0 6px 15px ${color}50`,
               },
             }}
           >
-            View Details
+            View Details →
           </Button>
         </Box>
       </Box>
     </>
   );
 };
-
 const EventsSection = () => {
   const navigate = useNavigate();
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   // Fetch active events from backend
   const { data: eventsData, loading } = useApiWithCache<Event[]>(
@@ -456,19 +604,105 @@ const EventsSection = () => {
 
   return (
     <Box
+      ref={sectionRef}
       sx={{
         margin: 0,
         padding: 0,
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #FDF8F3 100%)",
+        background:
+          "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 30%, #E8D5C4 60%, #F5EBE0 85%, #FDF8F3 100%)",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         fontFamily: '"Inter", sans-serif',
-        py: { xs: 8, md: 12 },
+        py: { xs: 10, md: 14 },
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Background Decorative Elements */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          overflow: "hidden",
+        }}
+      >
+        {/* Large Decorative Circle */}
+        <Box
+          component={motion.div}
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 180, 360],
+          }}
+          transition={{
+            duration: 40,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          sx={{
+            position: "absolute",
+            top: "-20%",
+            right: "-10%",
+            width: "600px",
+            height: "600px",
+            border: "1px solid rgba(217,167,86,0.1)",
+            borderRadius: "50%",
+          }}
+        />
+        <Box
+          component={motion.div}
+          animate={{
+            scale: [1, 1.05, 1],
+            rotate: [360, 180, 0],
+          }}
+          transition={{
+            duration: 50,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          sx={{
+            position: "absolute",
+            bottom: "-15%",
+            left: "-8%",
+            width: "500px",
+            height: "500px",
+            border: "1px solid rgba(217,167,86,0.08)",
+            borderRadius: "50%",
+          }}
+        />
+
+        {/* Floating Particles */}
+        {[...Array(20)].map((_, i) => (
+          <Box
+            key={i}
+            component={motion.div}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, i % 2 === 0 ? 10 : -10, 0],
+              opacity: [0.1, 0.4, 0.1],
+            }}
+            transition={{
+              duration: 6 + i * 0.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.2,
+            }}
+            sx={{
+              position: "absolute",
+              width: `${3 + (i % 4) * 2}px`,
+              height: `${3 + (i % 4) * 2}px`,
+              borderRadius: "50%",
+              background: i % 3 === 0 ? "#D9A756" : "rgba(106,58,30,0.3)",
+              top: `${5 + i * 4.5}%`,
+              left: `${5 + i * 4.8}%`,
+            }}
+          />
+        ))}
+      </Box>
+
       {/* Section Header */}
       <Box
         sx={{
@@ -478,45 +712,18 @@ const EventsSection = () => {
           width: "100%",
           maxWidth: "1200px",
           px: 3,
+          zIndex: 1,
         }}
       >
-        {/* Floating particles */}
-        {[...Array(8)].map((_, i) => (
-          <Box
-            key={i}
-            component={motion.div}
-            animate={{
-              y: [0, -20, 0],
-              opacity: [0.2, 0.5, 0.2],
-            }}
-            transition={{
-              duration: 5 + i,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.3,
-            }}
-            sx={{
-              position: "absolute",
-              width: `${4 + i * 2}px`,
-              height: `${4 + i * 2}px`,
-              borderRadius: "50%",
-              background: "#D9A756",
-              top: `${20 + i * 10}%`,
-              left: `${10 + i * 12}%`,
-              pointerEvents: "none",
-            }}
-          />
-        ))}
-
         {/* Animated Top Accent */}
         <Box
           component={motion.div}
           initial={{ scaleX: 0, opacity: 0 }}
           whileInView={{ scaleX: 1, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 1, delay: 0.3 }}
+          transition={{ duration: 1, delay: 0.2 }}
           sx={{
-            width: 80,
+            width: 100,
             height: 3,
             background:
               "linear-gradient(90deg, transparent, #D9A756, transparent)",
@@ -526,15 +733,16 @@ const EventsSection = () => {
             "&::before, &::after": {
               content: '""',
               position: "absolute",
-              width: "8px",
-              height: "8px",
+              width: "10px",
+              height: "10px",
               borderRadius: "50%",
               background: "#D9A756",
               top: "50%",
               transform: "translateY(-50%)",
+              boxShadow: "0 0 10px rgba(217,167,86,0.5)",
             },
-            "&::before": { left: -4 },
-            "&::after": { right: -4 },
+            "&::before": { left: -5 },
+            "&::after": { right: -5 },
           }}
         />
 
@@ -543,12 +751,12 @@ const EventsSection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
           variant="overline"
           sx={{
             color: "#D9A756",
-            letterSpacing: "0.4em",
-            fontSize: { xs: "0.8rem", md: "0.95rem" },
+            letterSpacing: "0.5em",
+            fontSize: { xs: "0.75rem", md: "0.9rem" },
             fontFamily: '"Inter", sans-serif',
             fontWeight: 700,
             mb: 2,
@@ -556,10 +764,11 @@ const EventsSection = () => {
             textTransform: "uppercase",
             position: "relative",
             "&::before, &::after": {
-              content: '"✦"',
+              content: '"◆"',
               position: "relative",
               mx: 2,
-              opacity: 0.6,
+              opacity: 0.5,
+              fontSize: "0.6em",
             },
           }}
         >
@@ -568,18 +777,23 @@ const EventsSection = () => {
 
         <Typography
           component={motion.h2}
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, scale: 0.9, y: 30 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.5 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
           sx={{
             fontFamily: '"Cormorant Garamond", Georgia, serif',
-            fontSize: { xs: "3rem", sm: "4rem", md: "5.5rem" },
-            fontWeight: 800,
+            fontSize: { xs: "2.8rem", sm: "4rem", md: "5rem" },
+            fontWeight: 700,
             color: "#4A2C17",
             mb: 3,
-            textShadow: "0 0 40px rgba(106,58,30,0.15)",
+            textShadow: "0 4px 30px rgba(106,58,30,0.15)",
             letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+            background: "linear-gradient(180deg, #4A2C17 0%, #6A3A1E 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
           }}
         >
           Upcoming Events
@@ -590,51 +804,69 @@ const EventsSection = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
           sx={{
             fontFamily: '"Inter", sans-serif',
-            fontSize: { xs: "1rem", md: "1.2rem" },
+            fontSize: { xs: "1rem", md: "1.15rem" },
             color: "#6A3A1E",
-            maxWidth: 700,
+            maxWidth: 650,
             mx: "auto",
-            lineHeight: 1.8,
+            lineHeight: 1.9,
             fontWeight: 400,
             px: 3,
-            mb: 6,
+            mb: 4,
           }}
         >
           Unforgettable experiences, live entertainment, and celebrations that
           bring our community together
         </Typography>
+
+        {/* Decorative Divider */}
+        <Box
+          component={motion.div}
+          initial={{ width: 0 }}
+          whileInView={{ width: "180px" }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          sx={{
+            height: "1px",
+            background:
+              "linear-gradient(90deg, transparent, rgba(217,167,86,0.5), transparent)",
+            mx: "auto",
+            mb: 6,
+          }}
+        />
       </Box>
 
       {/* Cards Container */}
       <Box
         sx={{
           width: "100%",
-          maxWidth: "1000px",
+          maxWidth: "1100px",
           position: "relative",
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           flexWrap: "wrap",
-          gap: { xs: 4, sm: 3 },
-          px: { xs: 2, sm: 3 },
-          mb: { xs: 6, md: 10 },
-          alignItems: "center",
+          gap: { xs: 5, sm: 4, md: 5 },
+          px: { xs: 3, sm: 4 },
+          mb: { xs: 8, md: 12 },
+          alignItems: "flex-start",
           flexDirection: { xs: "column", sm: "row" },
+          zIndex: 1,
         }}
       >
-        {displayableEvents.map((event) => (
-          <EventCard key={event.id} event={event} />
+        {displayableEvents.map((event, index) => (
+          <EventCard key={event.id} event={event} index={index} />
         ))}
       </Box>
 
       {/* Call to Action */}
       <Box
         sx={{
-          py: { xs: 6, md: 8 },
+          py: { xs: 4, md: 6 },
           textAlign: "center",
           position: "relative",
+          zIndex: 1,
         }}
       >
         <Button
@@ -643,32 +875,47 @@ const EventsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          whileHover={{ scale: 1.08, y: -5 }}
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate("/events")}
           sx={{
-            px: 6,
-            py: 2.5,
-            background: "linear-gradient(135deg, #D9A756 0%, #C5933E 100%)",
+            px: { xs: 5, md: 7 },
+            py: { xs: 2, md: 2.5 },
+            background: "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
             border: "none",
             borderRadius: "50px",
             color: "#FFFDFB",
             fontFamily: '"Cormorant Garamond", Georgia, serif',
-            fontSize: "1.3rem",
-            fontWeight: 800,
+            fontSize: { xs: "1.1rem", md: "1.3rem" },
+            fontWeight: 700,
             letterSpacing: "0.15em",
             textTransform: "uppercase",
             position: "relative",
             overflow: "hidden",
-            boxShadow: "0 10px 30px rgba(217,167,86,0.4)",
-            transition: "all 0.4s ease",
+            boxShadow:
+              "0 15px 40px rgba(217,167,86,0.4), 0 5px 15px rgba(106,58,30,0.2)",
+            transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: "-100%",
+              width: "100%",
+              height: "100%",
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
+              transition: "left 0.6s",
+            },
             "&:hover": {
-              boxShadow: "0 15px 40px rgba(217,167,86,0.6)",
-              transform: "translateY(-5px)",
+              boxShadow:
+                "0 20px 50px rgba(217,167,86,0.5), 0 10px 25px rgba(106,58,30,0.25)",
+              "&::before": {
+                left: "100%",
+              },
             },
           }}
         >
-          Explore All Events
+          Explore All Events →
         </Button>
       </Box>
     </Box>

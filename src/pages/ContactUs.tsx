@@ -1,6 +1,9 @@
 import { useState } from "react";
 import Nav from "../components/common/Nav";
 import Footer from "../components/common/Footer";
+import HeroSection from "../components/common/HeroSection";
+import AnimatedBackground from "../components/common/AnimatedBackground";
+import { ContactSEO } from "../config/seo.presets";
 import {
   Box,
   TextField,
@@ -20,7 +23,6 @@ import GroupIcon from "@mui/icons-material/Group";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import { motion } from "framer-motion";
-import ContactBg from "../assets/images/hero-bg.jpg";
 import contactAnimation from "../assets/animations/contact-animation.json";
 import Lottie from "lottie-react";
 import { useApiWithCache } from "../hooks/useApi";
@@ -200,7 +202,8 @@ const ContactUs = () => {
           : formData.subject || "Contact from website";
         const subject = encodeURIComponent(subjectLine);
         const body = encodeURIComponent(
-          `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone || "N/A"
+          `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
+            formData.phone || "N/A"
           }\n\n${fullMessage}`
         );
         window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
@@ -222,7 +225,8 @@ const ContactUs = () => {
       }
 
       const body = encodeURIComponent(
-        `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone || "N/A"
+        `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
+          formData.phone || "N/A"
         }\n\n${fullMessage}`
       );
       window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
@@ -237,143 +241,33 @@ const ContactUs = () => {
   };
 
   return (
-    <div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "#FDF8F3",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <AnimatedBackground variant="subtle" />
+      <ContactSEO />
       <Nav />
       <Callicon />
       <SocialMedia />
 
-      {/* Hero Section - consistent with other pages */}
-      <Box
-        sx={{
-          minHeight: { xs: "55vh", sm: "55vh", md: "60vh" },
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-          px: { xs: 2, sm: 4 },
-          pt: { xs: 10, sm: 6, md: 0 },
-          backgroundImage: `url(${ContactBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          position: "relative",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              "linear-gradient(180deg, rgba(60,31,14,0.7) 0%, rgba(106,58,30,0.6) 100%)",
-          },
-        }}
-      >
-        {/* Decorative overlay pattern */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(217,167,86,0.1) 0%, transparent 50%),
-                              radial-gradient(circle at 80% 50%, rgba(217,167,86,0.08) 0%, transparent 50%)`,
-            pointerEvents: "none",
-          }}
-        />
-
-        <Box
-          component={motion.div}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          {/* Decorative line above */}
-          <Box
-            component={motion.div}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            sx={{
-              width: 80,
-              height: 2,
-              backgroundColor: "#D9A756",
-              mb: 2,
-            }}
-          />
-
-          <Typography
-            component={motion.h1}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            sx={{
-              margin: 0,
-              color: "#F3E3CC",
-              fontSize: { xs: "2rem", sm: "3rem", md: "4rem" },
-              letterSpacing: { xs: 1, sm: 2, md: 4 },
-              textTransform: "uppercase",
-              fontWeight: 700,
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              textShadow: "2px 2px 12px rgba(0,0,0,0.4)",
-              lineHeight: 1.2,
-            }}
-          >
-            Contact Us
-          </Typography>
-
-          <Typography
-            component={motion.p}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            sx={{
-              mt: { xs: 1.5, md: 2 },
-              color: "rgba(243, 227, 204, 0.9)",
-              fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 400,
-              letterSpacing: { xs: 0.5, md: 1 },
-              maxWidth: { xs: "90%", md: 600 },
-              px: 2,
-              textShadow: "1px 1px 4px rgba(0,0,0,0.3)",
-            }}
-          >
-            Reservations, events, or just saying hello — we'd love to hear from
-            you
-          </Typography>
-
-          {/* Decorative line below */}
-          <Box
-            component={motion.div}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            sx={{
-              width: 120,
-              height: 2,
-              backgroundColor: "#D9A756",
-              mt: 3,
-            }}
-          />
-        </Box>
-      </Box>
+      {/* Hero Section - using reusable component */}
+      <HeroSection
+        id="contact-hero"
+        title="Get In Touch"
+        subtitle="Reservations, events, or just saying hello — we'd love to hear from you"
+        overlineText="✦ CONTACT US ✦"
+        variant="light"
+      />
 
       {/* Background wrapper for main content */}
       <Box
         sx={{
-          background: "linear-gradient(180deg, #F3E3CC 0%, #E8D4B8 100%)",
+          background: "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 100%)",
           minHeight: "100vh",
           py: { xs: 4, sm: 6, md: 10 },
           pb: { xs: 12, md: 10 },
@@ -1018,7 +912,7 @@ const ContactUs = () => {
       </Snackbar>
 
       <Footer />
-    </div>
+    </Box>
   );
 };
 

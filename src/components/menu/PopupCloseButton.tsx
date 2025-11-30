@@ -1,12 +1,14 @@
-import React from "react";
-
 type Props = {
   onClick: () => void;
   ariaLabel?: string;
   zIndex?: number;
 };
 
-export default function PopupCloseButton({ onClick, ariaLabel = "Close popup", zIndex = 14002 }: Props) {
+export default function PopupCloseButton({
+  onClick,
+  ariaLabel = "Close popup",
+  zIndex = 14002,
+}: Props) {
   return (
     <button
       onClick={onClick}
@@ -30,14 +32,19 @@ export default function PopupCloseButton({ onClick, ariaLabel = "Close popup", z
         zIndex,
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 0 22px rgba(217, 167, 86, 0.45)";
-        (e.currentTarget as HTMLElement).style.background = "rgba(106, 58, 30, 1)";
+        (e.currentTarget as HTMLElement).style.boxShadow =
+          "0 0 22px rgba(217, 167, 86, 0.45)";
+        (e.currentTarget as HTMLElement).style.background =
+          "rgba(106, 58, 30, 1)";
         (e.currentTarget as HTMLElement).style.borderColor = "#d9a756";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(106,58,30,0.3)";
-        (e.currentTarget as HTMLElement).style.background = "rgba(106, 58, 30, 0.9)";
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(217, 167, 86, 0.6)";
+        (e.currentTarget as HTMLElement).style.boxShadow =
+          "0 4px 12px rgba(106,58,30,0.3)";
+        (e.currentTarget as HTMLElement).style.background =
+          "rgba(106, 58, 30, 0.9)";
+        (e.currentTarget as HTMLElement).style.borderColor =
+          "rgba(217, 167, 86, 0.6)";
       }}
     >
       <svg

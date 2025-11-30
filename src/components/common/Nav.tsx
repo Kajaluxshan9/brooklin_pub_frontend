@@ -74,9 +74,8 @@ const Nav = () => {
   );
 
   // Fetch all menu items from backend
-  const { data: menuItems } = useApiWithCache<any[]>(
-    "all-menu-items",
-    () => menuService.getAllMenuItems()
+  const { data: _menuItems } = useApiWithCache<any[]>("all-menu-items", () =>
+    menuService.getAllMenuItems()
   );
 
   // Filter specials that are currently visible (within display date range)
@@ -148,7 +147,9 @@ const Nav = () => {
   const [openParent, setOpenParent] = useState<string | null>(null);
   const [mobileOpenParent, setMobileOpenParent] = useState<string | null>(null);
   // Track which category is expanded in the dropdown
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [_expandedCategory, setExpandedCategory] = useState<string | null>(
+    null
+  );
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -351,47 +352,91 @@ const Nav = () => {
                     onMouseLeave={scheduleCloseParent}
                   >
                     {/* Parent Button (dropdown) — styled like other nav links; clickable if `path` exists */}
-                    <Button
-                      component={link.path ? Link : undefined}
-                      to={link.path}
-                      onClick={(e: any) => {
-                        // If there's no path, prevent navigation on click and keep dropdown behavior
-                        if (!link.path) {
-                          e.preventDefault();
-                          openParentNow(link.label);
-                        } else {
-                          closeParentNow();
-                        }
-                      }}
-                      sx={{
-                        fontWeight: 500,
-                        textTransform: "none",
-                        color: isActive ? "#6A3A1E" : "primary.main",
-                        position: "relative",
-                        px: 0.5,
-                        cursor: link.path ? "pointer" : "default",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        fontSize: "0.875rem",
-                        lineHeight: 1.2,
-                        minHeight: 0,
-                        py: 0.5,
-                        "&::after": {
-                          content: '""',
-                          position: "absolute",
-                          bottom: 0,
-                          left: 0,
-                          width: isActive ? "100%" : "0%",
-                          height: "2px",
-                          backgroundColor: "#6A3A1E",
-                          transition: "width 0.25s ease",
-                          borderRadius: 2,
-                        },
-                        "&:hover::after": { width: "100%" },
-                      }}
-                    >
-                      {link.label}
-                    </Button>
+                    {link.path ? (
+                      <Button
+                        component={Link}
+                        to={link.path}
+                        onClick={() => closeParentNow()}
+                        sx={{
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          fontFamily: '"Inter", sans-serif',
+                          color: isActive ? "#6A3A1E" : "#4A2C17",
+                          position: "relative",
+                          px: 1,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          fontSize: "0.75rem",
+                          lineHeight: 1.2,
+                          minHeight: 0,
+                          py: 0.5,
+                          pb: 1.5,
+                          transition: "color 0.2s ease",
+                          "&:hover": { color: "#6A3A1E" },
+                        }}
+                      >
+                        {link.label}
+                        {/* Active dot indicator */}
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            bottom: 2,
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            width: 5,
+                            height: 5,
+                            borderRadius: "50%",
+                            backgroundColor: "#D9A756",
+                            opacity: isActive ? 1 : 0,
+                            transition: "opacity 0.25s ease",
+                          }}
+                        />
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => openParentNow(link.label)}
+                        sx={{
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          fontFamily: '"Inter", sans-serif',
+                          color: isActive ? "#6A3A1E" : "#4A2C17",
+                          position: "relative",
+                          px: 1,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          fontSize: "0.75rem",
+                          lineHeight: 1.2,
+                          minHeight: 0,
+                          py: 0.5,
+                          pb: 1.5,
+                          transition: "color 0.2s ease",
+                          "&:hover": { color: "#6A3A1E" },
+                        }}
+                      >
+                        {link.label}
+                        {/* Active dot indicator */}
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            bottom: 2,
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            width: 5,
+                            height: 5,
+                            borderRadius: "50%",
+                            backgroundColor: "#D9A756",
+                            opacity: isActive ? 1 : 0,
+                            transition: "opacity 0.25s ease",
+                          }}
+                        />
+                      </Button>
+                    )}
 
                     {openParent === link.label && (
                       <motion.ul
@@ -402,30 +447,78 @@ const Nav = () => {
                           }
                         }}
                         onMouseLeave={scheduleCloseParent}
-                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                        initial={{ opacity: 0, y: -12, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        exit={{ opacity: 0, y: -12, scale: 0.95 }}
+                        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                         style={{
                           position: "absolute",
-                          top: "100%",
-                          left: 0,
+                          top: "calc(100% + 8px)",
+                          left: "50%",
+                          transform: "translateX(-50%)",
                           background:
-                            "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.90))",
-                          borderRadius: 14,
+                            "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(253,248,243,0.98))",
+                          borderRadius: 20,
                           boxShadow:
-                            "0 10px 30px rgba(0,0,0,0.12), 0 2px 10px rgba(0,0,0,0.06)",
-                          padding: "10px 0",
+                            "0 25px 50px -12px rgba(106, 58, 30, 0.25), 0 12px 24px -8px rgba(0,0,0,0.12), 0 0 0 1px rgba(217, 167, 86, 0.15)",
+                          padding: "16px 8px",
                           listStyle: "none",
-                          minWidth: 280,
-                          maxWidth: 400,
+                          minWidth: 260,
+                          maxWidth: 320,
                           maxHeight: "70vh",
                           overflowY: "auto",
                           zIndex: 2000,
-                          backdropFilter: "blur(12px)",
-                          border: "1px solid rgba(255,255,255,0.45)",
+                          backdropFilter: "blur(20px)",
+                          border: "1px solid rgba(217, 167, 86, 0.2)",
                         }}
                       >
+                        {/* Decorative top accent */}
+                        <Box
+                          component="li"
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            mb: 1.5,
+                            pb: 1.5,
+                            borderBottom: "1px solid rgba(217, 167, 86, 0.15)",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 30,
+                                height: 1.5,
+                                background:
+                                  "linear-gradient(90deg, transparent, #D9A756)",
+                                borderRadius: 1,
+                              }}
+                            />
+                            <Box
+                              sx={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: "50%",
+                                backgroundColor: "#D9A756",
+                              }}
+                            />
+                            <Box
+                              sx={{
+                                width: 30,
+                                height: 1.5,
+                                background:
+                                  "linear-gradient(90deg, #D9A756, transparent)",
+                                borderRadius: 1,
+                              }}
+                            />
+                          </Box>
+                        </Box>
+
                         {link.dropdown!.map((item, index) => {
                           const isChildActive = location.pathname.startsWith(
                             item.path || ""
@@ -436,8 +529,15 @@ const Nav = () => {
                           return (
                             <motion.li
                               key={item.label}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{
+                                delay: index * 0.05,
+                                duration: 0.2,
+                              }}
                               style={{
                                 position: "relative",
+                                margin: "0 4px",
                               }}
                             >
                               <Button
@@ -447,93 +547,179 @@ const Nav = () => {
                                   width: "100%",
                                   justifyContent: "flex-start",
                                   textTransform: "none",
-                                  px: 3,
-                                  py: 1.2,
+                                  px: 2.5,
+                                  py: 1.4,
                                   color:
                                     isChildActive || isSelectedByQuery
                                       ? "#6A3A1E"
-                                      : "primary.main",
-                                  fontSize: "0.94rem",
-                                  borderRadius: 0,
+                                      : "#4A2C17",
+                                  fontSize: "0.95rem",
+                                  fontWeight:
+                                    isChildActive || isSelectedByQuery
+                                      ? 600
+                                      : 500,
+                                  fontFamily: '"Inter", sans-serif',
+                                  letterSpacing: "0.02em",
+                                  borderRadius: "12px",
                                   position: "relative",
+                                  background:
+                                    isChildActive || isSelectedByQuery
+                                      ? "linear-gradient(135deg, rgba(217, 167, 86, 0.12), rgba(217, 167, 86, 0.06))"
+                                      : "transparent",
+                                  transition:
+                                    "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                                  overflow: "hidden",
+                                  "&::before": {
+                                    content: '""',
+                                    position: "absolute",
+                                    left: 0,
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    width:
+                                      isChildActive || isSelectedByQuery
+                                        ? 4
+                                        : 0,
+                                    height:
+                                      isChildActive || isSelectedByQuery
+                                        ? "60%"
+                                        : 0,
+                                    background:
+                                      "linear-gradient(180deg, #D9A756, #B08030)",
+                                    borderRadius: "0 4px 4px 0",
+                                    transition: "all 0.25s ease",
+                                  },
                                   "&:hover": {
-                                    bgcolor: "rgba(245, 240, 235, 0.6)",
+                                    bgcolor: "rgba(217, 167, 86, 0.08)",
+                                    color: "#6A3A1E",
+                                    transform: "translateX(4px)",
+                                    "&::before": {
+                                      width: 4,
+                                      height: "60%",
+                                    },
                                   },
                                 }}
                                 onClick={closeParentNow}
                               >
-                                {/* Highlight left bar when active or selected by query */}
-                                {(isChildActive || isSelectedByQuery) && (
-                                  <motion.span
-                                    layoutId="menu-left-bar"
-                                    style={{
-                                      position: "absolute",
-                                      left: 0,
-                                      top: 0,
-                                      width: "4px",
-                                      height: "100%",
-                                      background: "#6A3A1E",
-                                      borderRadius: "0 6px 6px 0",
-                                    }}
-                                  />
-                                )}
-
+                                {/* Subtle icon indicator */}
+                                <Box
+                                  sx={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: "50%",
+                                    mr: 1.5,
+                                    background:
+                                      isChildActive || isSelectedByQuery
+                                        ? "#D9A756"
+                                        : "rgba(106, 58, 30, 0.2)",
+                                    transition: "all 0.25s ease",
+                                    flexShrink: 0,
+                                  }}
+                                />
                                 {item.label}
                               </Button>
 
-                              {/* Add subtle divider except last */}
+                              {/* Subtle divider between items */}
                               {index < link.dropdown!.length - 1 && (
                                 <Box
                                   sx={{
-                                    width: "85%",
+                                    width: "70%",
                                     height: "1px",
                                     mx: "auto",
-                                    bgcolor: "rgba(0,0,0,0.06)",
+                                    my: 0.5,
+                                    background:
+                                      "linear-gradient(90deg, transparent, rgba(217, 167, 86, 0.15), transparent)",
                                   }}
                                 />
                               )}
                             </motion.li>
                           );
                         })}
+
+                        {/* Decorative bottom accent */}
+                        <Box
+                          component="li"
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            mt: 1.5,
+                            pt: 1.5,
+                            borderTop: "1px solid rgba(217, 167, 86, 0.15)",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                            }}
+                          >
+                            {[...Array(3)].map((_, i) => (
+                              <Box
+                                key={i}
+                                sx={{
+                                  width: 4,
+                                  height: 4,
+                                  borderRadius: "50%",
+                                  backgroundColor: "rgba(217, 167, 86, 0.4)",
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
                       </motion.ul>
                     )}
                   </Box>
                 ) : (
-                  // Non dropdown links unchanged
-                  <Box key={link.path} sx={{ position: "relative", display: 'flex', alignItems: 'center' }}>
+                  // Non dropdown links
+                  <Box
+                    key={link.path}
+                    sx={{
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
                     <Button
                       component={Link}
                       to={link.path!}
                       sx={{
-                        fontWeight: 500,
-                        textTransform: "none",
-                        color: isActive ? "#6A3A1E" : "primary.main",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        fontFamily: '"Inter", sans-serif',
+                        color: isActive ? "#6A3A1E" : "#4A2C17",
                         position: "relative",
                         lineHeight: 1.2,
                         minHeight: 0,
                         px: 1,
                         py: 0.5,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        "&:hover": { color: "primary.dark" },
+                        pb: 1.5,
+                        fontSize: "0.75rem",
+                        display: "inline-flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        transition: "color 0.2s ease",
+                        "&:hover": { color: "#6A3A1E" },
                       }}
                     >
                       {link.label}
+                      {/* Active dot indicator */}
+                      {isActive && (
+                        <motion.div
+                          layoutId="nav-dot"
+                          style={{
+                            position: "absolute",
+                            bottom: 2,
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            width: 5,
+                            height: 5,
+                            borderRadius: "50%",
+                            background: "#D9A756",
+                          }}
+                        />
+                      )}
                     </Button>
-                    {isActive && (
-                      <motion.div
-                        layoutId="nav-underline"
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          bottom: 0,
-                          height: 2,
-                          width: "100%",
-                          background: "#6A3A1E",
-                          borderRadius: 2,
-                        }}
-                      />
-                    )}
                   </Box>
                 );
               })}
@@ -549,8 +735,10 @@ const Nav = () => {
                 px: 3,
                 py: 1.2,
                 borderRadius: 50,
-                textTransform: "none",
-                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                fontWeight: 700,
+                fontSize: "0.8rem",
               }}
             >
               Order Online
@@ -690,14 +878,15 @@ const Nav = () => {
                 sx={{
                   fontFamily: '"Cormorant Garamond", Georgia, serif',
                   fontWeight: 700,
-                  fontSize: "1.15rem",
+                  fontSize: "1rem",
                   color: "#3C1F0E",
                   display: { xs: "block", md: "none" },
                   lineHeight: 1.1,
-                  letterSpacing: "0.02em",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
                 }}
               >
-                The Brooklin Pub
+                Brooklin Pub
               </Box>
             </Box>
 
@@ -710,11 +899,12 @@ const Nav = () => {
               rel="noopener noreferrer"
               sx={{
                 borderRadius: 999,
-                textTransform: "none",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
                 px: 2.2,
                 py: "6px",
-                fontSize: "0.85rem",
-                fontWeight: 600,
+                fontSize: "0.75rem",
+                fontWeight: 700,
                 bgcolor: "#6A3A1E",
                 "&:hover": { bgcolor: "#3C1F0E" },
               }}

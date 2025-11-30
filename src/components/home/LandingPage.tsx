@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { motion } from "framer-motion";
+import { Box, Typography, Button } from "@mui/material";
 
 const images = [
   "https://i.pinimg.com/736x/8b/b4/c5/8bb4c59a46590ce36065bf3b60c8b3e1.jpg",
@@ -18,6 +20,7 @@ const LandingPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const tinyRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Responsive radius and spacing based on viewport
   const getResponsiveValues = () => {
@@ -102,14 +105,14 @@ const LandingPage = () => {
 
     // Tiny floating images - reduce count on mobile for performance
     const tinyElements = tinyRefs.current;
-    const isMobile = window.innerWidth < 768;
+    const isMobileView = window.innerWidth < 768;
     tinyElements.forEach((el) => {
       if (!el || !containerRef.current) return;
 
       const vw = containerRef.current.clientWidth || window.innerWidth;
       const vh = containerRef.current.clientHeight || window.innerHeight;
-      const count = isMobile ? 20 : 50; // Fewer particles on mobile
-      const imgSize = isMobile ? 15 : 20;
+      const count = isMobileView ? 20 : 50; // Fewer particles on mobile
+      const imgSize = isMobileView ? 15 : 20;
 
       el!.innerHTML = ""; // clear previous tiny images
       for (let j = 0; j < count; j++) {
@@ -135,17 +138,35 @@ const LandingPage = () => {
         gsap.to(imgEl, {
           x:
             "+=" +
-            (Math.random() * (isMobile ? 50 : 100) - (isMobile ? 25 : 50)),
+            (Math.random() * (isMobileView ? 50 : 100) -
+              (isMobileView ? 25 : 50)),
           y:
             "+=" +
-            (Math.random() * (isMobile ? 50 : 100) - (isMobile ? 25 : 50)),
-          duration: (isMobile ? 8 : 5) + Math.random() * 5,
+            (Math.random() * (isMobileView ? 50 : 100) -
+              (isMobileView ? 25 : 50)),
+          duration: (isMobileView ? 8 : 5) + Math.random() * 5,
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
         });
       }
     });
+
+    // GSAP animation for content
+    if (contentRef.current) {
+      gsap.fromTo(
+        contentRef.current.querySelectorAll(".hero-content-item"),
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: "power3.out",
+          delay: 0.3,
+        }
+      );
+    }
 
     return () => {
       clearInterval(interval);
@@ -155,9 +176,9 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div
+    <Box
       ref={containerRef}
-      style={{
+      sx={{
         perspective: "1500px",
         width: "100%",
         height: "100vh",
@@ -168,96 +189,330 @@ const LandingPage = () => {
       }}
     >
       {images.map((src, i) => (
-        <div
+        <Box
           key={i}
-          ref={(el) => {
+          ref={(el: HTMLDivElement | null) => {
             cardsRef.current[i] = el;
           }}
           className="spiral-card"
-          style={{
+          sx={{
             width: "90%",
             maxWidth: "600px",
             aspectRatio: "16/9",
             background: `url(${src}) center/cover no-repeat`,
-            borderRadius: "20px",
+            borderRadius: "24px",
             position: "absolute",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
+            boxShadow:
+              "0 25px 50px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3)",
             opacity: 0,
+            border: "1px solid rgba(255,255,255,0.15)",
           }}
         >
-          <div
-            ref={(el) => {
+          <Box
+            ref={(el: HTMLDivElement | null) => {
               tinyRefs.current[i] = el;
             }}
-            style={{
+            sx={{
               position: "absolute",
               top: 0,
               left: 0,
               width: "100%",
               height: "100%",
             }}
-          ></div>
-        </div>
+          />
+        </Box>
       ))}
 
-      <div
-        style={{
+      <Box
+        sx={{
           position: "absolute",
           top: 0,
           left: 0,
           width: "100%",
           height: "100%",
           background:
-            "linear-gradient(180deg, rgba(139,90,43,0.4) 0%, rgba(184,130,70,0.35) 100%)",
+            "linear-gradient(180deg, rgba(74,44,23,0.65) 0%, rgba(60,31,14,0.75) 40%, rgba(74,44,23,0.7) 100%)",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           zIndex: 10,
           textAlign: "center",
-          color: "#4A2C17",
+          color: "#FFFDFB",
           padding: "20px",
+          gap: "20px",
         }}
       >
-        <h1
-          className="landing-heading"
-          style={{
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
+        {/* Decorative top accent */}
+        <Box
+          component={motion.div}
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: 1, opacity: 1 }}
+          transition={{ duration: 1, delay: 0.1 }}
+          sx={{
+            width: { xs: 60, md: 100 },
+            height: 3,
+            background:
+              "linear-gradient(90deg, transparent, #D9A756, transparent)",
+            mb: 1,
+            position: "relative",
+            "&::before, &::after": {
+              content: '""',
+              position: "absolute",
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background: "#D9A756",
+              top: "50%",
+              transform: "translateY(-50%)",
+            },
+            "&::before": { left: -3 },
+            "&::after": { right: -3 },
+          }}
+        />
+
+        {/* Overline */}
+        <Typography
+          component={motion.p}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          sx={{
+            color: "#D9A756",
+            letterSpacing: { xs: "0.25em", md: "0.4em" },
+            fontSize: { xs: "0.65rem", sm: "0.75rem", md: "0.9rem" },
+            fontFamily: '"Inter", sans-serif',
             fontWeight: 700,
-            lineHeight: 1.2,
-            fontFamily: '"Cormorant Garamond", Georgia, serif',
-            letterSpacing: "0.05em",
-            textShadow: "0 2px 12px rgba(255,255,255,0.3)",
+            textTransform: "uppercase",
+            textShadow: "0 2px 10px rgba(0,0,0,0.3)",
           }}
         >
-          Step into the Brooklin Pub
-        </h1>
-      </div>
+          ✦ Est. 2014 • Brooklin, Ontario ✦
+        </Typography>
+
+        {/* Main Heading */}
+        <Typography
+          component={motion.h1}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          sx={{
+            fontSize: {
+              xs: "2.5rem",
+              sm: "3.5rem",
+              md: "4.5rem",
+              lg: "5.5rem",
+            },
+            fontWeight: 800,
+            lineHeight: 1.05,
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            letterSpacing: "-0.02em",
+            textShadow: "0 6px 30px rgba(0,0,0,0.4)",
+            maxWidth: "900px",
+            px: 2,
+            background: "linear-gradient(180deg, #FFFDFB 0%, #F3E3CC 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Welcome to Brooklin Pub
+        </Typography>
+
+        {/* Decorative divider */}
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0, width: 0 }}
+          animate={{ opacity: 1, width: "auto" }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            my: 1,
+          }}
+        >
+          <Box
+            sx={{
+              width: { xs: 30, md: 50 },
+              height: 1,
+              background: "rgba(217,167,86,0.5)",
+            }}
+          />
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "#D9A756",
+            }}
+          />
+          <Box
+            sx={{
+              width: { xs: 30, md: 50 },
+              height: 1,
+              background: "rgba(217,167,86,0.5)",
+            }}
+          />
+        </Box>
+
+        {/* Tagline */}
+        <Typography
+          component={motion.p}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          sx={{
+            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.35rem" },
+            fontFamily: '"Inter", sans-serif',
+            fontWeight: 400,
+            color: "rgba(255,253,251,0.95)",
+            maxWidth: "650px",
+            lineHeight: 1.8,
+            px: 3,
+            textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+          }}
+        >
+          Where great food, cold drinks, and warm hospitality come together
+        </Typography>
+
+        {/* CTA Button */}
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+          sx={{ mt: 3 }}
+        >
+          <Button
+            component={motion.button}
+            whileHover={{ scale: 1.06, y: -3 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              const nextSection =
+                document.getElementById("menu-section") ||
+                document.querySelector("section:nth-of-type(2)");
+              if (nextSection) {
+                nextSection.scrollIntoView({ behavior: "smooth" });
+              } else {
+                window.scrollBy({
+                  top: window.innerHeight,
+                  behavior: "smooth",
+                });
+              }
+            }}
+            sx={{
+              background: "linear-gradient(135deg, #D9A756 0%, #B8923F 100%)",
+              color: "#FFFDFB",
+              px: { xs: 4, md: 5 },
+              py: { xs: 1.5, md: 1.8 },
+              borderRadius: "50px",
+              fontFamily: '"Inter", sans-serif',
+              fontWeight: 700,
+              fontSize: { xs: "0.9rem", md: "1rem" },
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              boxShadow:
+                "0 10px 35px rgba(217,167,86,0.5), 0 5px 15px rgba(0,0,0,0.2)",
+              border: "2px solid rgba(255,255,255,0.15)",
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                transition: "left 0.5s ease",
+              },
+              "&:hover": {
+                background: "linear-gradient(135deg, #E5B566 0%, #D9A756 100%)",
+                boxShadow:
+                  "0 15px 45px rgba(217,167,86,0.6), 0 8px 20px rgba(0,0,0,0.25)",
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
+            }}
+          >
+            Explore Our Menu
+          </Button>
+        </Box>
+
+        {/* Scroll Indicator */}
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: [0, 10, 0] }}
+          transition={{
+            opacity: { duration: 0.6, delay: 1.3 },
+            y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+          }}
+          sx={{
+            position: "absolute",
+            bottom: { xs: 25, md: 40 },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+            cursor: "pointer",
+          }}
+          onClick={() =>
+            window.scrollBy({ top: window.innerHeight, behavior: "smooth" })
+          }
+        >
+          <Typography
+            sx={{
+              fontSize: "0.7rem",
+              letterSpacing: "0.25em",
+              color: "rgba(255,253,251,0.6)",
+              fontFamily: '"Inter", sans-serif',
+              textTransform: "uppercase",
+              fontWeight: 500,
+            }}
+          >
+            Scroll Down
+          </Typography>
+          <Box
+            sx={{
+              width: 24,
+              height: 40,
+              borderRadius: 12,
+              border: "2px solid rgba(217,167,86,0.5)",
+              display: "flex",
+              justifyContent: "center",
+              pt: 1,
+            }}
+          >
+            <Box
+              component={motion.div}
+              animate={{ y: [0, 12, 0] }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              sx={{
+                width: 4,
+                height: 8,
+                borderRadius: 2,
+                background: "#D9A756",
+              }}
+            />
+          </Box>
+        </Box>
+      </Box>
 
       <style>{`
         .tiny-img { pointer-events: none; }
         @media (max-width: 1024px) { .spiral-card { max-width: 500px; } }
         @media (max-width: 768px) { .spiral-card { max-width: 350px; } }
         @media (max-width: 480px) { .spiral-card { max-width: 280px; } }
-
-        .landing-heading {
-          padding: 0;
-          box-sizing: border-box;
-          max-width: 90%;
-        }
-        @media (max-width: 768px) {
-          .landing-heading {
-            font-size: clamp(1.6rem, 6vw, 2.5rem) !important;
-            padding: 0 16px;
-          }
-        }
-        @media (max-width: 480px) {
-          .landing-heading {
-            font-size: clamp(1.4rem, 7vw, 2rem) !important;
-            padding: 0 12px;
-          }
-        }
       `}</style>
-    </div>
+    </Box>
   );
 };
 

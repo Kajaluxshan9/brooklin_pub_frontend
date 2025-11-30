@@ -4,16 +4,21 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useEffect } from "react";
-import Home from "./pages/Home";
-import About from "./pages/About";
+import { useEffect, Suspense, lazy } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import ContactUs from "./pages/ContactUs";
-import Special from "./pages/Special";
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import LoadingScreen from "./components/common/LoadingScreen";
 import ScrollTopFab from "./components/common/ScrollTopFab";
-import MainMenu from "./pages/MainMenu";
-import Events from "./pages/Events";
+import SkipLink from "./components/common/SkipLink";
+
+// Lazy-loaded page components for code splitting
+const Home = lazy(() => import("./pages/Home"));
+const About = lazy(() => import("./pages/About"));
+const ContactUs = lazy(() => import("./pages/ContactUs"));
+const Special = lazy(() => import("./pages/Special"));
+const MainMenu = lazy(() => import("./pages/MainMenu"));
+const Events = lazy(() => import("./pages/Events"));
 
 const theme = createTheme({
   palette: {
@@ -105,25 +110,32 @@ const theme = createTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contactus" element={<ContactUs />} />
-          <Route path="/events" element={<Events />} />
-          {/* All special routes use the Special page wrapper with SpecialDisplay */}
-          <Route path="/special/:type" element={<Special />} />
-          {/* Fallback: /special without type redirects to daily */}
-          <Route path="/special" element={<Special />} />
-          {/* Generic menu route that responds to query params like ?category=<id> */}
-          <Route path="/menu" element={<MainMenu />} />
-        </Routes>
-        <ScrollTopFab />
-      </Router>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <SkipLink />
+          <ScrollToTop />
+          <Suspense fallback={<LoadingScreen />}>
+            <main id="main-content">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contactus" element={<ContactUs />} />
+                <Route path="/events" element={<Events />} />
+                {/* All special routes use the Special page wrapper with SpecialDisplay */}
+                <Route path="/special/:type" element={<Special />} />
+                {/* Fallback: /special without type redirects to daily */}
+                <Route path="/special" element={<Special />} />
+                {/* Generic menu route that responds to query params like ?category=<id> */}
+                <Route path="/menu" element={<MainMenu />} />
+              </Routes>
+            </main>
+          </Suspense>
+          <ScrollTopFab />
+        </Router>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

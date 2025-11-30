@@ -283,7 +283,7 @@ export default function CylinderMenuPopup() {
           position: "relative",
           touchAction: "none",
           userSelect: "none",
-          background: "#FAF7F2",
+          background: "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 100%)",
           marginTop: `${verticalGap}px`,
           marginBottom: `${verticalGap}px`,
         }}
@@ -312,22 +312,22 @@ export default function CylinderMenuPopup() {
                 transform: translate(20px, 30px) rotate(270deg);
               }
             }
-            
+
             .bg-shape {
               animation: floatShape 25s ease-in-out infinite;
               will-change: transform;
             }
-            
+
             .bg-shape:nth-child(2n) {
               animation-duration: 30s;
               animation-delay: -5s;
             }
-            
+
             .bg-shape:nth-child(3n) {
               animation-duration: 35s;
               animation-delay: -10s;
             }
-            
+
             .bg-shape:nth-child(4n) {
               animation-duration: 28s;
               animation-delay: -15s;
@@ -357,7 +357,10 @@ export default function CylinderMenuPopup() {
                 height: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
                 borderRadius: i % 2 === 0 ? "50%" : "10%",
                 border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"}`,
-                background: i % 4 === 0 ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20` : "transparent",
+                background:
+                  i % 4 === 0
+                    ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20`
+                    : "transparent",
                 left: `${(i * 23 + 10) % 90}%`,
                 top: `${(i * 17 + 5) % 85}%`,
                 opacity: 0.05 + (i % 3) * 0.03,
@@ -370,23 +373,23 @@ export default function CylinderMenuPopup() {
         <motion.div
           onMouseEnter={() => setIsHoveringCylinder(true)}
           onMouseLeave={() => setIsHoveringCylinder(false)}
-            style={{
+          style={{
             rotateY: isCylinder ? angle : 0,
             transformStyle: isCylinder ? "preserve-3d" : "flat",
             width: isCylinder
               ? `${cardWidth}px`
               : isTwo
-                ? isMobile
-                  ? "90%"
-                  : `${cardWidth * 2 + 16}px`
-                : "min(1100px, 92%)",
+              ? isMobile
+                ? "90%"
+                : `${cardWidth * 2 + 16}px`
+              : "min(1100px, 92%)",
             height: isCylinder
               ? `${cardHeight}px`
               : isTwo
-                ? isMobile
-                  ? "auto"
-                  : `${cardHeight}px`
-                : "auto",
+              ? isMobile
+                ? "auto"
+                : `${cardHeight}px`
+              : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
             marginTop: 0,
@@ -444,8 +447,8 @@ export default function CylinderMenuPopup() {
                       ? "92%"
                       : `${cardWidth}px`
                     : isMobile
-                      ? "92%"
-                      : `${cardWidth}px`;
+                    ? "92%"
+                    : `${cardWidth}px`;
                   const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
                   return {
                     ...base,
@@ -487,7 +490,8 @@ export default function CylinderMenuPopup() {
                   left: 0,
                   width: "100vw",
                   height: "100vh",
-                  background: "#FAF7F2",
+                  background:
+                    "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -516,11 +520,26 @@ export default function CylinderMenuPopup() {
                       className="bg-shape"
                       style={{
                         position: "absolute",
-                        width: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
-                        height: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+                        width:
+                          i % 3 === 0
+                            ? "150px"
+                            : i % 3 === 1
+                            ? "100px"
+                            : "50px",
+                        height:
+                          i % 3 === 0
+                            ? "150px"
+                            : i % 3 === 1
+                            ? "100px"
+                            : "50px",
                         borderRadius: i % 2 === 0 ? "50%" : "10%",
-                        border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"}`,
-                        background: i % 4 === 0 ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20` : "transparent",
+                        border: `2px solid ${
+                          i % 2 === 0 ? "#B08030" : "#D9A756"
+                        }`,
+                        background:
+                          i % 4 === 0
+                            ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20`
+                            : "transparent",
                         left: `${(i * 23 + 10) % 90}%`,
                         top: `${(i * 17 + 5) % 85}%`,
                         opacity: 0.05 + (i % 3) * 0.03,
@@ -565,6 +584,6 @@ export default function CylinderMenuPopup() {
             document.body
           )}
       </div>
-    </div >
+    </div>
   );
 }

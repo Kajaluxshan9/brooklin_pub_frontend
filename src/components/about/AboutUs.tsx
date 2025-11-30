@@ -8,7 +8,7 @@ const pages = [
     id: 1,
     title: "Our Story",
     subtitle:
-      "Serving Brooklin since 1985 with passion, pride, and great food.",
+      "Serving Brooklin since 2014 with passion, pride, and great food.",
     image:
       "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&q=80",
   },
