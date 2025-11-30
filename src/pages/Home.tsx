@@ -474,7 +474,6 @@ const Home = () => {
         </Typography>
       </Box>
       <EventsSection />
-      <AdditionalSpecial />
       <Footer />
     </div>
   );

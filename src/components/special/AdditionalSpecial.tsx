@@ -11,7 +11,7 @@ const sections = [
     image:
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80",
     accent: "Culinary Excellence",
-    color: "#D9A756",
+    color: "#B08030", // Darker gold for contrast
   },
   {
     title: "Game Day Ready",
@@ -20,7 +20,7 @@ const sections = [
     image:
       "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&q=80",
     accent: "Sports & Entertainment",
-    color: "#C5933E",
+    color: "#A07020", // Darker bronze
   },
   {
     title: "Unforgettable Nights",
@@ -29,7 +29,7 @@ const sections = [
     image:
       "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200&q=80",
     accent: "Live Events",
-    color: "#B8923F",
+    color: "#906020", // Darker brown-gold
   },
 ];
 
@@ -88,18 +88,18 @@ const SectionComponent = ({
     <Box
       ref={sectionRef}
       sx={{
-        minHeight: { xs: "auto", md: "100vh" },
+        minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
         overflow: "hidden",
-        py: { xs: 6, sm: 8, md: 12 },
-        px: { xs: 2, sm: 3, md: 4 },
-        background: `linear-gradient(135deg,
-          ${isEven ? "#FDF8F3" : "#F5EBE0"} 0%,
-          ${isEven ? "#F5EBE0" : "#E8D5C4"} 50%,
-          ${isEven ? "#FDF8F3" : "#F5EBE0"} 100%)`,
+        py: { xs: 8, md: 12 },
+        px: { xs: 2, md: 4 },
+        background: `linear-gradient(135deg, 
+          ${isEven ? "#faf9f6" : "#f0eadd"} 0%, 
+          ${isEven ? "#f0eadd" : "#e6dfd1"} 50%, 
+          ${isEven ? "#faf9f6" : "#f0eadd"} 100%)`,
       }}
     >
       {/* Animated mesh gradient background */}
@@ -118,9 +118,9 @@ const SectionComponent = ({
           position: "absolute",
           inset: 0,
           backgroundImage: `
-            radial-gradient(at 20% 30%, ${section.color}15 0%, transparent 50%),
-            radial-gradient(at 80% 70%, ${section.color}10 0%, transparent 50%),
-            radial-gradient(at 50% 50%, rgba(106,58,30,0.08) 0%, transparent 60%)
+            radial-gradient(at 20% 30%, ${section.color}10 0%, transparent 50%),
+            radial-gradient(at 80% 70%, ${section.color}08 0%, transparent 50%),
+            radial-gradient(at 50% 50%, rgba(106,58,30,0.03) 0%, transparent 60%)
           `,
           backgroundSize: "200% 200%",
           pointerEvents: "none",
@@ -151,7 +151,7 @@ const SectionComponent = ({
             borderRadius: i % 2 === 0 ? "50%" : "0%",
             top: `${10 + i * 15}%`,
             left: `${5 + i * 15}%`,
-            opacity: 0.1,
+            opacity: 0.15,
             pointerEvents: "none",
           }}
         />
@@ -190,12 +190,12 @@ const SectionComponent = ({
             sx={{
               order: { xs: 1, md: isEven ? 1 : 2 },
               position: "relative",
-              height: { xs: "280px", sm: "350px", md: "600px" },
-              borderRadius: { xs: "20px", md: "30px" },
+              height: { xs: "400px", md: "600px" },
+              borderRadius: "30px",
               overflow: "hidden",
-              boxShadow: `0 30px 80px rgba(106,58,30,0.25),
+              boxShadow: `0 30px 80px rgba(0,0,0,0.15), 
                          0 0 0 1px ${section.color}40,
-                         inset 0 0 100px rgba(0,0,0,0.15)`,
+                         inset 0 0 100px rgba(0,0,0,0.1)`,
               transform: isHovered ? "translateZ(50px)" : "translateZ(0px)",
               transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
@@ -210,7 +210,7 @@ const SectionComponent = ({
                 backgroundImage: `url(${section.image})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                filter: isHovered ? "brightness(1.1)" : "brightness(0.9)",
+                filter: isHovered ? "brightness(1.05)" : "brightness(1)",
                 transition: "filter 0.6s ease",
               }}
             />
@@ -220,11 +220,11 @@ const SectionComponent = ({
               sx={{
                 position: "absolute",
                 inset: 0,
-                background: `linear-gradient(135deg,
-                  transparent 0%,
-                  ${section.color}20 50%,
+                background: `linear-gradient(135deg, 
+                  transparent 0%, 
+                  ${section.color}15 50%, 
                   transparent 100%)`,
-                opacity: isHovered ? 0.6 : 0.3,
+                opacity: isHovered ? 0.4 : 0.2,
                 transition: "opacity 0.6s ease",
               }}
             />
@@ -245,7 +245,7 @@ const SectionComponent = ({
                 border: `3px solid ${section.color}`,
                 borderRight: "none",
                 borderBottom: "none",
-                opacity: 0.8,
+                opacity: 0.9,
               }}
             />
             <Box
@@ -263,7 +263,7 @@ const SectionComponent = ({
                 border: `3px solid ${section.color}`,
                 borderLeft: "none",
                 borderTop: "none",
-                opacity: 0.8,
+                opacity: 0.9,
               }}
             />
 
@@ -274,22 +274,23 @@ const SectionComponent = ({
               transition={{ duration: 0.6 }}
               sx={{
                 position: "absolute",
-                top: { xs: -12, md: -20 },
-                right: { xs: -12, md: -20 },
-                width: { xs: 60, sm: 70, md: 100 },
-                height: { xs: 60, sm: 70, md: 100 },
+                top: -20,
+                right: -20,
+                width: 100,
+                height: 100,
                 borderRadius: "50%",
                 background: `linear-gradient(135deg, ${section.color} 0%, ${section.color}dd 100%)`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontSize: { xs: "1.8rem", sm: "2.2rem", md: "3rem" },
+                fontSize: "3rem",
                 fontWeight: 800,
-                color: "#FFFDFB",
-                boxShadow: `0 10px 40px ${section.color}60, inset 0 2px 0 rgba(255,255,255,0.3)`,
-                border: "4px solid rgba(255,255,255,0.2)",
+                color: "#fff",
+                boxShadow: `0 10px 40px ${section.color}60, inset 0 2px 0 rgba(255,255,255,0.4)`,
+                border: "4px solid rgba(255,255,255,0.4)",
                 cursor: "pointer",
+                textShadow: "0 2px 4px rgba(0,0,0,0.2)",
               }}
             >
               {index + 1}
@@ -313,9 +314,9 @@ const SectionComponent = ({
                 left: 0,
                 width: "100%",
                 height: "100%",
-                background: `linear-gradient(90deg,
-                  transparent 0%,
-                  rgba(255,255,255,0.1) 50%,
+                background: `linear-gradient(90deg, 
+                  transparent 0%, 
+                  rgba(255,255,255,0.3) 50%, 
                   transparent 100%)`,
                 transform: "skewX(-20deg)",
                 pointerEvents: "none",
@@ -378,21 +379,21 @@ const SectionComponent = ({
               transition={{ duration: 0.8, delay: 0.3 }}
               sx={{
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontSize: { xs: "2rem", sm: "3rem", md: "4.5rem", lg: "6rem" },
+                fontSize: { xs: "3.5rem", sm: "4.5rem", md: "6rem" },
                 fontWeight: 800,
                 lineHeight: 0.95,
-                mb: { xs: 2, md: 4 },
-                color: "#4A2C17",
-                textShadow: `0 2px 10px rgba(255,255,255,0.5), 0 0 40px ${section.color}25`,
+                mb: 4,
+                color: "#2a1410",
+                textShadow: `0 4px 20px rgba(0,0,0,0.05), 0 0 40px ${section.color}20`,
                 letterSpacing: "-0.02em",
                 position: "relative",
                 "&::after": {
                   content: '""',
                   position: "absolute",
-                  bottom: { xs: -6, md: -10 },
+                  bottom: -10,
                   left: 0,
                   width: "60%",
-                  height: { xs: 1.5, md: 2 },
+                  height: 2,
                   background: `linear-gradient(90deg, ${section.color} 0%, transparent 100%)`,
                 },
               }}
@@ -409,12 +410,12 @@ const SectionComponent = ({
               transition={{ duration: 0.8, delay: 0.5 }}
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: { xs: "0.95rem", sm: "1rem", md: "1.25rem" },
-                lineHeight: { xs: 1.7, md: 1.9 },
-                color: "rgba(74,44,23,0.9)",
-                mb: { xs: 3, md: 5 },
+                fontSize: { xs: "1.1rem", md: "1.25rem" },
+                lineHeight: 1.9,
+                color: "rgba(42, 20, 16, 0.8)",
+                mb: 5,
                 maxWidth: "90%",
-                textShadow: "0 1px 2px rgba(255,255,255,0.3)",
+                textShadow: "0 1px 2px rgba(0,0,0,0.05)",
               }}
             >
               {section.description}

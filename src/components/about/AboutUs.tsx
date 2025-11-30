@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -44,6 +44,74 @@ export default function AboutUs() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
 
+  // Track which pages have been viewed
+  const [viewedPages, setViewedPages] = useState<Set<number>>(new Set([0]));
+  const [allPagesViewed, setAllPagesViewed] = useState(false);
+
+  // Track if component is fully visible in viewport
+  const [isFullyVisible, setIsFullyVisible] = useState(false);
+
+  // Intersection Observer to detect when component is fully visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Component is fully visible when intersection ratio is >= 95%
+        setIsFullyVisible(entry.intersectionRatio >= 0.95);
+      },
+      {
+        threshold: [0, 0.25, 0.5, 0.75, 0.95, 1], // Multiple thresholds for smooth detection
+        rootMargin: "0px",
+      }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+
+  // Update viewed pages when pageIndex changes
+  useEffect(() => {
+    setViewedPages((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(pageIndex);
+      return newSet;
+    });
+  }, [pageIndex]);
+
+  // Check if all pages have been viewed
+  useEffect(() => {
+    if (viewedPages.size === pages.length && !allPagesViewed) {
+      setAllPagesViewed(true);
+    }
+  }, [viewedPages, allPagesViewed]);
+
+  // Prevent page scrolling ONLY when component is fully visible AND not all slides viewed
+  useEffect(() => {
+    const shouldLockScroll = isFullyVisible && !allPagesViewed;
+
+    if (shouldLockScroll) {
+      // Lock body scroll when component is visible and slides not complete
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      // Allow body scroll otherwise
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [isFullyVisible, allPagesViewed]);
+
   const randomDirection = () => {
     const dirs = ["left", "right", "top", "bottom"];
     return dirs[Math.floor(Math.random() * dirs.length)];
@@ -52,20 +120,27 @@ export default function AboutUs() {
   // Handle wheel event only when container is hovered (for desktop)
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
-      if (!scrollEnabled || !isHovering) return;
+      // If component is visible and not all pages viewed, prevent default scroll and handle slide navigation
+      if (isFullyVisible && !allPagesViewed) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      setScrollEnabled(false);
-      setDirection(randomDirection());
+        if (!scrollEnabled || !isHovering) return;
 
-      if (e.deltaY > 0) {
-        setPageIndex((prev) => (prev + 1) % pages.length);
-      } else {
-        setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
+        setScrollEnabled(false);
+        setDirection(randomDirection());
+
+        if (e.deltaY > 0) {
+          setPageIndex((prev) => (prev + 1) % pages.length);
+        } else {
+          setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
+        }
+
+        setTimeout(() => setScrollEnabled(true), 1000);
       }
-
-      setTimeout(() => setScrollEnabled(true), 1000);
+      // If all pages viewed or not fully visible, allow normal page scrolling (don't prevent default)
     },
-    [scrollEnabled, isHovering]
+    [scrollEnabled, isHovering, allPagesViewed, isFullyVisible]
   );
 
   const getVariants = (dir: string) => {
@@ -99,40 +174,46 @@ export default function AboutUs() {
     }
   };
 
-  // imageVariants removed — no image grid in this layout
-
   const currentPage = pages[pageIndex];
 
   // Touch swipe handling for mobile
   const touchStartY = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isFullyVisible && !allPagesViewed) {
+      e.preventDefault();
+    }
     touchStartY.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!scrollEnabled || touchStartY.current === null) return;
+    if (isFullyVisible && !allPagesViewed) {
+      e.preventDefault();
 
-    const touchEndY = e.changedTouches[0].clientY;
-    const diff = touchStartY.current - touchEndY;
+      if (!scrollEnabled || touchStartY.current === null) return;
 
-    // Require minimum swipe distance (50px)
-    if (Math.abs(diff) > 50) {
-      setScrollEnabled(false);
-      setDirection(randomDirection());
+      const touchEndY = e.changedTouches[0].clientY;
+      const diff = touchStartY.current - touchEndY;
 
-      if (diff > 0) {
-        // Swiped up - next page
-        setPageIndex((prev) => (prev + 1) % pages.length);
-      } else {
-        // Swiped down - previous page
-        setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
+      // Require minimum swipe distance (50px)
+      if (Math.abs(diff) > 50) {
+        setScrollEnabled(false);
+        setDirection(randomDirection());
+
+        if (diff > 0) {
+          // Swiped up - next page
+          setPageIndex((prev) => (prev + 1) % pages.length);
+        } else {
+          // Swiped down - previous page
+          setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
+        }
+
+        setTimeout(() => setScrollEnabled(true), 1000);
       }
 
-      setTimeout(() => setScrollEnabled(true), 1000);
+      touchStartY.current = null;
     }
-
-    touchStartY.current = null;
+    // If all pages viewed or not fully visible, allow normal touch scrolling
   };
 
   return (
@@ -244,8 +325,6 @@ export default function AboutUs() {
               {currentPage.subtitle}
             </Typography>
           </motion.div>
-
-          {/* (Background image is shown via container style; no image grid) */}
         </motion.div>
       </AnimatePresence>
     </Box>

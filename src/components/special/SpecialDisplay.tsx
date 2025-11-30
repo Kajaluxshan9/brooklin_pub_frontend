@@ -103,11 +103,10 @@ export default function CylinderMenuPopup() {
   // Derived value for card sizing
   const mobile = screenWidth < 768;
   const cardWidth = mobile
-    ? Math.max(100, Math.min(screenWidth * 0.5, 260)) // Smaller cards on mobile
+    ? Math.max(120, Math.min(screenWidth * 0.6, 320)) // mobile
     : Math.max(180, Math.min(screenWidth * 0.3, 300)); // desktop
   const cardHeight = cardWidth * 1.05;
-  // Smaller radius on mobile for tighter cylinder
-  const radius = mobile ? cardWidth * 1.2 : cardWidth * 1.7;
+  const radius = cardWidth * 1.7;
   const total = cards.length;
   const isCylinder = total > 2;
   const isTwo = total === 2;
@@ -155,16 +154,14 @@ export default function CylinderMenuPopup() {
     });
   }, [chefCards]);
   // intro slideshow removed
-  // Auto rotate - slower on mobile, disabled for small card counts
+  // Auto rotate
   useEffect(() => {
     if (!autoRotate || !isCylinder) return;
-    // Mobile: slower rotation speed for smoother experience
-    const rotationSpeed = isMobile ? 0.2 : 0.4;
     const interval = setInterval(() => {
-      setAngle((prev) => (prev + rotationSpeed) % 360);
+      setAngle((prev) => (prev + 0.4) % 360);
     }, 30);
     return () => clearInterval(interval);
-  }, [autoRotate, isMobile]);
+  }, [autoRotate]);
   // if not a cylinder (1-2 cards) keep angle fixed at 0
   useEffect(() => {
     if (!isCylinder) setAngle(0);
@@ -174,8 +171,7 @@ export default function CylinderMenuPopup() {
     if (!isCylinder) return;
     if (!isMobile && isInteracting && lastX !== null) {
       const deltaX = e.clientX - lastX;
-      // Invert rotation direction to match natural drag (drag right -> rotate to previous)
-      setAngle((prev) => (prev - deltaX * 0.3 + 360) % 360);
+      setAngle((prev) => (prev + deltaX * 0.3) % 360);
     }
     setLastX(e.clientX);
   };
@@ -207,8 +203,7 @@ export default function CylinderMenuPopup() {
     if (isMobile && isInteracting && lastX !== null && e.touches.length === 1) {
       const touchX = e.touches[0].clientX;
       const deltaX = touchX - lastX;
-      // Reduced sensitivity on mobile for smoother control
-      setAngle((prev) => (prev - deltaX * 0.25 + 360) % 360);
+      setAngle((prev) => (prev + deltaX * 0.4) % 360);
       setLastX(touchX);
     }
   };
@@ -236,23 +231,57 @@ export default function CylinderMenuPopup() {
       document.removeEventListener("touchstart", handleOutside);
     };
   }, []);
+
+  // Track if mouse is over the cylinder
+  const [isHoveringCylinder, setIsHoveringCylinder] = useState(false);
+
+  // Native wheel listener for non-passive scrolling
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!isCylinder) return;
+
+      // Only prevent default scroll if hovering over the cylinder
+      if (isHoveringCylinder) {
+        e.preventDefault();
+
+        // Stop auto-rotation when user interacts
+        setAutoRotate(false);
+
+        // Rotate based on scroll delta
+        setAngle((prev) => (prev + e.deltaY * 0.2) % 360);
+      }
+      // If not hovering, allow normal page scroll
+    };
+
+    // Add listener with passive: false to allow preventDefault()
+    element.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      element.removeEventListener("wheel", handleWheel);
+    };
+  }, [isCylinder, isHoveringCylinder]);
+
   return (
     <div>
       <div
+        ref={containerRef}
         style={{
           width: "100vw",
           height: mobile
-            ? "clamp(320px, 60vh, 600px)"
+            ? "clamp(350px, 70vh, 900px)"
             : "clamp(600px, 100vh, 1200px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          perspective: mobile ? "800px" : "1200px",
+          perspective: "1200px",
           overflow: "hidden",
           position: "relative",
           touchAction: "none",
           userSelect: "none",
-          background: "#FDF8F3",
+          background: "#FAF7F2",
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -261,157 +290,99 @@ export default function CylinderMenuPopup() {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onWheel={(e) => {
-          if (!isCylinder) return;
-          setAutoRotate(false);
-          setAngle((prev) => (prev - e.deltaY * 0.2 + 360) % 360);
-        }}
       >
-        {/* Animated Background Layers */}
+        {/* CSS Animated Geometric Shapes Background */}
         <style>
           {`
-            @keyframes float1 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); }
-              33% { transform: translate(15%, 20%) scale(1.1); }
-              66% { transform: translate(-10%, 15%) scale(0.95); }
+            @keyframes floatShape {
+              0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+              }
+              25% {
+                transform: translate(30px, -30px) rotate(90deg);
+              }
+              50% {
+                transform: translate(-20px, 20px) rotate(180deg);
+              }
+              75% {
+                transform: translate(20px, 30px) rotate(270deg);
+              }
             }
-            @keyframes float2 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); }
-              33% { transform: translate(-20%, -15%) scale(1.05); }
-              66% { transform: translate(10%, -10%) scale(0.9); }
+            
+            .bg-shape {
+              animation: floatShape 25s ease-in-out infinite;
+              will-change: transform;
             }
-            @keyframes float3 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); }
-              33% { transform: translate(20%, -10%) scale(0.95); }
-              66% { transform: translate(-15%, 20%) scale(1.1); }
+            
+            .bg-shape:nth-child(2n) {
+              animation-duration: 30s;
+              animation-delay: -5s;
             }
-            @keyframes float4 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); }
-              33% { transform: translate(-10%, 25%) scale(1.05); }
-              66% { transform: translate(15%, -15%) scale(0.9); }
+            
+            .bg-shape:nth-child(3n) {
+              animation-duration: 35s;
+              animation-delay: -10s;
+            }
+            
+            .bg-shape:nth-child(4n) {
+              animation-duration: 28s;
+              animation-delay: -15s;
             }
           `}
         </style>
-
-        {/* Base Mesh Gradient */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at 20% 30%, rgba(217, 167, 86, 0.15) 0%, transparent 50%), " +
-              "radial-gradient(circle at 80% 70%, rgba(139, 90, 43, 0.12) 0%, transparent 50%), " +
-              "radial-gradient(circle at 50% 50%, rgba(232, 213, 196, 0.4) 0%, transparent 60%), " +
-              "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
             zIndex: 1,
-          }}
-        />
-
-        {/* Floating Orbs with Blur */}
-        <div
-          style={{
-            position: "absolute",
-            top: "10%",
-            left: "15%",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(217, 167, 86, 0.25) 0%, rgba(184, 134, 74, 0.1) 40%, transparent 70%)",
-            filter: "blur(60px)",
-            animation: "float1 20s ease-in-out infinite",
-            zIndex: 2,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: "60%",
-            right: "10%",
-            width: "350px",
-            height: "350px",
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(139, 90, 43, 0.2) 0%, rgba(106, 58, 30, 0.08) 40%, transparent 70%)",
-            filter: "blur(70px)",
-            animation: "float2 25s ease-in-out infinite",
-            zIndex: 2,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: "15%",
-            left: "25%",
-            width: "300px",
-            height: "300px",
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(217, 167, 86, 0.18) 0%, rgba(184, 134, 74, 0.06) 40%, transparent 70%)",
-            filter: "blur(65px)",
-            animation: "float3 22s ease-in-out infinite",
-            zIndex: 2,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: "30%",
-            right: "30%",
-            width: "280px",
-            height: "280px",
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(232, 213, 196, 0.35) 0%, rgba(245, 235, 224, 0.15) 40%, transparent 70%)",
-            filter: "blur(55px)",
-            animation: "float4 18s ease-in-out infinite",
-            zIndex: 2,
-          }}
-        />
-
-        {/* Radial Overlay for Depth */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse at center, transparent 0%, rgba(253, 248, 243, 0.3) 70%, rgba(253, 248, 243, 0.6) 100%)",
-            zIndex: 3,
-          }}
-        />
-
-        {/* Subtle Vignette */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at center, transparent 40%, rgba(232, 213, 196, 0.25) 100%)",
-            zIndex: 4,
             pointerEvents: "none",
+            overflow: "hidden",
           }}
-        />
+        >
+          {/* Abstract Geometric Shapes */}
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="bg-shape"
+              style={{
+                position: "absolute",
+                width: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+                height: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+                borderRadius: i % 2 === 0 ? "50%" : "10%",
+                border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"}`,
+                background: i % 4 === 0 ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20` : "transparent",
+                left: `${(i * 23 + 10) % 90}%`,
+                top: `${(i * 17 + 5) % 85}%`,
+                opacity: 0.05 + (i % 3) * 0.03,
+              }}
+            />
+          ))}
+        </div>
 
         {/* Cylinder */}
         <motion.div
-          ref={containerRef}
+          onMouseEnter={() => setIsHoveringCylinder(true)}
+          onMouseLeave={() => setIsHoveringCylinder(false)}
           style={{
             rotateY: isCylinder ? angle : 0,
             transformStyle: isCylinder ? "preserve-3d" : "flat",
             width: isCylinder
               ? `${cardWidth}px`
               : isTwo
-              ? isMobile
-                ? "90%"
-                : `${cardWidth * 2 + 16}px`
-              : "min(1100px, 92%)",
+                ? isMobile
+                  ? "90%"
+                  : `${cardWidth * 2 + 16}px`
+                : "min(1100px, 92%)",
             height: isCylinder
               ? `${cardHeight}px`
               : isTwo
-              ? isMobile
-                ? "auto"
-                : `${cardHeight}px`
-              : "auto",
+                ? isMobile
+                  ? "auto"
+                  : `${cardHeight}px`
+                : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
             marginTop: "60px",
@@ -445,9 +416,9 @@ export default function CylinderMenuPopup() {
                     flexDirection: "column",
                     justifyContent: "flex-end",
                     alignItems: "center",
-                    color: "#fff",
+                    color: "#2a1a10",
                     padding: "1rem",
-                    textShadow: "0 2px 8px rgba(0,0,0,0.7)",
+                    textShadow: "0 2px 8px rgba(255,255,255,0.8)",
                     cursor: "pointer",
                     filter: "brightness(1)",
                   } as React.CSSProperties;
@@ -469,8 +440,8 @@ export default function CylinderMenuPopup() {
                       ? "92%"
                       : `${cardWidth}px`
                     : isMobile
-                    ? "92%"
-                    : `${cardWidth}px`;
+                      ? "92%"
+                      : `${cardWidth}px`;
                   const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
                   return {
                     ...base,
@@ -482,27 +453,16 @@ export default function CylinderMenuPopup() {
                   };
                 })()}
               >
-                <h2
+                {/* <h2
                   style={{
                     fontSize: "1.1rem",
                     fontWeight: "700",
                     marginBottom: "0.2rem",
-                    color: "#fff",
-                    textShadow: "0 2px 8px rgba(0,0,0,0.8)",
                   }}
                 >
                   {card.title}
                 </h2>
-                <p
-                  style={{
-                    fontSize: "0.9rem",
-                    opacity: 0.95,
-                    color: "#fff",
-                    textShadow: "0 2px 6px rgba(0,0,0,0.7)",
-                  }}
-                >
-                  {card.desc}
-                </p>
+                <p style={{ fontSize: "0.9rem", opacity: 0.9 }}>{card.desc}</p> */}
               </motion.div>
             );
           })}
@@ -523,14 +483,47 @@ export default function CylinderMenuPopup() {
                   left: 0,
                   width: "100vw",
                   height: "100vh",
-                  background: "rgba(253,248,243,0.95)",
+                  background: "#FAF7F2",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   zIndex: 999999999,
+                  overflow: "hidden",
                 }}
                 onClick={() => setSelectedCard(null)}
               >
+                {/* CSS Animated Background for Popup */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    zIndex: 1,
+                    pointerEvents: "none",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Abstract Geometric Shapes */}
+                  {[...Array(12)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-shape"
+                      style={{
+                        position: "absolute",
+                        width: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+                        height: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+                        borderRadius: i % 2 === 0 ? "50%" : "10%",
+                        border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"}`,
+                        background: i % 4 === 0 ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20` : "transparent",
+                        left: `${(i * 23 + 10) % 90}%`,
+                        top: `${(i * 17 + 5) % 85}%`,
+                        opacity: 0.05 + (i % 3) * 0.03,
+                      }}
+                    />
+                  ))}
+                </div>
                 <motion.div
                   onClick={(e) => e.stopPropagation()}
                   initial={{ scale: 0.8, opacity: 0 }}
@@ -548,7 +541,6 @@ export default function CylinderMenuPopup() {
                 >
                   {/* Close Button */}
                   <button
-                    aria-label="Close special popup"
                     onClick={() => setSelectedCard(null)}
                     style={{
                       position: "absolute",
@@ -558,26 +550,27 @@ export default function CylinderMenuPopup() {
                       height: "50px",
                       borderRadius: "50%",
                       backdropFilter: "blur(14px)",
-                      background: "rgba(106, 58, 30, 0.9)",
-                      border: "1px solid rgba(217, 167, 86, 0.5)",
+                      background: "rgba(42, 26, 16, 0.15)",
+                      border: "1px solid rgba(42, 26, 16, 0.3)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      boxShadow: "0 4px 12px rgba(106,58,30,0.3)",
+                      boxShadow: "0 0 0 rgba(42, 26, 16, 0.4)",
                       transition: "0.35s cubic-bezier(0.165, 0.84, 0.44, 1)",
+                      zIndex: 10,
                     }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLElement).style.boxShadow =
-                        "0 0 22px rgba(217,167,86,0.45)";
+                        "0 0 22px rgba(42, 26, 16, 0.45)";
                       (e.currentTarget as HTMLElement).style.background =
-                        "rgba(106, 58, 30, 1)";
+                        "rgba(42, 26, 16, 0.25)";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.boxShadow =
-                        "0 4px 12px rgba(106,58,30,0.3)";
+                        "0 0 0 rgba(42, 26, 16, 0.4)";
                       (e.currentTarget as HTMLElement).style.background =
-                        "rgba(106, 58, 30, 0.9)";
+                        "rgba(42, 26, 16, 0.15)";
                     }}
                   >
                     <svg
@@ -585,7 +578,7 @@ export default function CylinderMenuPopup() {
                       height="22"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="white"
+                      stroke="#2a1a10"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -601,7 +594,6 @@ export default function CylinderMenuPopup() {
                           "rotate(0deg)";
                       }}
                     >
-                      <title>Close special popup</title>
                       <path d="M18 6L6 18" />
                       <path d="M6 6l12 12" />
                     </svg>
@@ -623,6 +615,6 @@ export default function CylinderMenuPopup() {
             document.body
           )}
       </div>
-    </div>
+    </div >
   );
 }

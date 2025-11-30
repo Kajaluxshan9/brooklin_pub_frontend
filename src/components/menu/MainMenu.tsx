@@ -288,6 +288,70 @@ export default function MainMenu() {
         overflow: "visible",
       }}
     >
+      {/* Animated Geometric Shapes Background */}
+      <div
+        ref={(el) => {
+          if (!el) return;
+          const shapes = el.querySelectorAll(".menu-bg-shape");
+
+          // Initial random positions
+          shapes.forEach((shape) => {
+            const randomLeft = Math.random() * 100;
+            const randomTop = Math.random() * 100;
+            const randomRotation = Math.random() * 360;
+            const randomOpacity = 0.05 + Math.random() * 0.1;
+            const randomScale = 0.5 + Math.random();
+
+            (shape as HTMLElement).style.left = `${randomLeft}%`;
+            (shape as HTMLElement).style.top = `${randomTop}%`;
+            (shape as HTMLElement).style.transform = `rotate(${randomRotation}deg) scale(${randomScale})`;
+            (shape as HTMLElement).style.opacity = `${randomOpacity}`;
+          });
+
+          // Continuous floating animation
+          shapes.forEach((shape, i) => {
+            const duration = 3000 + Math.random() * 3000;
+            const animate = () => {
+              const randomX = -50 + Math.random() * 100;
+              const randomY = -50 + Math.random() * 100;
+              const randomRotation = -180 + Math.random() * 360;
+
+              (shape as HTMLElement).style.transition = `transform ${duration}ms ease-in-out`;
+              (shape as HTMLElement).style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
+
+              setTimeout(animate, duration);
+            };
+            setTimeout(animate, i * 200);
+          });
+        }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 0,
+          pointerEvents: "none",
+          overflow: "hidden",
+        }}
+      >
+        {/* Abstract Geometric Shapes */}
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="menu-bg-shape"
+            style={{
+              position: "absolute",
+              width: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+              height: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+              borderRadius: i % 2 === 0 ? "50%" : "10%",
+              border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"}`,
+              background: i % 4 === 0 ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20` : "transparent",
+            }}
+          />
+        ))}
+      </div>
+
       {/* SVG Decorative Connecting Lines */}
       {svgPositions && svgPositions.length >= 2 && (
         <motion.svg
@@ -330,9 +394,8 @@ export default function MainMenu() {
             return (
               <motion.path
                 key={`h-${idx}`}
-                d={`M ${pos.x} ${pos.y} C ${pos.x + 40} ${pos.y - 15}, ${
-                  nextInRow.x - 40
-                } ${nextInRow.y - 15}, ${nextInRow.x} ${nextInRow.y}`}
+                d={`M ${pos.x} ${pos.y} C ${pos.x + 40} ${pos.y - 15}, ${nextInRow.x - 40
+                  } ${nextInRow.y - 15}, ${nextInRow.x} ${nextInRow.y}`}
                 stroke="url(#lineGradient)"
                 strokeWidth="2"
                 fill="none"
@@ -520,6 +583,70 @@ export default function MainMenu() {
             },
           }}
         >
+          {/* Animated Background for Popup */}
+          <div
+            ref={(el) => {
+              if (!el) return;
+              const shapes = el.querySelectorAll(".popup-bg-shape");
+
+              // Initial random positions
+              shapes.forEach((shape) => {
+                const randomLeft = Math.random() * 100;
+                const randomTop = Math.random() * 100;
+                const randomRotation = Math.random() * 360;
+                const randomOpacity = 0.05 + Math.random() * 0.1;
+                const randomScale = 0.5 + Math.random();
+
+                (shape as HTMLElement).style.left = `${randomLeft}%`;
+                (shape as HTMLElement).style.top = `${randomTop}%`;
+                (shape as HTMLElement).style.transform = `rotate(${randomRotation}deg) scale(${randomScale})`;
+                (shape as HTMLElement).style.opacity = `${randomOpacity}`;
+              });
+
+              // Continuous floating animation
+              shapes.forEach((shape, i) => {
+                const duration = 3000 + Math.random() * 3000;
+                const animate = () => {
+                  const randomX = -50 + Math.random() * 100;
+                  const randomY = -50 + Math.random() * 100;
+                  const randomRotation = -180 + Math.random() * 360;
+
+                  (shape as HTMLElement).style.transition = `transform ${duration}ms ease-in-out`;
+                  (shape as HTMLElement).style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
+
+                  setTimeout(animate, duration);
+                };
+                setTimeout(animate, i * 200);
+              });
+            }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              zIndex: 0,
+              pointerEvents: "none",
+              overflow: "hidden",
+            }}
+          >
+            {/* Abstract Geometric Shapes */}
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className="popup-bg-shape"
+                style={{
+                  position: "absolute",
+                  width: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+                  height: i % 3 === 0 ? "150px" : i % 3 === 1 ? "100px" : "50px",
+                  borderRadius: i % 2 === 0 ? "50%" : "10%",
+                  border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"}`,
+                  background: i % 4 === 0 ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20` : "transparent",
+                }}
+              />
+            ))}
+          </div>
+
           {/* Close Button - Matching SpecialDisplay style */}
           <button
             onClick={() => setSelectedItem(null)}
