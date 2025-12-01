@@ -1,6 +1,6 @@
 import Nav from "../components/common/Nav";
 import LandingPage from "../components/home/LandingPage";
-import EventsSection from "../components/home/EventsSection";
+import EventsSection from "../components/home/eventSection";
 import TeamSection from "../components/home/TeamSection";
 import Footer from "../components/common/Footer";
 import { HomeSEO } from "../config/seo.presets";
