@@ -6,7 +6,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MenuBackground from "../menu/MenuBackground";
 
 // Import team images
-import Team1 from "../../assets/images/team/team-1.jpg";
 import Team2 from "../../assets/images/team/team-2.png";
 import Team3 from "../../assets/images/team/team-3.png";
 import Team4 from "../../assets/images/team/team-4.png";
@@ -25,16 +24,8 @@ interface TeamMember {
 
 const teamMembers: TeamMember[] = [
     {
-        id: 1,
-        image: Team1,
-        name: "Our Culinary Team",
-        role: "Kitchen & Service Excellence",
-        specialty: "Crafting memorable dining experiences",
-        position: { x: -15, y: -8, rotation: -3 },
-    },
-    {
         id: 2,
-        image: Team2,
+        image: Team3,
         name: "Premium Service",
         role: "Fine Dining Specialist",
         specialty: "Steak & Wine Pairing Expert",
@@ -42,7 +33,7 @@ const teamMembers: TeamMember[] = [
     },
     {
         id: 3,
-        image: Team3,
+        image: Team2,
         name: "Hospitality Expert",
         role: "Guest Experience",
         specialty: "Creating warm welcomes",
@@ -349,13 +340,13 @@ const TeamSection = () => {
                                     />
                                 </Box>
 
-                                {/* Info Panel - Slides in on hover */}
+                                {/* Info Panel - Always visible */}
                                 <Box
                                     component={motion.div}
                                     initial={{ opacity: 0, x: isEven ? -50 : 50 }}
                                     animate={{
-                                        opacity: hoveredMember === member.id ? 1 : 0,
-                                        x: hoveredMember === member.id ? 0 : isEven ? -50 : 50,
+                                        opacity: 1,
+                                        x: 0,
                                     }}
                                     transition={{ duration: 0.4, ease: "easeOut" }}
                                     sx={{

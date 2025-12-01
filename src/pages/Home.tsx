@@ -1015,8 +1015,8 @@ const Home = () => {
       <Callicon />
       <SocialMedia />
       <HeroMiddleSection />
-      <TeamSection />
       <EventsSection />
+      <TeamSection />
       <Footer />
     </Box>
   );
