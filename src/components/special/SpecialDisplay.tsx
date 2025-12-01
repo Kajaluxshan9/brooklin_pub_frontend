@@ -100,6 +100,9 @@ export default function CylinderMenuPopup() {
     if (chefCards && chefCards.length > 0) exportedChefSpecials = chefCards;
   }, [dailyCards, chefCards]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const startXRef = useRef<number | null>(null);
+  const startYRef = useRef<number | null>(null);
+  const isScrollingRef = useRef<boolean>(false);
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
   // Derived value for card sizing
   const mobile = screenWidth < 768;
@@ -198,12 +201,32 @@ export default function CylinderMenuPopup() {
       setIsInteracting(true);
       setAutoRotate(false);
       setLastX(e.touches[0].clientX);
+      startXRef.current = e.touches[0].clientX;
+      startYRef.current = e.touches[0].clientY;
+      isScrollingRef.current = false;
     }
   };
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!isCylinder) return;
     if (isMobile && isInteracting && lastX !== null && e.touches.length === 1) {
       const touchX = e.touches[0].clientX;
+      const touchY = e.touches[0].clientY;
+
+      // If we've already determined this is a scroll, ignore rotation
+      if (isScrollingRef.current) return;
+
+      // Check for vertical scroll intent
+      if (startXRef.current !== null && startYRef.current !== null) {
+        const deltaXTotal = Math.abs(touchX - startXRef.current);
+        const deltaYTotal = Math.abs(touchY - startYRef.current);
+
+        // If moved enough to determine direction and vertical movement dominates
+        if (deltaYTotal > 5 && deltaYTotal > deltaXTotal) {
+          isScrollingRef.current = true;
+          return;
+        }
+      }
+
       const deltaX = touchX - lastX;
       setAngle((prev) => (prev + deltaX * 0.4) % 360);
       setLastX(touchX);
@@ -281,11 +304,11 @@ export default function CylinderMenuPopup() {
           perspective: "1200px",
           overflow: "hidden",
           position: "relative",
-          touchAction: "none",
+          touchAction: "pan-y",
           userSelect: "none",
           background: "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 100%)",
           marginTop: `${verticalGap}px`,
-          marginBottom: `${verticalGap}px`,
+
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -379,17 +402,17 @@ export default function CylinderMenuPopup() {
             width: isCylinder
               ? `${cardWidth}px`
               : isTwo
-              ? isMobile
-                ? "90%"
-                : `${cardWidth * 2 + 16}px`
-              : "min(1100px, 92%)",
+                ? isMobile
+                  ? "90%"
+                  : `${cardWidth * 2 + 16}px`
+                : "min(1100px, 92%)",
             height: isCylinder
               ? `${cardHeight}px`
               : isTwo
-              ? isMobile
-                ? "auto"
-                : `${cardHeight}px`
-              : "auto",
+                ? isMobile
+                  ? "auto"
+                  : `${cardHeight}px`
+                : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
             marginTop: 0,
@@ -447,8 +470,8 @@ export default function CylinderMenuPopup() {
                       ? "92%"
                       : `${cardWidth}px`
                     : isMobile
-                    ? "92%"
-                    : `${cardWidth}px`;
+                      ? "92%"
+                      : `${cardWidth}px`;
                   const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
                   return {
                     ...base,
@@ -524,18 +547,17 @@ export default function CylinderMenuPopup() {
                           i % 3 === 0
                             ? "150px"
                             : i % 3 === 1
-                            ? "100px"
-                            : "50px",
+                              ? "100px"
+                              : "50px",
                         height:
                           i % 3 === 0
                             ? "150px"
                             : i % 3 === 1
-                            ? "100px"
-                            : "50px",
+                              ? "100px"
+                              : "50px",
                         borderRadius: i % 2 === 0 ? "50%" : "10%",
-                        border: `2px solid ${
-                          i % 2 === 0 ? "#B08030" : "#D9A756"
-                        }`,
+                        border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"
+                          }`,
                         background:
                           i % 4 === 0
                             ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20`

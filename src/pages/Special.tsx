@@ -5,7 +5,7 @@ import Footer from "../components/common/Footer";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import HeroSection from "../components/common/HeroSection";
-import AnimatedBackground from "../components/common/AnimatedBackground";
+import AnimatedBackground from "../components/menu/PopupBackground";
 import { SpecialsSEO } from "../config/seo.presets";
 import { Box } from "@mui/material";
 
