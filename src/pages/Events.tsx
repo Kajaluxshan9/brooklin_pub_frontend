@@ -91,357 +91,318 @@ const getEventGradient = (type: string): string => {
   return gradients[type] || "linear-gradient(135deg, #D9A756 0%, #B8923F 100%)";
 };
 
-// Premium Event Card Component
-const EventCard = ({ event, index }: { event: Event; index: number }) => {
+// 🎨 MAGAZINE-STYLE MASONRY LAYOUT - Overlapping Images with Floating Panels!
+const MagazineEventItem = ({ event, index }: { event: Event; index: number }) => {
   const [isHovered, setIsHovered] = useState(false);
   const color = getEventColor(event.type);
   const gradient = getEventGradient(event.type);
-  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Create varied layouts for visual interest
+  const layouts = [
+    { imageSize: "large", rotation: -4, zIndex: 3, offsetX: 0, offsetY: 0 },
+    { imageSize: "medium", rotation: 3, zIndex: 2, offsetX: 60, offsetY: -40 },
+    { imageSize: "large", rotation: -2, zIndex: 3, offsetX: -40, offsetY: 30 },
+    { imageSize: "medium", rotation: 5, zIndex: 2, offsetX: 50, offsetY: -20 },
+    { imageSize: "large", rotation: -3, zIndex: 3, offsetX: 0, offsetY: 0 },
+  ];
+
+  const layout = layouts[index % layouts.length];
+  const isLarge = layout.imageSize === "large";
 
   return (
     <Box
-      ref={cardRef}
       component={motion.div}
-      initial={{ opacity: 0, y: 60 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
+      initial={{ opacity: 0, scale: 0.85, rotate: layout.rotation - 10 }}
+      whileInView={{ opacity: 1, scale: 1, rotate: layout.rotation }}
+      viewport={{ once: true, margin: "-150px" }}
       transition={{
-        duration: 0.7,
-        delay: index * 0.1,
+        duration: 1,
+        delay: index * 0.15,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       sx={{
-        width: "100%",
-        mb: { xs: 4, md: 6 },
+        position: "relative",
+        width: { xs: "100%", md: isLarge ? "55%" : "42%" },
+        height: { xs: "450px", md: isLarge ? "550px" : "420px" },
+        mb: { xs: 6, md: 0 },
+        cursor: "pointer",
+        transformStyle: "preserve-3d",
+        perspective: "1000px",
       }}
     >
+      {/* Main Image - Polaroid Style */}
       <Box
         component={motion.div}
         animate={{
-          y: isHovered ? -8 : 0,
-          boxShadow: isHovered
-            ? `0 30px 60px -15px rgba(106, 58, 30, 0.3), 0 0 0 1px rgba(217, 167, 86, 0.2)`
-            : `0 15px 35px -10px rgba(106, 58, 30, 0.15), 0 0 0 1px rgba(217, 167, 86, 0.1)`,
+          rotate: isHovered ? 0 : layout.rotation,
+          scale: isHovered ? 1.05 : 1,
+          zIndex: isHovered ? 50 : layout.zIndex,
         }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         sx={{
-          background:
-            "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(253,248,243,0.95))",
-          borderRadius: "28px",
-          overflow: "hidden",
           position: "relative",
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          minHeight: { xs: "auto", md: "340px" },
+          width: "100%",
+          height: "100%",
+          background: "#FFFDFB",
+          padding: "12px",
+          boxShadow: isHovered
+            ? `0 50px 100px rgba(106,58,30,0.4), 0 0 0 1px rgba(217,167,86,0.3)`
+            : `0 25px 60px rgba(106,58,30,0.25), 0 0 0 1px rgba(217,167,86,0.15)`,
+          transition: "box-shadow 0.5s ease",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(135deg, rgba(217,167,86,0.05) 0%, transparent 50%)",
+            pointerEvents: "none",
+          },
         }}
       >
-        {/* Image Section */}
+        {/* Image */}
         <Box
+          component="img"
+          src={
+            event.imageUrls?.[0]
+              ? getImageUrl(event.imageUrls[0])
+              : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80"
+          }
+          alt={event.title}
           sx={{
-            width: { xs: "100%", md: "45%" },
-            height: { xs: "220px", md: "auto" },
-            position: "relative",
-            overflow: "hidden",
+            width: "100%",
+            height: "calc(100% - 80px)",
+            objectFit: "cover",
+            filter: isHovered ? "brightness(1.05) contrast(1.05)" : "brightness(1)",
+            transition: "filter 0.5s ease",
           }}
-        >
-          <Box
-            component={motion.img}
-            animate={{ scale: isHovered ? 1.08 : 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            src={
-              event.imageUrls?.[0]
-                ? getImageUrl(event.imageUrls[0])
-                : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80"
-            }
-            alt={event.title}
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-            }}
-          />
+        />
 
-          {/* Image overlay gradient */}
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              background: `linear-gradient(135deg, ${color}20 0%, transparent 50%), linear-gradient(to right, rgba(0,0,0,0.1) 0%, transparent 30%)`,
-              pointerEvents: "none",
-            }}
-          />
-
-          {/* Event Type Badge - Floating on image */}
-          <Chip
-            label={getEventTypeLabel(event.type)}
-            sx={{
-              position: "absolute",
-              top: 16,
-              left: 16,
-              background: gradient,
-              color: "#FFFDFB",
-              fontFamily: '"Inter", sans-serif',
-              fontWeight: 700,
-              fontSize: "0.7rem",
-              px: 1,
-              height: 28,
-              borderRadius: "14px",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-              backdropFilter: "blur(8px)",
-            }}
-          />
-
-          {/* Date badge - Bottom of image */}
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 16,
-              left: 16,
-              background: "rgba(255,255,255,0.95)",
-              backdropFilter: "blur(10px)",
-              borderRadius: "16px",
-              p: 1.5,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              minWidth: 70,
-              boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-            }}
-          >
-            <Typography
-              sx={{
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontSize: "1.8rem",
-                fontWeight: 700,
-                color: "#6A3A1E",
-                lineHeight: 1,
-              }}
-            >
-              {new Date(event.eventStartDate).getDate()}
-            </Typography>
-            <Typography
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "0.7rem",
-                fontWeight: 600,
-                color: color,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              {new Date(event.eventStartDate).toLocaleDateString("en-US", {
-                month: "short",
-              })}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Content Section */}
+        {/* Polaroid Caption Area */}
         <Box
           sx={{
-            flex: 1,
-            p: { xs: 3, md: 4 },
+            height: "80px",
             display: "flex",
-            flexDirection: "column",
+            alignItems: "center",
             justifyContent: "center",
             position: "relative",
           }}
         >
-          {/* Decorative accent */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: 120,
-              height: 120,
-              background: `radial-gradient(circle at top right, ${color}10 0%, transparent 70%)`,
-              pointerEvents: "none",
-            }}
-          />
-
-          {/* Title */}
           <Typography
-            variant="h3"
             sx={{
               fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontWeight: 700,
-              fontSize: { xs: "1.6rem", md: "2rem" },
-              color: "#4A2C17",
-              mb: 2,
-              lineHeight: 1.2,
-              position: "relative",
+              fontSize: "1.1rem",
+              fontWeight: 600,
+              color: "#6A3A1E",
+              textAlign: "center",
             }}
           >
             {event.title}
           </Typography>
+        </Box>
 
-          {/* Date, Time & Location Info */}
-          <Box
-            sx={{ display: "flex", flexDirection: "column", gap: 1.5, mb: 3 }}
+        {/* Event Type Sticker */}
+        <Box
+          component={motion.div}
+          animate={{ rotate: isHovered ? [0, -5, 5, 0] : 0 }}
+          transition={{ duration: 0.5 }}
+          sx={{
+            position: "absolute",
+            top: -5,
+            right: -5,
+            px: 2.5,
+            py: 1,
+            background: gradient,
+            color: "#FFFDFB",
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.7rem",
+            fontWeight: 800,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            transform: "rotate(8deg)",
+            boxShadow: `0 8px 25px ${color}50`,
+            border: "3px solid #FFFDFB",
+            borderRadius: "4px",
+            zIndex: 10,
+          }}
+        >
+          {getEventTypeLabel(event.type)}
+        </Box>
+
+        {/* Date Stamp */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 100,
+            left: -10,
+            width: 70,
+            height: 70,
+            borderRadius: "50%",
+            background: `linear-gradient(135deg, ${color} 0%, ${color}DD 100%)`,
+            border: "4px solid #FFFDFB",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: `0 10px 30px ${color}60`,
+            transform: "rotate(-15deg)",
+            zIndex: 10,
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontSize: "1.6rem",
+              fontWeight: 700,
+              color: "#FFFDFB",
+              lineHeight: 1,
+            }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "10px",
-                  background: `${color}15`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <CalendarTodayOutlinedIcon
-                  sx={{ fontSize: 16, color: color }}
-                />
-              </Box>
-              <Typography
-                sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: "0.9rem",
-                  color: "#6A3A1E",
-                  fontWeight: 500,
-                }}
-              >
-                {formatEventDate(event.eventStartDate)}
-              </Typography>
-            </Box>
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "10px",
-                  background: `${color}15`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <AccessTimeOutlinedIcon sx={{ fontSize: 16, color: color }} />
-              </Box>
-              <Typography
-                sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: "0.9rem",
-                  color: "#6A3A1E",
-                  fontWeight: 500,
-                }}
-              >
-                {formatEventTime(event.eventStartDate)}
-              </Typography>
-            </Box>
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "10px",
-                  background: `${color}15`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <LocationOnOutlinedIcon sx={{ fontSize: 16, color: color }} />
-              </Box>
-              <Typography
-                sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: "0.9rem",
-                  color: "#6A3A1E",
-                  fontWeight: 500,
-                }}
-              >
-                The Brooklin Pub
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Description */}
+            {new Date(event.eventStartDate).getDate()}
+          </Typography>
           <Typography
             sx={{
               fontFamily: '"Inter", sans-serif',
-              color: "rgba(74,44,23,0.8)",
-              fontSize: "0.95rem",
-              lineHeight: 1.7,
-              mb: 3,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              color: "#FFFDFB",
+              textTransform: "uppercase",
+              mt: 0.3,
             }}
           >
-            {event.description}
+            {new Date(event.eventStartDate).toLocaleDateString("en-US", {
+              month: "short",
+            })}
           </Typography>
+        </Box>
+      </Box>
 
-          {/* Action Button */}
-          <Box
-            component={motion.div}
-            whileHover={{ x: 5 }}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
-              width: "fit-content",
-            }}
-          >
+      {/* Floating Info Panel - Appears on Hover */}
+      <Box
+        component={motion.div}
+        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+        animate={{
+          opacity: isHovered ? 1 : 0,
+          y: isHovered ? 0 : 20,
+          scale: isHovered ? 1 : 0.9,
+        }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        sx={{
+          position: "absolute",
+          bottom: { xs: -180, md: -120 },
+          left: { xs: 0, md: "50%" },
+          transform: { md: "translateX(-50%)" },
+          width: "100%",
+          maxWidth: "500px",
+          p: 3,
+          background: "linear-gradient(135deg, rgba(255,253,251,0.98) 0%, rgba(250,247,242,0.95) 100%)",
+          backdropFilter: "blur(20px)",
+          borderRadius: "24px",
+          boxShadow: "0 25px 60px rgba(106,58,30,0.3), 0 0 0 1px rgba(217,167,86,0.2)",
+          pointerEvents: isHovered ? "auto" : "none",
+          zIndex: 100,
+        }}
+      >
+        {/* Details Grid */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 2.5 }}>
+          {/* Date */}
+          <Box sx={{ textAlign: "center" }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 20, color: color, mb: 0.5 }} />
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "0.9rem",
+                fontSize: "0.7rem",
+                color: "#6A3A1E",
                 fontWeight: 600,
-                color: color,
-                letterSpacing: "0.02em",
+                lineHeight: 1.3,
               }}
             >
-              Learn More
+              {new Date(event.eventStartDate).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
             </Typography>
-            <IconButton
-              size="small"
-              sx={{
-                width: 32,
-                height: 32,
-                background: gradient,
-                color: "#FFFDFB",
-                "&:hover": {
-                  background: gradient,
-                  transform: "translateX(4px)",
-                },
-                transition: "transform 0.3s ease",
-              }}
-            >
-              <ArrowForwardIcon sx={{ fontSize: 16 }} />
-            </IconButton>
           </Box>
 
-          {/* Decorative bottom line */}
-          <Box
-            component={motion.div}
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            sx={{
-              position: "absolute",
-              bottom: 0,
-              left: { xs: 24, md: 32 },
-              right: { xs: 24, md: 32 },
-              height: 3,
-              background: `linear-gradient(90deg, ${color}, transparent)`,
-              borderRadius: "3px 3px 0 0",
-              transformOrigin: "left",
-            }}
-          />
+          {/* Time */}
+          <Box sx={{ textAlign: "center" }}>
+            <AccessTimeOutlinedIcon sx={{ fontSize: 20, color: color, mb: 0.5 }} />
+            <Typography
+              sx={{
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "0.7rem",
+                color: "#6A3A1E",
+                fontWeight: 600,
+                lineHeight: 1.3,
+              }}
+            >
+              {formatEventTime(event.eventStartDate)}
+            </Typography>
+          </Box>
+
+          {/* Location */}
+          <Box sx={{ textAlign: "center" }}>
+            <LocationOnOutlinedIcon sx={{ fontSize: 20, color: color, mb: 0.5 }} />
+            <Typography
+              sx={{
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "0.7rem",
+                color: "#6A3A1E",
+                fontWeight: 600,
+                lineHeight: 1.3,
+              }}
+            >
+              Brooklin Pub
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Description */}
+        <Typography
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.85rem",
+            color: "rgba(74,44,23,0.8)",
+            lineHeight: 1.6,
+            mb: 2.5,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {event.description}
+        </Typography>
+
+        {/* CTA Button */}
+        <Box
+          component={motion.div}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1.5,
+            py: 1.5,
+            background: gradient,
+            borderRadius: "50px",
+            color: "#FFFDFB",
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.8rem",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            cursor: "pointer",
+            boxShadow: `0 8px 25px ${color}40`,
+            transition: "all 0.3s ease",
+            "&:hover": {
+              boxShadow: `0 12px 35px ${color}50`,
+            },
+          }}
+        >
+          View Details
+          <ArrowForwardIcon sx={{ fontSize: 16 }} />
         </Box>
       </Box>
     </Box>
@@ -967,9 +928,8 @@ const Events = () => {
                           }}
                         />
                         <Chip
-                          label={`${events.length} event${
-                            events.length > 1 ? "s" : ""
-                          }`}
+                          label={`${events.length} event${events.length > 1 ? "s" : ""
+                            }`}
                           size="small"
                           sx={{
                             background: "rgba(217, 167, 86, 0.15)",
@@ -982,13 +942,27 @@ const Events = () => {
                       </Box>
 
                       {/* Events in this month */}
-                      {events.map((event, index) => (
-                        <EventCard
-                          key={event.id}
-                          event={event}
-                          index={groupIndex * 10 + index}
-                        />
-                      ))}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: { xs: 0, md: 4 },
+                          justifyContent: { md: "space-between" },
+                          alignItems: "flex-start",
+                          position: "relative",
+                          px: { xs: 2, md: 4 },
+                          py: { xs: 4, md: 6 },
+                          overflow: "visible",
+                        }}
+                      >
+                        {events.map((event, index) => (
+                          <MagazineEventItem
+                            key={event.id}
+                            event={event}
+                            index={groupIndex * 10 + index}
+                          />
+                        ))}
+                      </Box>
                     </Box>
                   )
                 )}
@@ -1142,7 +1116,7 @@ const Events = () => {
       </Box>
 
       <Footer />
-    </Box>
+    </Box >
   );
 };
 
