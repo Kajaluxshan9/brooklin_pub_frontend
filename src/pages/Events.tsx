@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { Box, Typography, Chip, Container, IconButton } from "@mui/material";
+import { Box, Typography, Chip, Container } from "@mui/material";
 import {
   motion,
   AnimatePresence,
@@ -13,6 +13,7 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import Nav from "../components/common/Nav";
 import Footer from "../components/common/Footer";
 import AnimatedBackground from "../components/common/AnimatedBackground";
+import MenuBackground from "../components/menu/MenuBackground";
 import { EventsSEO } from "../config/seo.presets";
 import { useApiWithCache } from "../hooks/useApi";
 import { eventsService } from "../services/events.service";
@@ -29,17 +30,6 @@ const shouldDisplayEvent = (event: Event): boolean => {
     return now >= displayStart && now <= displayEnd;
   }
   return true;
-};
-
-// Format event date
-const formatEventDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
 };
 
 // Format event time
@@ -91,168 +81,227 @@ const getEventGradient = (type: string): string => {
   return gradients[type] || "linear-gradient(135deg, #D9A756 0%, #B8923F 100%)";
 };
 
-// 🎨 MAGAZINE-STYLE MASONRY LAYOUT - Overlapping Images with Floating Panels!
-const MagazineEventItem = ({ event, index }: { event: Event; index: number }) => {
+// 🎨 PREMIUM DIAGONAL ZIGZAG EVENT LAYOUT - Alternating Left/Right with Elegant Styling
+const DiagonalEventItem = ({
+  event,
+  index,
+}: {
+  event: Event;
+  index: number;
+}) => {
   const [isHovered, setIsHovered] = useState(false);
   const color = getEventColor(event.type);
   const gradient = getEventGradient(event.type);
-
-  // Create varied layouts for visual interest
-  const layouts = [
-    { imageSize: "large", rotation: -4, zIndex: 3, offsetX: 0, offsetY: 0 },
-    { imageSize: "medium", rotation: 3, zIndex: 2, offsetX: 60, offsetY: -40 },
-    { imageSize: "large", rotation: -2, zIndex: 3, offsetX: -40, offsetY: 30 },
-    { imageSize: "medium", rotation: 5, zIndex: 2, offsetX: 50, offsetY: -20 },
-    { imageSize: "large", rotation: -3, zIndex: 3, offsetX: 0, offsetY: 0 },
-  ];
-
-  const layout = layouts[index % layouts.length];
-  const isLarge = layout.imageSize === "large";
+  const isEven = index % 2 === 0;
 
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, scale: 0.85, rotate: layout.rotation - 10 }}
-      whileInView={{ opacity: 1, scale: 1, rotate: layout.rotation }}
-      viewport={{ once: true, margin: "-150px" }}
+      initial={{ opacity: 0, x: isEven ? -80 : 80, y: 40 }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
       transition={{
-        duration: 1,
-        delay: index * 0.15,
+        duration: 0.9,
+        delay: 0.1,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       sx={{
+        display: "flex",
+        flexDirection: {
+          xs: "column",
+          md: isEven ? "row" : "row-reverse",
+        },
+        alignItems: "center",
+        gap: { xs: 4, md: 6, lg: 8 },
+        mb: { xs: 8, md: 0 },
         position: "relative",
-        width: { xs: "100%", md: isLarge ? "55%" : "42%" },
-        height: { xs: "450px", md: isLarge ? "550px" : "420px" },
-        mb: { xs: 6, md: 0 },
-        cursor: "pointer",
-        transformStyle: "preserve-3d",
-        perspective: "1000px",
       }}
     >
-      {/* Main Image - Polaroid Style */}
+      {/* Image Section */}
       <Box
         component={motion.div}
-        animate={{
-          rotate: isHovered ? 0 : layout.rotation,
-          scale: isHovered ? 1.05 : 1,
-          zIndex: isHovered ? 50 : layout.zIndex,
-        }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        whileHover={{ scale: 1.02 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
         sx={{
           position: "relative",
-          width: "100%",
-          height: "100%",
-          background: "#FFFDFB",
-          padding: "12px",
-          boxShadow: isHovered
-            ? `0 50px 100px rgba(106,58,30,0.4), 0 0 0 1px rgba(217,167,86,0.3)`
-            : `0 25px 60px rgba(106,58,30,0.25), 0 0 0 1px rgba(217,167,86,0.15)`,
-          transition: "box-shadow 0.5s ease",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(135deg, rgba(217,167,86,0.05) 0%, transparent 50%)",
-            pointerEvents: "none",
-          },
+          width: { xs: "100%", md: "50%" },
+          maxWidth: { xs: "450px", md: "none" },
+          mx: { xs: "auto", md: 0 },
         }}
       >
-        {/* Image */}
+        {/* Decorative Frame */}
         <Box
-          component="img"
-          src={
-            event.imageUrls?.[0]
-              ? getImageUrl(event.imageUrls[0])
-              : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80"
-          }
-          alt={event.title}
           sx={{
-            width: "100%",
-            height: "calc(100% - 80px)",
-            objectFit: "cover",
-            filter: isHovered ? "brightness(1.05) contrast(1.05)" : "brightness(1)",
-            transition: "filter 0.5s ease",
+            position: "absolute",
+            top: { xs: -12, md: -16 },
+            left: isEven ? { xs: -12, md: -16 } : "auto",
+            right: isEven ? "auto" : { xs: -12, md: -16 },
+            width: { xs: "70%", md: "85%" },
+            height: { xs: "70%", md: "85%" },
+            border: "2px solid",
+            borderColor: isHovered
+              ? "rgba(217,167,86,0.6)"
+              : "rgba(217,167,86,0.25)",
+            transition: "all 0.5s ease",
+            zIndex: 0,
           }}
         />
 
-        {/* Polaroid Caption Area */}
+        {/* Main Image Container */}
         <Box
           sx={{
-            height: "80px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             position: "relative",
+            aspectRatio: "4/5",
+            overflow: "hidden",
+            zIndex: 1,
+            boxShadow: isHovered
+              ? "0 30px 70px rgba(106,58,30,0.35)"
+              : "0 15px 40px rgba(106,58,30,0.2)",
+            transition: "box-shadow 0.5s ease",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              inset: 0,
+              background: isHovered
+                ? "linear-gradient(180deg, transparent 40%, rgba(60,31,14,0.6) 100%)"
+                : "linear-gradient(180deg, transparent 50%, rgba(60,31,14,0.4) 100%)",
+              zIndex: 2,
+              transition: "all 0.5s ease",
+              pointerEvents: "none",
+            },
           }}
         >
-          <Typography
+          <Box
+            component={motion.img}
+            src={
+              event.imageUrls?.[0]
+                ? getImageUrl(event.imageUrls[0])
+                : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80"
+            }
+            alt={event.title}
+            animate={{
+              scale: isHovered ? 1.08 : 1,
+            }}
+            transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
             sx={{
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontSize: "1.1rem",
-              fontWeight: 600,
-              color: "#6A3A1E",
-              textAlign: "center",
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              filter: isHovered
+                ? "brightness(1.05) saturate(1.1)"
+                : "brightness(1)",
+              transition: "filter 0.5s ease",
+            }}
+          />
+
+          {/* Event Type Badge on Image */}
+          <Box
+            component={motion.div}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            sx={{
+              position: "absolute",
+              top: 20,
+              left: isEven ? 20 : "auto",
+              right: isEven ? "auto" : 20,
+              px: 2.5,
+              py: 1,
+              background: gradient,
+              color: "#FFFDFB",
+              fontFamily: '"Inter", sans-serif',
+              fontSize: "0.7rem",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+              borderRadius: "4px",
+              boxShadow: `0 8px 25px ${color}60`,
+              zIndex: 5,
             }}
           >
-            {event.title}
-          </Typography>
+            {getEventTypeLabel(event.type)}
+          </Box>
+
+          {/* Gold Accent Corner - Decorative */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: isEven ? 0 : "auto",
+              right: isEven ? "auto" : 0,
+              width: { xs: 50, md: 65 },
+              height: { xs: 50, md: 65 },
+              background: gradient,
+              clipPath: isEven
+                ? "polygon(0 100%, 0 0, 100% 100%)"
+                : "polygon(100% 100%, 100% 0, 0 100%)",
+              zIndex: 3,
+              opacity: isHovered ? 1 : 0.85,
+              transition: "opacity 0.4s ease",
+            }}
+          />
         </Box>
 
-        {/* Event Type Sticker */}
+        {/* Decorative Dot Pattern */}
         <Box
-          component={motion.div}
-          animate={{ rotate: isHovered ? [0, -5, 5, 0] : 0 }}
-          transition={{ duration: 0.5 }}
           sx={{
             position: "absolute",
-            top: -5,
-            right: -5,
-            px: 2.5,
-            py: 1,
-            background: gradient,
-            color: "#FFFDFB",
-            fontFamily: '"Inter", sans-serif',
-            fontSize: "0.7rem",
-            fontWeight: 800,
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            transform: "rotate(8deg)",
-            boxShadow: `0 8px 25px ${color}50`,
-            border: "3px solid #FFFDFB",
-            borderRadius: "4px",
-            zIndex: 10,
+            bottom: { xs: -20, md: -30 },
+            left: isEven ? "auto" : { xs: -20, md: -30 },
+            right: isEven ? { xs: -20, md: -30 } : "auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 8px)",
+            gap: "8px",
+            opacity: isHovered ? 1 : 0.4,
+            transition: "opacity 0.4s ease",
           }}
         >
-          {getEventTypeLabel(event.type)}
+          {[...Array(9)].map((_, i) => (
+            <Box
+              key={i}
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: color,
+                opacity: ((i % 3) + i / 3) % 2 === 0 ? 1 : 0.4,
+              }}
+            />
+          ))}
         </Box>
 
-        {/* Date Stamp */}
+        {/* Date Circle Badge */}
         <Box
+          component={motion.div}
+          animate={{
+            rotate: isHovered ? 0 : -12,
+            scale: isHovered ? 1.1 : 1,
+          }}
+          transition={{ duration: 0.4 }}
           sx={{
             position: "absolute",
-            bottom: 100,
-            left: -10,
-            width: 70,
-            height: 70,
+            bottom: { xs: 20, md: 40 },
+            left: isEven ? "auto" : { xs: 20, md: -35 },
+            right: isEven ? { xs: 20, md: -35 } : "auto",
+            width: { xs: 70, md: 85 },
+            height: { xs: 70, md: 85 },
             borderRadius: "50%",
-            background: `linear-gradient(135deg, ${color} 0%, ${color}DD 100%)`,
+            background: `linear-gradient(145deg, ${color} 0%, ${color}DD 100%)`,
             border: "4px solid #FFFDFB",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: `0 10px 30px ${color}60`,
-            transform: "rotate(-15deg)",
+            boxShadow: `0 15px 40px ${color}50`,
             zIndex: 10,
           }}
         >
           <Typography
             sx={{
               fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontSize: "1.6rem",
+              fontSize: { xs: "1.6rem", md: "2rem" },
               fontWeight: 700,
               color: "#FFFDFB",
               lineHeight: 1,
@@ -263,7 +312,7 @@ const MagazineEventItem = ({ event, index }: { event: Event; index: number }) =>
           <Typography
             sx={{
               fontFamily: '"Inter", sans-serif',
-              fontSize: "0.65rem",
+              fontSize: { xs: "0.6rem", md: "0.7rem" },
               fontWeight: 700,
               color: "#FFFDFB",
               textTransform: "uppercase",
@@ -277,79 +326,141 @@ const MagazineEventItem = ({ event, index }: { event: Event; index: number }) =>
         </Box>
       </Box>
 
-      {/* Floating Info Panel - Appears on Hover */}
+      {/* Content Section */}
       <Box
-        component={motion.div}
-        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-        animate={{
-          opacity: isHovered ? 1 : 0,
-          y: isHovered ? 0 : 20,
-          scale: isHovered ? 1 : 0.9,
-        }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
         sx={{
-          position: "absolute",
-          bottom: { xs: -180, md: -120 },
-          left: { xs: 0, md: "50%" },
-          transform: { md: "translateX(-50%)" },
-          width: "100%",
-          maxWidth: "500px",
-          p: 3,
-          background: "linear-gradient(135deg, rgba(255,253,251,0.98) 0%, rgba(250,247,242,0.95) 100%)",
-          backdropFilter: "blur(20px)",
-          borderRadius: "24px",
-          boxShadow: "0 25px 60px rgba(106,58,30,0.3), 0 0 0 1px rgba(217,167,86,0.2)",
-          pointerEvents: isHovered ? "auto" : "none",
-          zIndex: 100,
+          flex: 1,
+          width: { xs: "100%", md: "50%" },
+          textAlign: { xs: "center", md: isEven ? "left" : "right" },
+          px: { xs: 2, md: 0 },
         }}
       >
-        {/* Details Grid */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 2.5 }}>
-          {/* Date */}
-          <Box sx={{ textAlign: "center" }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 20, color: color, mb: 0.5 }} />
+        {/* Decorative Line */}
+        <Box
+          component={motion.div}
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          sx={{
+            width: { xs: 60, md: 80 },
+            height: 3,
+            background: gradient,
+            mb: 3,
+            mx: { xs: "auto", md: isEven ? 0 : "auto" },
+            mr: { md: isEven ? "auto" : 0 },
+            transformOrigin: isEven ? "left" : "right",
+          }}
+        />
+
+        {/* Event Title */}
+        <Typography
+          component={motion.h3}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          sx={{
+            fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.5rem" },
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            fontWeight: 700,
+            color: "#3C1F0E",
+            mb: 2,
+            lineHeight: 1.2,
+          }}
+        >
+          {event.title}
+        </Typography>
+
+        {/* Event Details - Date & Time */}
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 2,
+            mb: 3,
+            justifyContent: {
+              xs: "center",
+              md: isEven ? "flex-start" : "flex-end",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 0.75,
+              background: "rgba(217,167,86,0.12)",
+              borderRadius: "20px",
+              border: "1px solid rgba(217,167,86,0.25)",
+            }}
+          >
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: color }} />
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "0.7rem",
+                fontSize: "0.8rem",
                 color: "#6A3A1E",
                 fontWeight: 600,
-                lineHeight: 1.3,
               }}
             >
               {new Date(event.eventStartDate).toLocaleDateString("en-US", {
+                weekday: "short",
                 month: "short",
                 day: "numeric",
               })}
             </Typography>
           </Box>
-
-          {/* Time */}
-          <Box sx={{ textAlign: "center" }}>
-            <AccessTimeOutlinedIcon sx={{ fontSize: 20, color: color, mb: 0.5 }} />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 0.75,
+              background: "rgba(217,167,86,0.12)",
+              borderRadius: "20px",
+              border: "1px solid rgba(217,167,86,0.25)",
+            }}
+          >
+            <AccessTimeOutlinedIcon sx={{ fontSize: 16, color: color }} />
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "0.7rem",
+                fontSize: "0.8rem",
                 color: "#6A3A1E",
                 fontWeight: 600,
-                lineHeight: 1.3,
               }}
             >
               {formatEventTime(event.eventStartDate)}
             </Typography>
           </Box>
-
-          {/* Location */}
-          <Box sx={{ textAlign: "center" }}>
-            <LocationOnOutlinedIcon sx={{ fontSize: 20, color: color, mb: 0.5 }} />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 0.75,
+              background: "rgba(217,167,86,0.12)",
+              borderRadius: "20px",
+              border: "1px solid rgba(217,167,86,0.25)",
+            }}
+          >
+            <LocationOnOutlinedIcon sx={{ fontSize: 16, color: color }} />
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "0.7rem",
+                fontSize: "0.8rem",
                 color: "#6A3A1E",
                 fontWeight: 600,
-                lineHeight: 1.3,
               }}
             >
               Brooklin Pub
@@ -359,14 +470,22 @@ const MagazineEventItem = ({ event, index }: { event: Event; index: number }) =>
 
         {/* Description */}
         <Typography
+          component={motion.p}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.6 }}
           sx={{
+            fontSize: { xs: "0.95rem", md: "1rem" },
             fontFamily: '"Inter", sans-serif',
-            fontSize: "0.85rem",
-            color: "rgba(74,44,23,0.8)",
-            lineHeight: 1.6,
-            mb: 2.5,
+            color: "rgba(60,31,14,0.75)",
+            lineHeight: 1.8,
+            maxWidth: { xs: "none", md: "450px" },
+            mx: { xs: "auto", md: isEven ? 0 : "auto" },
+            ml: { md: isEven ? 0 : "auto" },
+            mb: 3,
             display: "-webkit-box",
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 3,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
           }}
@@ -377,13 +496,17 @@ const MagazineEventItem = ({ event, index }: { event: Event; index: number }) =>
         {/* CTA Button */}
         <Box
           component={motion.div}
-          whileHover={{ scale: 1.03 }}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+          whileHover={{ scale: 1.03, y: -2 }}
           whileTap={{ scale: 0.98 }}
           sx={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
-            justifyContent: "center",
             gap: 1.5,
+            px: 4,
             py: 1.5,
             background: gradient,
             borderRadius: "50px",
@@ -392,16 +515,32 @@ const MagazineEventItem = ({ event, index }: { event: Event; index: number }) =>
             fontSize: "0.8rem",
             fontWeight: 700,
             textTransform: "uppercase",
-            letterSpacing: "0.1em",
+            letterSpacing: "0.12em",
             cursor: "pointer",
-            boxShadow: `0 8px 25px ${color}40`,
+            boxShadow: `0 10px 30px ${color}40`,
             transition: "all 0.3s ease",
+            position: "relative",
+            overflow: "hidden",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: "-100%",
+              width: "100%",
+              height: "100%",
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
+              transition: "left 0.5s ease",
+            },
             "&:hover": {
-              boxShadow: `0 12px 35px ${color}50`,
+              boxShadow: `0 15px 40px ${color}50`,
+              "&::before": {
+                left: "100%",
+              },
             },
           }}
         >
-          View Details
+          Learn More
           <ArrowForwardIcon sx={{ fontSize: 16 }} />
         </Box>
       </Box>
@@ -782,24 +921,105 @@ const Events = () => {
       {/* Events List Section */}
       <Box
         sx={{
-          py: { xs: 8, md: 12 },
+          py: { xs: 10, md: 14 },
           position: "relative",
+          background:
+            "linear-gradient(180deg, #FDF8F3 0%, #FAF7F2 50%, #FDF8F3 100%)",
         }}
       >
-        {/* Section background decoration */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 200,
-            background: "linear-gradient(180deg, #F5EBE0 0%, transparent 100%)",
-            pointerEvents: "none",
-          }}
-        />
+        {/* Premium Background */}
+        <MenuBackground />
 
-        <Container maxWidth="lg">
+        {/* Section Header */}
+        <Container
+          maxWidth="lg"
+          sx={{ position: "relative", zIndex: 2, mb: { xs: 6, md: 8 } }}
+        >
+          <Box
+            component={motion.div}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            sx={{
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 80,
+                height: 3,
+                background:
+                  "linear-gradient(90deg, transparent, #D9A756, transparent)",
+                position: "relative",
+                "&::before, &::after": {
+                  content: '""',
+                  position: "absolute",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#D9A756",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  boxShadow: "0 0 15px rgba(217,167,86,0.6)",
+                },
+                "&::before": { left: -4 },
+                "&::after": { right: -4 },
+              }}
+            />
+            <Typography
+              sx={{
+                color: "#D9A756",
+                letterSpacing: "0.3em",
+                fontSize: { xs: "0.7rem", sm: "0.8rem" },
+                fontFamily: '"Inter", sans-serif',
+                fontWeight: 700,
+                textTransform: "uppercase",
+              }}
+            >
+              ◆ Mark Your Calendar ◆
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                color: "#3C1F0E",
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.2,
+              }}
+            >
+              Featured{" "}
+              <Box
+                component="span"
+                sx={{
+                  background:
+                    "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                Experiences
+              </Box>
+            </Typography>
+            <Box
+              sx={{
+                width: { xs: 100, md: 150 },
+                height: 1,
+                background:
+                  "linear-gradient(90deg, transparent, rgba(217,167,86,0.5), transparent)",
+              }}
+            />
+          </Box>
+        </Container>
+
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
           {loading ? (
             <Box sx={{ textAlign: "center", py: 10 }}>
               <Box
@@ -893,7 +1113,7 @@ const Events = () => {
               >
                 {Object.entries(eventsByMonth).map(
                   ([monthYear, events], groupIndex) => (
-                    <Box key={monthYear} sx={{ mb: { xs: 6, md: 10 } }}>
+                    <Box key={monthYear} sx={{ mb: { xs: 8, md: 12 } }}>
                       {/* Month Header */}
                       <Box
                         component={motion.div}
@@ -905,7 +1125,7 @@ const Events = () => {
                           display: "flex",
                           alignItems: "center",
                           gap: 3,
-                          mb: 4,
+                          mb: { xs: 6, md: 8 },
                         }}
                       >
                         <Typography
@@ -923,40 +1143,37 @@ const Events = () => {
                             flex: 1,
                             height: 2,
                             background:
-                              "linear-gradient(90deg, rgba(217, 167, 86, 0.3), transparent)",
+                              "linear-gradient(90deg, rgba(217, 167, 86, 0.4), transparent)",
                             borderRadius: 1,
                           }}
                         />
                         <Chip
-                          label={`${events.length} event${events.length > 1 ? "s" : ""
-                            }`}
+                          label={`${events.length} event${
+                            events.length > 1 ? "s" : ""
+                          }`}
                           size="small"
                           sx={{
-                            background: "rgba(217, 167, 86, 0.15)",
+                            background:
+                              "linear-gradient(135deg, rgba(217, 167, 86, 0.2), rgba(217, 167, 86, 0.1))",
                             color: "#6A3A1E",
                             fontFamily: '"Inter", sans-serif',
-                            fontWeight: 600,
+                            fontWeight: 700,
                             fontSize: "0.75rem",
+                            border: "1px solid rgba(217,167,86,0.3)",
                           }}
                         />
                       </Box>
 
-                      {/* Events in this month */}
+                      {/* Diagonal Zigzag Events Layout */}
                       <Box
                         sx={{
                           display: "flex",
-                          flexWrap: "wrap",
-                          gap: { xs: 0, md: 4 },
-                          justifyContent: { md: "space-between" },
-                          alignItems: "flex-start",
-                          position: "relative",
-                          px: { xs: 2, md: 4 },
-                          py: { xs: 4, md: 6 },
-                          overflow: "visible",
+                          flexDirection: "column",
+                          gap: { xs: 6, md: 10 },
                         }}
                       >
                         {events.map((event, index) => (
-                          <MagazineEventItem
+                          <DiagonalEventItem
                             key={event.id}
                             event={event}
                             index={groupIndex * 10 + index}
@@ -970,6 +1187,67 @@ const Events = () => {
             </AnimatePresence>
           )}
         </Container>
+
+        {/* Bottom decorative element */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            mt: { xs: 8, md: 12 },
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <Box
+            sx={{
+              width: { xs: 30, md: 60 },
+              height: 1,
+              background:
+                "linear-gradient(90deg, transparent, rgba(217,167,86,0.5))",
+            }}
+          />
+          <Box
+            sx={{
+              width: 12,
+              height: 12,
+              border: "2px solid #D9A756",
+              transform: "rotate(45deg)",
+              opacity: 0.6,
+            }}
+          />
+          <Typography
+            sx={{
+              color: "rgba(217,167,86,0.8)",
+              fontSize: { xs: "0.7rem", md: "0.8rem" },
+              fontFamily: '"Inter", sans-serif',
+              fontWeight: 600,
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              px: 2,
+            }}
+          >
+            More Events Coming Soon
+          </Typography>
+          <Box
+            sx={{
+              width: 12,
+              height: 12,
+              border: "2px solid #D9A756",
+              transform: "rotate(45deg)",
+              opacity: 0.6,
+            }}
+          />
+          <Box
+            sx={{
+              width: { xs: 30, md: 60 },
+              height: 1,
+              background:
+                "linear-gradient(90deg, rgba(217,167,86,0.5), transparent)",
+            }}
+          />
+        </Box>
       </Box>
 
       {/* Bottom CTA Section */}
@@ -1116,7 +1394,7 @@ const Events = () => {
       </Box>
 
       <Footer />
-    </Box >
+    </Box>
   );
 };
 
