@@ -127,6 +127,7 @@ export interface Event {
   eventEndDate: string;
   isActive: boolean;
   imageUrls: string[];
+  ticketLink?: string | null;
   createdAt: string;
   updatedAt: string;
 }

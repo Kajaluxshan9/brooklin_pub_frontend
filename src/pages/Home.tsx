@@ -261,10 +261,10 @@ const HeroMiddleSection = () => {
           className="hero-animate"
           sx={{
             color: "#D9A756",
-            letterSpacing: "0.4em",
-            fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.9rem" },
+            letterSpacing: "0.35em",
+            fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.85rem" },
             fontFamily: '"Inter", sans-serif',
-            fontWeight: 700,
+            fontWeight: 600,
             textTransform: "uppercase",
             opacity: 0,
             "&::before, &::after": {
@@ -289,7 +289,7 @@ const HeroMiddleSection = () => {
             textShadow: "0 4px 30px rgba(0,0,0,0.4)",
             fontFamily: '"Cormorant Garamond", Georgia, serif',
             fontWeight: 700,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.025em",
             lineHeight: 1.1,
             opacity: 0,
           }}
@@ -327,12 +327,13 @@ const HeroMiddleSection = () => {
           className="hero-animate"
           sx={{
             maxWidth: "650px",
-            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
+            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.15rem" },
             color: "rgba(255,253,251,0.9)",
             textShadow: "0 2px 10px rgba(0,0,0,0.3)",
             fontFamily: '"Inter", sans-serif',
-            lineHeight: 1.9,
+            lineHeight: 1.85,
             fontWeight: 400,
+            letterSpacing: "0.01em",
             px: { xs: 2, md: 0 },
             opacity: 0,
           }}
@@ -369,8 +370,8 @@ const HeroMiddleSection = () => {
               color: "#FFFDFB",
               fontFamily: '"Inter", sans-serif',
               fontSize: { xs: "0.9rem", md: "0.95rem" },
-              fontWeight: 700,
-              letterSpacing: "0.1em",
+              fontWeight: 600,
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               boxShadow: "0 10px 30px rgba(217,167,86,0.4)",
               transition: "all 0.4s ease",
@@ -416,8 +417,8 @@ const HeroMiddleSection = () => {
               color: "#D9A756",
               fontFamily: '"Inter", sans-serif',
               fontSize: { xs: "0.9rem", md: "0.95rem" },
-              fontWeight: 700,
-              letterSpacing: "0.1em",
+              fontWeight: 600,
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               transition: "all 0.4s ease",
               backdropFilter: "blur(10px)",
@@ -821,27 +822,46 @@ const Home = () => {
                     padding: isMobile ? "8px" : "12px",
                   }}
                 >
-                  <AnimatePresence mode="wait">
-                    <motion.img
-                      key={slideshowIndex}
-                      src={popupCards[slideshowIndex].popupImg}
-                      alt={popupCards[slideshowIndex].title}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.05 }}
-                      transition={{ duration: 0.4 }}
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: isMobile
-                          ? "calc(100dvh - 260px)"
-                          : "calc(88vh - 200px)",
-                        objectFit: "contain",
-                        borderRadius: isMobile ? "16px" : "20px",
-                        boxShadow:
-                          "0 20px 60px rgba(106,58,30,0.25), 0 0 0 1px rgba(217,167,86,0.2)",
-                      }}
-                    />
-                  </AnimatePresence>
+                  {/* Stack all images and crossfade between them - no close/open effect */}
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {popupCards.map((card, idx) => (
+                      <motion.img
+                        key={idx}
+                        src={card.popupImg}
+                        alt={card.title}
+                        initial={false}
+                        animate={{
+                          opacity: idx === slideshowIndex ? 1 : 0,
+                          scale: idx === slideshowIndex ? 1 : 0.98,
+                        }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                        style={{
+                          position: idx === 0 ? "relative" : "absolute",
+                          maxWidth: "100%",
+                          maxHeight: isMobile
+                            ? "calc(100dvh - 260px)"
+                            : "calc(88vh - 200px)",
+                          objectFit: "contain",
+                          borderRadius: isMobile ? "16px" : "20px",
+                          boxShadow:
+                            idx === slideshowIndex
+                              ? "0 20px 60px rgba(106,58,30,0.25), 0 0 0 1px rgba(217,167,86,0.2)"
+                              : "none",
+                          pointerEvents:
+                            idx === slideshowIndex ? "auto" : "none",
+                        }}
+                      />
+                    ))}
+                  </div>
 
                   {/* Image glow effect - hide on mobile */}
                   {!isMobile && (

@@ -298,10 +298,10 @@ const LandingPage = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           sx={{
             color: "#D9A756",
-            letterSpacing: { xs: "0.25em", md: "0.4em" },
-            fontSize: { xs: "0.65rem", sm: "0.75rem", md: "0.9rem" },
+            letterSpacing: { xs: "0.2em", md: "0.35em" },
+            fontSize: { xs: "0.65rem", sm: "0.75rem", md: "0.85rem" },
             fontFamily: '"Inter", sans-serif',
-            fontWeight: 700,
+            fontWeight: 600,
             textTransform: "uppercase",
             textShadow: "0 2px 10px rgba(0,0,0,0.3)",
           }}
@@ -322,10 +322,10 @@ const LandingPage = () => {
               md: "4.5rem",
               lg: "5.5rem",
             },
-            fontWeight: 800,
+            fontWeight: 700,
             lineHeight: 1.05,
             fontFamily: '"Cormorant Garamond", Georgia, serif',
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.025em",
             textShadow: "0 6px 30px rgba(0,0,0,0.4)",
             maxWidth: "900px",
             px: 2,
@@ -381,17 +381,18 @@ const LandingPage = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.7 }}
           sx={{
-            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.35rem" },
+            fontSize: { xs: "1rem", sm: "1.1rem", md: "1.3rem" },
             fontFamily: '"Inter", sans-serif',
             fontWeight: 400,
             color: "rgba(255,253,251,0.95)",
             maxWidth: "650px",
-            lineHeight: 1.8,
+            lineHeight: 1.85,
+            letterSpacing: "0.01em",
             px: 3,
             textShadow: "0 2px 10px rgba(0,0,0,0.3)",
           }}
         >
-          Where great food, cold drinks, and warm hospitality come together
+          Craft beer, homemade comfort food, and the warmest welcome in town
         </Typography>
 
         {/* CTA Button */}
@@ -426,10 +427,10 @@ const LandingPage = () => {
               py: { xs: 1.5, md: 1.8 },
               borderRadius: "50px",
               fontFamily: '"Inter", sans-serif',
-              fontWeight: 700,
-              fontSize: { xs: "0.9rem", md: "1rem" },
+              fontWeight: 600,
+              fontSize: { xs: "0.85rem", md: "0.95rem" },
               textTransform: "uppercase",
-              letterSpacing: "0.1em",
+              letterSpacing: "0.12em",
               boxShadow:
                 "0 10px 35px rgba(217,167,86,0.5), 0 5px 15px rgba(0,0,0,0.2)",
               border: "2px solid rgba(255,255,255,0.15)",

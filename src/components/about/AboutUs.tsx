@@ -14,32 +14,35 @@ const pages = [
     id: 1,
     title: "Our Story",
     subtitle:
-      "Serving Brooklin since 2014 with passion, pride, and great food.",
+      "Serving Brooklin since 2014—where neighbours become friends and every visit feels like coming home.",
     image: FrontView,
   },
   {
     id: 2,
     title: "The Pub",
     subtitle:
-      "A welcoming neighborhood gathering place for friends and family.",
+      "More than a restaurant—we're where memories are made, from first dates to family celebrations.",
     image: DancingInFunction,
   },
   {
     id: 3,
     title: "Our Kitchen",
-    subtitle: "Fresh ingredients, homemade recipes, and dishes made with love.",
+    subtitle:
+      "Fresh local ingredients meet time-honoured recipes. Every dish is crafted with love and passion.",
     image: ShowCase,
   },
   {
     id: 4,
-    title: "Community",
-    subtitle: "More than a pub – we're part of the Brooklin family.",
+    title: "Community First",
+    subtitle:
+      "We're woven into Brooklin's fabric—sponsoring local teams and always keeping a seat for you.",
     image: BrooklinPubPillers,
   },
   {
     id: 5,
-    title: "Community",
-    subtitle: "More than a pub – we're part of the Brooklin family.",
+    title: "Join the Family",
+    subtitle:
+      "Pull up a chair and stay awhile. First visit or hundredth—you're always welcome here.",
     image: IndoorView,
   },
 ];
@@ -142,7 +145,8 @@ export default function AboutUs() {
               cursor: "pointer",
               transition: "all 0.3s ease",
               "&:hover": {
-                backgroundColor: idx === pageIndex ? "#D9A756" : "rgba(255, 253, 251, 0.8)",
+                backgroundColor:
+                  idx === pageIndex ? "#D9A756" : "rgba(255, 253, 251, 0.8)",
                 transform: "scale(1.2)",
               },
             }}
@@ -162,9 +166,10 @@ export default function AboutUs() {
             position: isMobile ? "relative" : "absolute",
             width: "100%",
             height: isMobile ? "auto" : "100%",
-            background: !isMobile && currentPage.image
-              ? `linear-gradient(rgba(60,31,14,0.55), rgba(106,58,30,0.45)), url(${currentPage.image})`
-              : undefined,
+            background:
+              !isMobile && currentPage.image
+                ? `linear-gradient(rgba(60,31,14,0.55), rgba(106,58,30,0.45)), url(${currentPage.image})`
+                : undefined,
             backgroundSize: !isMobile ? "cover" : undefined,
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -246,14 +251,15 @@ export default function AboutUs() {
             <Typography
               sx={{
                 fontWeight: 600,
-                letterSpacing: "0.15em",
+                letterSpacing: "0.12em",
                 mb: 3,
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
                 textTransform: "uppercase",
                 fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
+                lineHeight: 1.1,
                 // Use darker, high-contrast color on mobile where background is light
                 color: isMobile ? "#3C1F0E" : "#F3E3CC",
-                textShadow: isMobile ? "none" : "0 2px 12px rgba(60,31,14,0.4)",
+                textShadow: isMobile ? "none" : "0 2px 12px rgba(60,31,14,0.3)",
               }}
             >
               {currentPage.title}
@@ -261,10 +267,11 @@ export default function AboutUs() {
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
+                fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
                 color: isMobile ? "#4A2C17" : "rgba(243,227,204,0.9)",
                 maxWidth: "600px",
-                lineHeight: 1.6,
+                lineHeight: 1.7,
+                letterSpacing: "0.01em",
                 mx: "auto",
               }}
             >

@@ -75,53 +75,6 @@ export function addSpecial(s: Special) {
   }
 }
 
-// Load initial specials by importing the existing special component modules
-// which export their local `cards` arrays. This avoids creating any new files
-// and ensures Home can show notifications immediately on first visit.
-export async function loadInitialSpecials(): Promise<void> {
-  try {
-    let daily: any[] = [];
-    let other: any[] = [];
-
-    // Try importing component modules that now export their `cards` arrays.
-    try {
-      const specialComp = await import("../components/special/SpecialDisplay");
-      daily = specialComp.exportedDailySpecials || [];
-      other = specialComp.exportedChefSpecials || []; // exportedChefSpecials now contains "other" specials
-    } catch (e) {
-      daily = [];
-      other = [];
-    }
-
-    // Register items with the same id pattern used in the component registration
-    daily.forEach((d: any, idx: number) => {
-      addSpecial({
-        id: d.id ?? `daily-${idx}`,
-        title: d.title,
-        desc: d.desc,
-        bg: d.bg,
-        popupImg: d.popupImg,
-        status: d.status ?? "new",
-        category: "daily",
-      });
-    });
-
-    other.forEach((c: any, idx: number) => {
-      addSpecial({
-        id: c.id ?? `other-${idx}`,
-        title: c.title,
-        desc: c.desc,
-        bg: c.bg,
-        popupImg: c.popupImg,
-        status: c.status ?? "new",
-        category: "other",
-      });
-    });
-  } catch (err) {
-    // ignore loader errors — registration is optional
-  }
-}
-
 export default {
   getLatestSpecial,
   hasNewSpecial,

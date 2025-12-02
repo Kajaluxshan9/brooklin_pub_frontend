@@ -433,9 +433,9 @@ export default function MainMenu() {
                           WebkitTextFillColor: "transparent",
                           backgroundClip: "text",
                           textAlign: "center",
-                          filter: `drop-shadow(-1px -1px 0 #D9A75640) 
-                                   drop-shadow(1px -1px 0 #D9A75640) 
-                                   drop-shadow(-1px 1px 0 #D9A75640) 
+                          filter: `drop-shadow(-1px -1px 0 #D9A75640)
+                                   drop-shadow(1px -1px 0 #D9A75640)
+                                   drop-shadow(-1px 1px 0 #D9A75640)
                                    drop-shadow(1px 1px 0 #D9A75640)
                                    drop-shadow(0 0 8px rgba(217, 167, 86, 0.2))`,
                           lineHeight: 1.2,
@@ -452,13 +452,13 @@ export default function MainMenu() {
                   {/* Item count - minimal style */}
                   <Typography
                     sx={{
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "1.1rem",
+                      fontFamily: '"Inter", sans-serif',
+                      fontSize: "1rem",
                       fontWeight: 500,
                       color: "#8B7355",
-                      letterSpacing: "0.15em",
+                      letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      opacity: 0.8,
+                      opacity: 0.85,
                     }}
                   >
                     {item.menuItems.length} Items
@@ -484,11 +484,11 @@ export default function MainMenu() {
                     >
                       <Typography
                         sx={{
-                          fontFamily: "'Cormorant Garamond', serif",
-                          fontSize: "1.1rem",
+                          fontFamily: '"Cormorant Garamond", Georgia, serif',
+                          fontSize: "1rem",
                           fontWeight: 600,
                           color: "#D9A756",
-                          letterSpacing: "0.15em",
+                          letterSpacing: "0.18em",
                           textTransform: "uppercase",
                         }}
                       >
@@ -729,13 +729,14 @@ export default function MainMenu() {
                       variant="h3"
                       align="center"
                       sx={{
-                        fontFamily: "'Cormorant Garamond', serif",
+                        fontFamily: '"Cormorant Garamond", Georgia, serif',
                         color: "#4A2C17",
                         fontWeight: 700,
                         fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-                        letterSpacing: "0.1em",
+                        letterSpacing: "0.08em",
                         textTransform: "uppercase",
-                        textShadow: "0 2px 4px rgba(106, 58, 30, 0.1)",
+                        textShadow: "0 2px 4px rgba(106, 58, 30, 0.08)",
+                        lineHeight: 1.15,
                       }}
                     >
                       {selectedItem.name}
@@ -747,13 +748,15 @@ export default function MainMenu() {
                           variant="body1"
                           align="center"
                           sx={{
-                            fontFamily: "'Cormorant Garamond', serif",
+                            fontFamily: '"Cormorant Garamond", Georgia, serif',
                             color: "rgba(106, 58, 30, 0.7)",
-                            fontSize: { xs: "1rem", md: "1.15rem" },
+                            fontSize: { xs: "1rem", md: "1.1rem" },
                             fontStyle: "italic",
                             mt: 1.5,
                             maxWidth: "600px",
                             mx: "auto",
+                            lineHeight: 1.7,
+                            letterSpacing: "0.01em",
                           }}
                         >
                           {selectedItem.description}
@@ -850,11 +853,13 @@ export default function MainMenu() {
                                 <Typography
                                   variant="h6"
                                   sx={{
-                                    fontFamily: "'Cormorant Garamond', serif",
+                                    fontFamily:
+                                      '"Cormorant Garamond", Georgia, serif',
                                     fontWeight: 700,
                                     color: "#4A2C17",
-                                    fontSize: { xs: "1.2rem", md: "1.4rem" },
-                                    lineHeight: 1.3,
+                                    fontSize: { xs: "1.2rem", md: "1.35rem" },
+                                    lineHeight: 1.25,
+                                    letterSpacing: "0.01em",
                                     flex: 1,
                                   }}
                                 >
@@ -875,7 +880,7 @@ export default function MainMenu() {
                                     <Typography
                                       sx={{
                                         fontFamily:
-                                          "'Cormorant Garamond', serif",
+                                          '"Cormorant Garamond", Georgia, serif',
                                         color: "#FDF8F3",
                                         fontWeight: 700,
                                         fontSize: { xs: "1rem", md: "1.15rem" },
@@ -893,10 +898,10 @@ export default function MainMenu() {
                                   variant="body2"
                                   sx={{
                                     color: "rgba(74, 44, 23, 0.75)",
-                                    fontFamily:
-                                      "'Inter', 'Montserrat', sans-serif",
-                                    fontSize: { xs: "0.9rem", md: "0.95rem" },
-                                    lineHeight: 1.7,
+                                    fontFamily: '"Inter", sans-serif',
+                                    fontSize: { xs: "0.875rem", md: "0.9rem" },
+                                    lineHeight: 1.65,
+                                    letterSpacing: "0.01em",
                                     mb: mi.hasMeasurements ? 2 : 0,
                                   }}
                                 >
@@ -966,7 +971,7 @@ export default function MainMenu() {
                                             color: "#4A2C17",
                                             fontWeight: 700,
                                             fontFamily:
-                                              "'Cormorant Garamond', serif",
+                                              '"Cormorant Garamond", Georgia, serif',
                                             fontSize: "0.95rem",
                                           }}
                                         >

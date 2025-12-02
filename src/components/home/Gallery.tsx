@@ -997,7 +997,14 @@ export default function Gallery() {
       </style>
 
       {/* Popup animated background (scoped to gallery so it stays behind content) */}
-      <Box sx={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
         <PopupBackground scoped />
       </Box>
 
@@ -1047,10 +1054,10 @@ export default function Gallery() {
           variant="overline"
           sx={{
             color: "#D9A756",
-            letterSpacing: "0.5em",
+            letterSpacing: "0.35em",
             fontSize: { xs: "0.75rem", md: "0.85rem" },
             fontFamily: '"Inter", sans-serif',
-            fontWeight: 700,
+            fontWeight: 600,
             mb: 2,
             display: "block",
             textTransform: "uppercase",
@@ -1077,7 +1084,7 @@ export default function Gallery() {
             fontWeight: 700,
             color: "#4A2C17",
             mb: 3,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.025em",
             lineHeight: 1.1,
             background: "linear-gradient(180deg, #4A2C17 0%, #6A3A1E 100%)",
             WebkitBackgroundClip: "text",
@@ -1099,14 +1106,15 @@ export default function Gallery() {
             color: "#6A3A1E",
             maxWidth: 600,
             mx: "auto",
-            lineHeight: 1.8,
+            lineHeight: 1.85,
+            letterSpacing: "0.01em",
             fontWeight: 400,
             opacity: 1,
             transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         >
-          Discover the warmth, character, and memories that make The Brooklin
-          Pub a cherished gathering place
+          Step inside and see why Brooklin calls us home—the laughter, the
+          celebrations, and the moments that matter
         </Typography>
 
         {/* Bottom Decorative Divider */}

@@ -50,13 +50,13 @@ import dayjs, { Dayjs } from "dayjs";
 // ═══════════════════════════════════════════════════════════════════
 
 const subjectOptions = [
-  { value: "general", label: "General Inquiry", icon: "💬" },
-  { value: "reservation", label: "Party Reservation", icon: "🎉" },
-  { value: "event", label: "Event Inquiry", icon: "🎊" },
-  { value: "catering", label: "Catering Request", icon: "🍴" },
-  { value: "feedback", label: "Feedback", icon: "⭐" },
-  { value: "careers", label: "Careers", icon: "💼" },
-  { value: "other", label: "Other", icon: "📝" },
+  { value: "general", label: "General Inquiry" },
+  { value: "reservation", label: "Party Reservation" },
+  { value: "event", label: "Event Inquiry" },
+  { value: "catering", label: "Catering Request" },
+  { value: "feedback", label: "Feedback" },
+  { value: "careers", label: "Careers" },
+  { value: "other", label: "Other" },
 ];
 
 // Career positions removed - now using CV upload instead
@@ -553,8 +553,8 @@ const ContactUs = () => {
       const subjectLine = isReservation
         ? `Party Reservation - ${formData.reservationDate}`
         : isCareers
-          ? `Careers Application`
-          : subjectOptions.find((opt) => opt.value === formData.subject)?.label ||
+        ? `Careers Application`
+        : subjectOptions.find((opt) => opt.value === formData.subject)?.label ||
           "Contact from website";
 
       let fullMessage = formData.message;
@@ -562,16 +562,19 @@ const ContactUs = () => {
         fullMessage = `PARTY RESERVATION REQUEST\n\nDate: ${formData.reservationDate}\nTime: ${formData.reservationTime}\nNumber of Guests: ${formData.guestCount}\n\nAdditional Notes:\n${formData.message}`;
       }
       if (isCareers) {
-        fullMessage = `CAREERS APPLICATION\n\nCover Letter / Message:\n${formData.message
-          }${formData.cvFile
+        fullMessage = `CAREERS APPLICATION\n\nCover Letter / Message:\n${
+          formData.message
+        }${
+          formData.cvFile
             ? "\n\n[CV Attached: " + formData.cvFile.name + "]"
             : ""
-          }`;
+        }`;
       }
 
       const subject = encodeURIComponent(subjectLine);
       const body = encodeURIComponent(
-        `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone || "N/A"
+        `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
+          formData.phone || "N/A"
         }\n\n${fullMessage}`
       );
       window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
@@ -675,8 +678,8 @@ const ContactUs = () => {
         {isReservation
           ? "Reservation Request Sent!"
           : isCareers
-            ? "Application Submitted!"
-            : "Message Sent!"}
+          ? "Application Submitted!"
+          : "Message Sent!"}
       </Typography>
 
       <Typography
@@ -695,8 +698,8 @@ const ContactUs = () => {
         {isReservation
           ? "Thank you! We'll confirm your party reservation shortly via email."
           : isCareers
-            ? "Thank you for your interest! Our team will review your application and get back to you soon."
-            : "Thank you for reaching out! We'll get back to you within 24 hours."}
+          ? "Thank you for your interest! Our team will review your application and get back to you soon."
+          : "Thank you for reaching out! We'll get back to you within 24 hours."}
       </Typography>
 
       <Box
@@ -799,8 +802,8 @@ const ContactUs = () => {
                 sx={{
                   color: "#D9A756",
                   fontSize: { xs: "0.7rem", sm: "0.8rem" },
-                  fontWeight: 700,
-                  letterSpacing: { xs: "0.15em", sm: "0.25em" },
+                  fontWeight: 600,
+                  letterSpacing: { xs: "0.2em", sm: "0.3em" },
                   textTransform: "uppercase",
                   mb: { xs: 1.5, md: 2 },
                 }}
@@ -815,7 +818,8 @@ const ContactUs = () => {
                   fontWeight: 700,
                   color: "#3C1F0E",
                   mb: { xs: 1.5, md: 2 },
-                  lineHeight: 1.2,
+                  lineHeight: 1.15,
+                  letterSpacing: "-0.02em",
                 }}
               >
                 How Can We{" "}
@@ -834,7 +838,8 @@ const ContactUs = () => {
                 sx={{
                   color: "#6A3A1E",
                   fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1.05rem" },
-                  lineHeight: 1.7,
+                  lineHeight: 1.85,
+                  letterSpacing: "0.01em",
                   maxWidth: "600px",
                   mx: "auto",
                   fontFamily: '"Inter", sans-serif',
@@ -1219,7 +1224,8 @@ const ContactUs = () => {
                           <Box sx={{ textAlign: "center", maxWidth: 520 }}>
                             <Typography
                               sx={{
-                                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                                fontFamily:
+                                  '"Cormorant Garamond", Georgia, serif',
                                 fontSize: {
                                   xs: "1.35rem",
                                   sm: "1.6rem",
@@ -1244,9 +1250,9 @@ const ContactUs = () => {
                                 mb: { xs: 1.5, md: 2 },
                               }}
                             >
-                              We'd love to hear from you! Whether you're planning a
-                              visit, looking to join our team, or just want to say
-                              hi — drop us a line.
+                              We'd love to hear from you! Whether you're
+                              planning a visit, looking to join our team, or
+                              just want to say hi — drop us a line.
                             </Typography>
                           </Box>
 
@@ -1389,7 +1395,6 @@ const ContactUs = () => {
                                   gap: 1.5,
                                 }}
                               >
-                                <span>{option.icon}</span>
                                 {option.label}
                               </Box>
                             </MenuItem>
@@ -1692,8 +1697,8 @@ const ContactUs = () => {
                             isReservation
                               ? "Special Requests / Notes"
                               : isCareers
-                                ? "Cover Letter / Why you want to join us"
-                                : "Your Message"
+                              ? "Cover Letter / Why you want to join us"
+                              : "Your Message"
                           }
                           name="message"
                           value={formData.message}
@@ -1705,8 +1710,8 @@ const ContactUs = () => {
                             isReservation
                               ? "Any dietary restrictions, special occasions, seating preferences..."
                               : isCareers
-                                ? "Tell us about yourself, your experience, and why you'd be a great fit for Brooklin Pub..."
-                                : "Tell us how we can help you..."
+                              ? "Tell us about yourself, your experience, and why you'd be a great fit for Brooklin Pub..."
+                              : "Tell us how we can help you..."
                           }
                           error={!!errors.message}
                           helperText={errors.message}
@@ -1764,8 +1769,8 @@ const ContactUs = () => {
                               {isReservation
                                 ? "Request Reservation"
                                 : isCareers
-                                  ? "Submit Application"
-                                  : "Send Message"}
+                                ? "Submit Application"
+                                : "Send Message"}
                             </>
                           )}
                         </Button>
@@ -1793,8 +1798,8 @@ const ContactUs = () => {
                   sx={{
                     color: "#D9A756",
                     fontSize: { xs: "0.7rem", md: "0.8rem" },
-                    fontWeight: 700,
-                    letterSpacing: { xs: "0.15em", md: "0.25em" },
+                    fontWeight: 600,
+                    letterSpacing: { xs: "0.2em", md: "0.3em" },
                     textTransform: "uppercase",
                     mb: 1,
                   }}
@@ -1807,6 +1812,7 @@ const ContactUs = () => {
                     fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.2rem" },
                     fontWeight: 700,
                     color: "#3C1F0E",
+                    letterSpacing: "-0.02em",
                   }}
                 >
                   Visit Our Location

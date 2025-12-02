@@ -129,12 +129,13 @@ export default function HeroSection({
                 variant="overline"
                 sx={{
                   color: "#D9A756",
-                  letterSpacing: "0.4em",
-                  fontSize: { xs: "0.75rem", md: "0.9rem" },
+                  letterSpacing: "0.45em",
+                  fontSize: { xs: "0.7rem", md: "0.85rem" },
                   fontFamily: '"Inter", sans-serif',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   mb: 2,
                   display: "block",
+                  textTransform: "uppercase",
                 }}
               >
                 {overlineText}
@@ -150,13 +151,13 @@ export default function HeroSection({
               transition={{ duration: 0.7, delay: 0.3 }}
               sx={{
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontSize: { xs: "2.5rem", sm: "3.5rem", md: "5rem" },
-                fontWeight: 800,
+                fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.5rem" },
+                fontWeight: 700,
                 color: "#4A2C17",
                 mb: 2,
-                textShadow: "0 0 40px rgba(106,58,30,0.15)",
-                letterSpacing: "-0.02em",
-                lineHeight: 1.1,
+                textShadow: "0 0 40px rgba(106,58,30,0.12)",
+                letterSpacing: "-0.015em",
+                lineHeight: 1.05,
               }}
             >
               {title}
@@ -171,12 +172,14 @@ export default function HeroSection({
                 transition={{ duration: 0.6, delay: 0.5 }}
                 sx={{
                   fontFamily: '"Inter", sans-serif',
-                  fontSize: { xs: "0.95rem", md: "1.15rem" },
+                  fontSize: { xs: "0.95rem", md: "1.1rem" },
                   color: "#6A3A1E",
-                  maxWidth: 600,
+                  maxWidth: 580,
                   mx: "auto",
-                  lineHeight: 1.8,
+                  lineHeight: 1.75,
+                  letterSpacing: "0.01em",
                   px: 2,
+                  fontWeight: 400,
                 }}
               >
                 {subtitle}

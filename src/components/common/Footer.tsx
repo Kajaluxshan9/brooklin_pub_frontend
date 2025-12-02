@@ -22,9 +22,15 @@ import { SvgIcon } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { motion } from "framer-motion";
-import moment from "moment-timezone";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
+
+// Extend dayjs with timezone support
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Toronto timezone for accurate open/close status
 const TIMEZONE = "America/Toronto";
@@ -220,7 +226,7 @@ const Footer = () => {
 
   // Check if a specific day is today (using Toronto timezone)
   const isToday = (dayOfWeek: string) => {
-    const today = moment().tz(TIMEZONE).format("dddd").toLowerCase();
+    const today = dayjs().tz(TIMEZONE).format("dddd").toLowerCase();
     return dayOfWeek.toLowerCase() === today;
   };
 
@@ -237,7 +243,7 @@ const Footer = () => {
       return { isOpen: false, message: "" };
     }
 
-    const now = moment().tz(TIMEZONE);
+    const now = dayjs().tz(TIMEZONE);
     const currentDay = now.format("dddd").toLowerCase();
     const currentTime = now.format("HH:mm");
 
@@ -263,7 +269,7 @@ const Footer = () => {
         if (currentTime >= openTime || currentTime <= closeTime) {
           return {
             isOpen: true,
-            message: `Open until ${moment(closeTime, "HH:mm").format(
+            message: `Open until ${dayjs(closeTime, "HH:mm").format(
               "h:mm A"
             )} (overnight)`,
           };
@@ -273,16 +279,14 @@ const Footer = () => {
         if (currentTime >= openTime && currentTime <= closeTime) {
           return {
             isOpen: true,
-            message: `Open until ${moment(closeTime, "HH:mm").format(
-              "h:mm A"
-            )}`,
+            message: `Open until ${dayjs(closeTime, "HH:mm").format("h:mm A")}`,
           };
         }
       }
     }
 
     // Check if we're in overnight hours from previous day
-    const previousDay = now.clone().subtract(1, "day");
+    const previousDay = now.subtract(1, "day");
     const previousDayName = previousDay.format("dddd").toLowerCase();
     const previousDayHours = openingHoursData.find(
       (oh) => oh.dayOfWeek.toLowerCase() === previousDayName
@@ -302,7 +306,7 @@ const Footer = () => {
       ) {
         return {
           isOpen: true,
-          message: `Open until ${moment(
+          message: `Open until ${dayjs(
             previousDayHours.closeTime,
             "HH:mm"
           ).format("h:mm A")}`,
@@ -459,14 +463,15 @@ const Footer = () => {
               sx={{
                 color: "rgba(245, 239, 230, 0.8)",
                 fontSize: { xs: "0.85rem", sm: "0.9rem" },
-                lineHeight: 1.7,
+                lineHeight: 1.8,
+                letterSpacing: "0.01em",
                 mb: 2.5,
                 maxWidth: { xs: "100%", sm: 280 },
                 mx: { xs: "auto", lg: 0 },
               }}
             >
-              Where Brooklin gathers since 2014. Craft beer, homemade food, and
-              good times — where every stranger's a friend you haven't met.
+              Brooklin's neighbourhood pub since 2014. Great food, cold beer,
+              and the kind of atmosphere where everyone feels at home.
             </Typography>
 
             {/* Social Icons - larger touch targets */}
@@ -554,12 +559,12 @@ const Footer = () => {
           >
             <Typography
               sx={{
-                fontFamily: '"Cormorant Garamond", serif',
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
                 fontWeight: 700,
                 fontSize: { xs: "1rem", sm: "1.15rem" },
                 color: "#D9A756",
                 mb: { xs: 1.5, sm: 2.5 },
-                letterSpacing: 1,
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
               }}
             >
@@ -608,7 +613,7 @@ const Footer = () => {
             {/* Download Menu PDF */}
             <Typography
               sx={{
-                fontFamily: '"Cormorant Garamond", serif',
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
                 fontWeight: 700,
                 fontSize: { xs: "0.9rem", sm: "1rem" },
                 color: "#D9A756",
@@ -679,10 +684,12 @@ const Footer = () => {
                 justifyContent: { xs: "flex-start", sm: "flex-start" },
               }}
             >
-              <AccessTimeIcon sx={{ fontSize: { xs: 18, sm: 20 }, color: "#D9A756" }} />
+              <AccessTimeIcon
+                sx={{ fontSize: { xs: 18, sm: 20 }, color: "#D9A756" }}
+              />
               <Typography
                 sx={{
-                  fontFamily: '"Cormorant Garamond", serif',
+                  fontFamily: '"Cormorant Garamond", Georgia, serif',
                   fontWeight: 700,
                   fontSize: { xs: "1rem", sm: "1.15rem" },
                   color: "#D9A756",
@@ -751,7 +758,13 @@ const Footer = () => {
             )}
 
             {/* Hours List - Compact */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.4, sm: 0.6 } }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: { xs: 0.4, sm: 0.6 },
+              }}
+            >
               {sortedHours.length > 0 ? (
                 sortedHours.map((hours, index) => {
                   const isTodayRow = isToday(hours.dayOfWeek);
@@ -836,18 +849,24 @@ const Footer = () => {
           >
             <Typography
               sx={{
-                fontFamily: '"Cormorant Garamond", serif',
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
                 fontWeight: 700,
                 fontSize: { xs: "1rem", sm: "1.15rem" },
                 color: "#D9A756",
                 mb: { xs: 1.5, sm: 2.5 },
-                letterSpacing: 1,
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
               }}
             >
               Get in Touch
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, sm: 2 } }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: { xs: 1.5, sm: 2 },
+              }}
+            >
               <Box
                 component={motion.a}
                 href="https://maps.google.com/?q=15+Baldwin+St,+Whitby,+ON+L1M+1A2"
@@ -1002,8 +1021,7 @@ const Footer = () => {
             <Typography
               sx={{ color: "rgba(245, 239, 230, 0.5)", fontSize: "0.85rem" }}
             >
-              © {new Date().getFullYear()} Brooklin Pub. All rights
-              reserved.
+              © {new Date().getFullYear()} Brooklin Pub. All rights reserved.
             </Typography>
           </Box>
           <Typography

@@ -3,6 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 // Modern, sleek icons for bottom navigation
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
@@ -13,11 +14,7 @@ import MailRoundedIcon from "@mui/icons-material/MailRounded";
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
 import { Link } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
@@ -116,7 +113,7 @@ const Nav = () => {
 
     if (hasOtherSpecials) {
       categories.push({
-        label: "Specials",
+        label: "Other Specials",
         path: "/special/other",
         id: "other",
       });
@@ -538,11 +535,17 @@ const Nav = () => {
                         </Box>
 
                         {link.dropdown!.map((item, index) => {
-                          const isChildActive = location.pathname.startsWith(
-                            item.path || ""
+                          const pathWithoutQuery = (item.path || "").split(
+                            "?"
+                          )[0];
+                          const hasQueryParam = (item.path || "").includes(
+                            "?category="
                           );
-                          const isSelectedByQuery =
-                            !!item.id && item.id === selectedCategory;
+                          const isChildActive = hasQueryParam
+                            ? location.pathname === pathWithoutQuery &&
+                              !!item.id &&
+                              item.id === selectedCategory
+                            : location.pathname === pathWithoutQuery;
 
                           return (
                             <motion.li
@@ -567,23 +570,16 @@ const Nav = () => {
                                   textTransform: "none",
                                   px: 2.5,
                                   py: 1.4,
-                                  color:
-                                    isChildActive || isSelectedByQuery
-                                      ? "#6A3A1E"
-                                      : "#4A2C17",
+                                  color: isChildActive ? "#6A3A1E" : "#4A2C17",
                                   fontSize: "0.95rem",
-                                  fontWeight:
-                                    isChildActive || isSelectedByQuery
-                                      ? 600
-                                      : 500,
+                                  fontWeight: isChildActive ? 600 : 500,
                                   fontFamily: '"Inter", sans-serif',
                                   letterSpacing: "0.02em",
                                   borderRadius: "12px",
                                   position: "relative",
-                                  background:
-                                    isChildActive || isSelectedByQuery
-                                      ? "linear-gradient(135deg, rgba(217, 167, 86, 0.12), rgba(217, 167, 86, 0.06))"
-                                      : "transparent",
+                                  background: isChildActive
+                                    ? "linear-gradient(135deg, rgba(217, 167, 86, 0.12), rgba(217, 167, 86, 0.06))"
+                                    : "transparent",
                                   transition:
                                     "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                                   overflow: "hidden",
@@ -593,14 +589,8 @@ const Nav = () => {
                                     left: 0,
                                     top: "50%",
                                     transform: "translateY(-50%)",
-                                    width:
-                                      isChildActive || isSelectedByQuery
-                                        ? 4
-                                        : 0,
-                                    height:
-                                      isChildActive || isSelectedByQuery
-                                        ? "60%"
-                                        : 0,
+                                    width: isChildActive ? 4 : 0,
+                                    height: isChildActive ? "60%" : 0,
                                     background:
                                       "linear-gradient(180deg, #D9A756, #B08030)",
                                     borderRadius: "0 4px 4px 0",
@@ -625,10 +615,9 @@ const Nav = () => {
                                     height: 8,
                                     borderRadius: "50%",
                                     mr: 1.5,
-                                    background:
-                                      isChildActive || isSelectedByQuery
-                                        ? "#D9A756"
-                                        : "rgba(106, 58, 30, 0.2)",
+                                    background: isChildActive
+                                      ? "#D9A756"
+                                      : "rgba(106, 58, 30, 0.2)",
                                     transition: "all 0.25s ease",
                                     flexShrink: 0,
                                   }}
@@ -765,73 +754,193 @@ const Nav = () => {
         </AppBar>
         <Toolbar disableGutters sx={{ minHeight: 0 }} />
 
-        {/* Popup dialog (used for Menu / Special) - desktop */}
+        {/* Popup dialog (used for Menu / Special) - desktop - Premium style */}
         <Dialog
           open={!!mobileOpenParent}
           onClose={() => setMobileOpenParent(null)}
           fullWidth
           maxWidth="xs"
+          disableRestoreFocus
           PaperProps={{
             sx: {
-              borderRadius: 3,
-              bgcolor: "#FAF7F2",
-              border: "2px solid #D9A756",
+              borderRadius: "20px",
+              background:
+                "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(253,248,243,0.98))",
+              backdropFilter: "blur(20px)",
+              boxShadow:
+                "0 25px 50px -12px rgba(106, 58, 30, 0.25), 0 12px 24px -8px rgba(0,0,0,0.12)",
+              border: "1px solid rgba(217, 167, 86, 0.2)",
+              overflow: "hidden",
             },
           }}
         >
-          <DialogTitle
+          {/* Decorative top accent - matching dropdown */}
+          <Box
             sx={{
-              fontWeight: 700,
-              textAlign: "center",
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              color: "#3C1F0E",
-              fontSize: "1.5rem",
-              borderBottom: "1px solid rgba(217,167,86,0.3)",
+              display: "flex",
+              justifyContent: "center",
+              pt: 2.5,
               pb: 2,
+              borderBottom: "1px solid rgba(217, 167, 86, 0.15)",
             }}
           >
-            {mobileOpenParent}
-          </DialogTitle>
-          <DialogContent sx={{ py: 2 }}>
-            <List>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 30,
+                  height: 1.5,
+                  background: "linear-gradient(90deg, transparent, #D9A756)",
+                  borderRadius: 1,
+                }}
+              />
+              <Typography
+                sx={{
+                  fontFamily: '"Cormorant Garamond", Georgia, serif',
+                  fontWeight: 700,
+                  fontSize: "1.3rem",
+                  color: "#3C1F0E",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {mobileOpenParent}
+              </Typography>
+              <Box
+                sx={{
+                  width: 30,
+                  height: 1.5,
+                  background: "linear-gradient(90deg, #D9A756, transparent)",
+                  borderRadius: 1,
+                }}
+              />
+            </Box>
+          </Box>
+
+          <DialogContent sx={{ py: 2, px: 1.5 }}>
+            <Box component="ul" sx={{ listStyle: "none", p: 0, m: 0 }}>
               {mobileOpenParent &&
                 navLinks
                   .find((n) => n.label === mobileOpenParent)
-                  ?.dropdown?.map((d) => (
-                    <ListItemButton
-                      key={d.label}
-                      component={Link}
-                      to={d.path || "/"}
-                      onClick={() => setMobileOpenParent(null)}
-                      sx={{
-                        justifyContent: "center",
-                        py: 1.5,
-                        borderRadius: 2,
-                        mb: 0.5,
-                        "&:hover": {
-                          bgcolor: "rgba(217,167,86,0.15)",
-                        },
-                      }}
-                    >
-                      <ListItemText
-                        primary={d.label}
-                        primaryTypographyProps={{
-                          align: "center",
-                          sx: {
-                            fontFamily: '"Inter", sans-serif',
-                            fontWeight: 500,
+                  ?.dropdown?.map((d, index, arr) => {
+                    // For menu items (with query params like /menu?category=xxx), check if the id matches selectedCategory
+                    // Only apply selection styling for Menu dropdown when on the /menu page
+                    const isMenuPage = location.pathname === "/menu";
+                    const hasQueryParam = d.path?.includes("?category=");
+                    // For special items (with path segments like /special/daily), check exact path match
+                    const pathWithoutQuery = d.path?.split("?")[0] || "";
+                    const isActive = hasQueryParam
+                      ? isMenuPage && !!d.id && d.id === selectedCategory
+                      : d.path && location.pathname === pathWithoutQuery;
+                    // Combined selection state (single source of truth)
+                    const isSelected = isActive;
+
+                    return (
+                      <Box
+                        component="li"
+                        key={d.label}
+                        sx={{ position: "relative", mx: 0.5 }}
+                      >
+                        <Box
+                          component={Link}
+                          to={d.path || "/"}
+                          onClick={() => setMobileOpenParent(null)}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            width: "100%",
+                            textDecoration: "none",
+                            px: 2.5,
+                            py: 1.6,
+                            color: isSelected ? "#6A3A1E" : "#5D4037",
                             fontSize: "1rem",
-                            color:
-                              d.id && d.id === selectedCategory
-                                ? "#D9A756"
-                                : "#3C1F0E",
-                          },
-                        }}
-                      />
-                    </ListItemButton>
-                  ))}
-            </List>
+                            fontWeight: isSelected ? 600 : 400,
+                            fontFamily: '"Inter", sans-serif',
+                            letterSpacing: "0.02em",
+                            borderRadius: "12px",
+                            position: "relative",
+                            background: isSelected
+                              ? "linear-gradient(135deg, rgba(217, 167, 86, 0.15), rgba(217, 167, 86, 0.08))"
+                              : "transparent",
+                            cursor: "pointer",
+                            transition:
+                              "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "&::before": {
+                              content: '""',
+                              position: "absolute",
+                              left: 0,
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              width: isSelected ? 4 : 0,
+                              height: isSelected ? "60%" : 0,
+                              background:
+                                "linear-gradient(180deg, #D9A756, #B08030)",
+                              borderRadius: "0 4px 4px 0",
+                              transition: "all 0.25s ease",
+                            },
+                            "&:hover": {
+                              bgcolor: "rgba(217, 167, 86, 0.08)",
+                              color: "#6A3A1E",
+                            },
+                          }}
+                        >
+                          {/* Dot indicator - only show when selected */}
+                          {isSelected && (
+                            <Box
+                              sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                mr: 1.5,
+                                background: "#D9A756",
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
+                          {d.label}
+                        </Box>
+
+                        {/* Subtle divider between items */}
+                        {index < arr.length - 1 && (
+                          <Box
+                            sx={{
+                              height: "1px",
+                              mx: 3,
+                              my: 0.5,
+                              background:
+                                "linear-gradient(90deg, transparent, rgba(217, 167, 86, 0.15), transparent)",
+                            }}
+                          />
+                        )}
+                      </Box>
+                    );
+                  })}
+            </Box>
           </DialogContent>
+
+          {/* Decorative bottom accent */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              pb: 2,
+              pt: 1,
+            }}
+          >
+            <Box
+              sx={{
+                width: 40,
+                height: 3,
+                background: "linear-gradient(90deg, #D9A756, #B08030)",
+                borderRadius: 2,
+                opacity: 0.5,
+              }}
+            />
+          </Box>
         </Dialog>
       </Box>
     );
@@ -852,26 +961,28 @@ const Nav = () => {
           paddingTop: "env(safe-area-inset-top, 0px)",
         }}
       >
-        <Toolbar sx={{ py: 0.8, pt: `calc(env(safe-area-inset-top, 0px) + 6px)` }}>
-            <Box
-              sx={{
-                position: "fixed",
-                top: `calc(env(safe-area-inset-top, 0px) + 12px)`, // safe-area aware lift
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: "90%", // not full width → floating bar look
-                borderRadius: "50px",
-                backdropFilter: "blur(18px)",
-                background: "rgba(255, 255, 255, 0.69)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.20)", // elegant shadow
-                border: "1px solid rgba(255,255,255,0.35)", // glass highlight edge
-                transition: "0.25s ease-in-out",
-                zIndex: 9999,
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "8px 16px",
-              }}
-            >
+        <Toolbar
+          sx={{ py: 0.8, pt: `calc(env(safe-area-inset-top, 0px) + 6px)` }}
+        >
+          <Box
+            sx={{
+              position: "fixed",
+              top: `calc(env(safe-area-inset-top, 0px) + 12px)`, // safe-area aware lift
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "90%", // not full width → floating bar look
+              borderRadius: "50px",
+              backdropFilter: "blur(18px)",
+              background: "rgba(255, 255, 255, 0.69)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.20)", // elegant shadow
+              border: "1px solid rgba(255,255,255,0.35)", // glass highlight edge
+              transition: "0.25s ease-in-out",
+              zIndex: 9999,
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "8px 16px",
+            }}
+          >
             {/* LOGO + NAME */}
             <Box
               component={Link}
@@ -896,13 +1007,13 @@ const Nav = () => {
               <Box
                 component="span"
                 sx={{
-                  fontFamily: '"Corinthia", cursive',
-                  fontWeight: 700,
-                  fontSize: "0.8rem",
+                  fontFamily: '"Cormorant Garamond", Georgia, serif',
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
                   color: "#3C1F0E",
                   display: { xs: "block", md: "none" },
                   lineHeight: 1.1,
-                  letterSpacing: "0.06em",
+                  letterSpacing: "0.08em",
                   textTransform: "uppercase",
                 }}
               >
@@ -935,10 +1046,12 @@ const Nav = () => {
         </Toolbar>
       </AppBar>
 
-      <Toolbar sx={{ minHeight: `calc(70px + env(safe-area-inset-top, 0px))` }} />
+      <Toolbar
+        sx={{ minHeight: `calc(70px + env(safe-area-inset-top, 0px))` }}
+      />
 
       {/* FIXED BOTTOM NAV (GLASS FLOATING STYLE) */}
-        <Box
+      <Box
         sx={{
           position: "fixed",
           // respect safe area inset for iPhone home indicator; keep a comfortable offset
@@ -1121,81 +1234,230 @@ const Nav = () => {
         </Button>
       </Box>
 
-      {/* Popup dialog (used for Menu / Special) - mobile/bottom nav */}
+      {/* Popup dialog (used for Menu / Special) - mobile/bottom nav - Desktop style */}
       <Dialog
         open={!!mobileOpenParent}
         onClose={() => setMobileOpenParent(null)}
         fullWidth
         maxWidth="xs"
+        disableRestoreFocus
         PaperProps={{
           sx: {
-            borderRadius: 3,
-            bgcolor: "#FAF7F2",
-            border: "2px solid #D9A756",
+            borderRadius: "20px",
+            background:
+              "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(253,248,243,0.98))",
+            backdropFilter: "blur(20px)",
+            boxShadow:
+              "0 25px 50px -12px rgba(106, 58, 30, 0.25), 0 12px 24px -8px rgba(0,0,0,0.12)",
+            border: "1px solid rgba(217, 167, 86, 0.2)",
+            overflow: "hidden",
           },
         }}
       >
-        <DialogTitle
+        {/* Decorative top accent - matching desktop */}
+        <Box
           sx={{
-            fontWeight: 700,
-            textAlign: "center",
-            fontFamily: '"Cormorant Garamond", Georgia, serif',
-            color: "#3C1F0E",
-            fontSize: "1.5rem",
-            borderBottom: "1px solid rgba(217,167,86,0.3)",
+            display: "flex",
+            justifyContent: "center",
+            pt: 2.5,
             pb: 2,
+            borderBottom: "1px solid rgba(217, 167, 86, 0.15)",
           }}
         >
-          {mobileOpenParent}
-        </DialogTitle>
-        <DialogContent sx={{ py: 2 }}>
-          <List>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            <Box
+              sx={{
+                width: 30,
+                height: 1.5,
+                background: "linear-gradient(90deg, transparent, #D9A756)",
+                borderRadius: 1,
+              }}
+            />
+            <Typography
+              sx={{
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                fontWeight: 700,
+                fontSize: "1.3rem",
+                color: "#3C1F0E",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {mobileOpenParent}
+            </Typography>
+            <Box
+              sx={{
+                width: 30,
+                height: 1.5,
+                background: "linear-gradient(90deg, #D9A756, transparent)",
+                borderRadius: 1,
+              }}
+            />
+          </Box>
+        </Box>
+
+        <DialogContent sx={{ py: 2, px: 1.5 }}>
+          <Box component="ul" sx={{ listStyle: "none", p: 0, m: 0 }}>
             {mobileOpenParent &&
               navLinks
                 .find((n) => n.label === mobileOpenParent)
-                ?.dropdown?.map((d) => {
-                  const isSelectedByQuery = !!d.id && d.id === selectedCategory;
+                ?.dropdown?.map((d, index, arr) => {
+                  // For menu items (with query params like /menu?category=xxx), check if the id matches selectedCategory
+                  // Only apply selection styling for Menu dropdown when on the /menu page
+                  const isMenuPage = location.pathname === "/menu";
+                  const hasQueryParam = d.path?.includes("?category=");
+                  // For special items (with path segments like /special/daily), check exact path match
+                  const pathWithoutQuery = d.path?.split("?")[0] || "";
+                  const isActive = hasQueryParam
+                    ? isMenuPage && !!d.id && d.id === selectedCategory
+                    : d.path && location.pathname === pathWithoutQuery;
+                  // Combined selection state
+                  const isSelected = isActive;
 
                   return (
-                    <Box key={d.label}>
-                      <ListItemButton
-                        onClick={() => {
+                    <Box
+                      component="li"
+                      key={d.label}
+                      sx={{ position: "relative", mx: 0.5 }}
+                    >
+                      <Box
+                        component="div"
+                        onTouchEnd={(e: React.TouchEvent) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           const targetPath = d.path;
-                          // Close dialog and navigate immediately
-                          setMobileOpenParent(null);
-                          setExpandedCategory(null);
                           if (targetPath) {
-                            // Navigate immediately without timeout
-                            navigate(targetPath);
+                            setMobileOpenParent(null);
+                            setExpandedCategory(null);
+                            setTimeout(() => {
+                              navigate(targetPath);
+                            }, 50);
+                          }
+                        }}
+                        onClick={(e: React.MouseEvent) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const targetPath = d.path;
+                          if (targetPath) {
+                            setMobileOpenParent(null);
+                            setExpandedCategory(null);
+                            setTimeout(() => {
+                              navigate(targetPath);
+                            }, 50);
                           }
                         }}
                         sx={{
-                          justifyContent: "center",
-                          py: 1.5,
-                          borderRadius: 2,
-                          mb: 0.5,
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                          textTransform: "none",
+                          px: 2.5,
+                          py: 1.6,
+                          color: isSelected ? "#6A3A1E" : "#5D4037",
+                          fontSize: "1rem",
+                          fontWeight: isSelected ? 600 : 400,
+                          fontFamily: '"Inter", sans-serif',
+                          letterSpacing: "0.02em",
+                          borderRadius: "12px",
+                          position: "relative",
+                          background: isSelected
+                            ? "linear-gradient(135deg, rgba(217, 167, 86, 0.15), rgba(217, 167, 86, 0.08))"
+                            : "transparent",
+                          cursor: "pointer",
+                          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                          WebkitTapHighlightColor: "transparent",
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            left: 0,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            width: isSelected ? 4 : 0,
+                            height: isSelected ? "60%" : 0,
+                            background:
+                              "linear-gradient(180deg, #D9A756, #B08030)",
+                            borderRadius: "0 4px 4px 0",
+                            transition: "all 0.25s ease",
+                          },
                           "&:hover": {
-                            bgcolor: "rgba(217,167,86,0.15)",
+                            bgcolor: "rgba(217, 167, 86, 0.08)",
+                            color: "#6A3A1E",
+                          },
+                          "&:active": {
+                            bgcolor: "rgba(217, 167, 86, 0.15)",
+                            transform: "scale(0.98)",
                           },
                         }}
                       >
-                        <ListItemText
-                          primary={d.label}
-                          primaryTypographyProps={{
-                            align: "center",
-                            sx: {
-                              fontFamily: '"Inter", sans-serif',
-                              fontWeight: 500,
-                              fontSize: "1rem",
-                              color: isSelectedByQuery ? "#D9A756" : "#3C1F0E",
-                            },
+                        {/* Dot indicator - only show when selected */}
+                        {isSelected && (
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              mr: 1.5,
+                              background: "#D9A756",
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        {d.label}
+                      </Box>
+
+                      {/* Subtle divider between items */}
+                      {index < arr.length - 1 && (
+                        <Box
+                          sx={{
+                            width: "70%",
+                            height: "1px",
+                            mx: "auto",
+                            my: 0.5,
+                            background:
+                              "linear-gradient(90deg, transparent, rgba(217, 167, 86, 0.15), transparent)",
                           }}
                         />
-                      </ListItemButton>
+                      )}
                     </Box>
                   );
                 })}
-          </List>
+          </Box>
+
+          {/* Decorative bottom accent */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mt: 2,
+              pt: 2,
+              borderTop: "1px solid rgba(217, 167, 86, 0.15)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+              }}
+            >
+              {[...Array(3)].map((_, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(217, 167, 86, 0.4)",
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
         </DialogContent>
       </Dialog>
 

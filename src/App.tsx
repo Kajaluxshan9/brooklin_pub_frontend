@@ -47,51 +47,85 @@ const theme = createTheme({
   typography: {
     // Primary font for body text - clean, modern, highly readable
     fontFamily: '"Inter", "Helvetica Neue", "Arial", sans-serif',
-    // Heading styles with elegant serif
+    // Heading styles with elegant serif - refined hierarchy
     h1: {
       fontFamily: '"Cormorant Garamond", "Georgia", serif',
-      fontWeight: 600,
+      fontWeight: 700,
+      letterSpacing: "-0.02em",
+      lineHeight: 1.1,
     },
     h2: {
       fontFamily: '"Cormorant Garamond", "Georgia", serif',
-      fontWeight: 600,
+      fontWeight: 700,
+      letterSpacing: "-0.015em",
+      lineHeight: 1.15,
     },
     h3: {
       fontFamily: '"Cormorant Garamond", "Georgia", serif',
       fontWeight: 600,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.2,
     },
     h4: {
       fontFamily: '"Cormorant Garamond", "Georgia", serif',
-      fontWeight: 500,
+      fontWeight: 600,
+      letterSpacing: "0",
+      lineHeight: 1.25,
     },
     h5: {
       fontFamily: '"Cormorant Garamond", "Georgia", serif',
       fontWeight: 500,
+      letterSpacing: "0.01em",
+      lineHeight: 1.3,
     },
     h6: {
       fontFamily: '"Cormorant Garamond", "Georgia", serif',
       fontWeight: 500,
+      letterSpacing: "0.02em",
+      lineHeight: 1.35,
     },
     subtitle1: {
       fontFamily: '"Inter", sans-serif',
       fontWeight: 500,
+      letterSpacing: "0.01em",
+      lineHeight: 1.5,
     },
     subtitle2: {
       fontFamily: '"Inter", sans-serif',
       fontWeight: 500,
+      letterSpacing: "0.02em",
+      lineHeight: 1.5,
     },
     body1: {
       fontFamily: '"Inter", sans-serif',
       fontWeight: 400,
+      letterSpacing: "0.01em",
+      lineHeight: 1.7,
     },
     body2: {
       fontFamily: '"Inter", sans-serif',
       fontWeight: 400,
+      letterSpacing: "0.015em",
+      lineHeight: 1.6,
     },
     button: {
       fontFamily: '"Inter", sans-serif',
       fontWeight: 600,
       textTransform: "none" as const,
+      letterSpacing: "0.03em",
+    },
+    caption: {
+      fontFamily: '"Inter", sans-serif',
+      fontWeight: 500,
+      letterSpacing: "0.04em",
+      lineHeight: 1.5,
+    },
+    overline: {
+      fontFamily: '"Inter", sans-serif',
+      fontWeight: 600,
+      letterSpacing: "0.15em",
+      lineHeight: 1.5,
+      textTransform: "uppercase" as const,
     },
   },
   components: {

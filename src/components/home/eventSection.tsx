@@ -6,6 +6,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useApiWithCache } from "../../hooks/useApi";
@@ -27,21 +28,25 @@ const shouldDisplayEvent = (event: Event): boolean => {
   return true;
 };
 
+// Format event date - display directly as stored (already in EST)
 const formatEventDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
+    timeZone: "America/Toronto", // EST timezone
   });
 };
 
+// Format event time - display directly as stored (already in EST)
 const formatEventTime = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: "America/Toronto", // EST timezone
   });
 };
 
@@ -245,10 +250,10 @@ const EventsSection = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           sx={{
             color: "#D9A756",
-            letterSpacing: "0.3em",
-            fontSize: { xs: "0.7rem", sm: "0.8rem" },
+            letterSpacing: "0.35em",
+            fontSize: { xs: "0.65rem", sm: "0.75rem" },
             fontFamily: '"Inter", sans-serif',
-            fontWeight: 700,
+            fontWeight: 600,
             mb: 2,
             display: "block",
             textTransform: "uppercase",
@@ -269,8 +274,8 @@ const EventsSection = () => {
             fontWeight: 700,
             color: "#3C1F0E",
             mb: 2,
-            letterSpacing: "-0.02em",
-            lineHeight: 1.2,
+            letterSpacing: "-0.015em",
+            lineHeight: 1.15,
           }}
         >
           Upcoming{" "}
@@ -295,11 +300,12 @@ const EventsSection = () => {
           transition={{ duration: 0.6, delay: 0.5 }}
           sx={{
             fontFamily: '"Inter", sans-serif',
-            fontSize: { xs: "1rem", md: "1.1rem" },
+            fontSize: { xs: "0.95rem", md: "1.05rem" },
             color: "rgba(60,31,14,0.8)",
             maxWidth: 700,
             mx: "auto",
-            lineHeight: 1.8,
+            lineHeight: 1.75,
+            letterSpacing: "0.01em",
             mb: 3,
           }}
         >
@@ -505,7 +511,7 @@ const EventsSection = () => {
                   <Typography
                     sx={{
                       color: "#FFFDFB",
-                      fontFamily: '"Cormorant Garamond", serif',
+                      fontFamily: '"Cormorant Garamond", Georgia, serif',
                       fontWeight: 700,
                       fontSize: "1.3rem",
                       textShadow: "0 2px 10px rgba(0,0,0,0.3)",
@@ -557,11 +563,11 @@ const EventsSection = () => {
                       <Typography
                         sx={{
                           // color: "#D9A756",
-                          color:"white",
-                          fontSize: "0.7rem",
-                          fontWeight: 700,
+                          color: "white",
+                          fontSize: "0.65rem",
+                          fontWeight: 600,
                           textTransform: "uppercase",
-                          letterSpacing: "0.15em",
+                          letterSpacing: "0.18em",
                         }}
                       >
                         {getEventTypeLabel(event.type)}
@@ -575,11 +581,11 @@ const EventsSection = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.35 }}
                       sx={{
-                        fontFamily: '"Cormorant Garamond", serif',
+                        fontFamily: '"Cormorant Garamond", Georgia, serif',
                         color: "#FFFDFB",
-                        fontSize: { xs: "2rem", md: "2.8rem" },
+                        fontSize: { xs: "2rem", md: "2.6rem" },
                         fontWeight: 700,
-                        lineHeight: 1.15,
+                        lineHeight: 1.1,
                         maxWidth: "700px",
                         textShadow: "0 4px 20px rgba(0,0,0,0.4)",
                         letterSpacing: "-0.01em",
@@ -661,76 +667,162 @@ const EventsSection = () => {
                           }}
                         >
                           {formatEventTime(event.eventStartDate)}
+                          {event.eventEndDate &&
+                            event.eventEndDate !== event.eventStartDate &&
+                            ` - ${formatEventTime(event.eventEndDate)}`}
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* Description */}
-                    <Typography
-                      component={motion.p}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.45 }}
-                      sx={{
-                        color: "rgba(255,255,255,0.85)",
-                        maxWidth: "550px",
-                        lineHeight: 1.7,
-                        fontSize: "0.95rem",
-                        display: { xs: "none", sm: "block" },
-                        fontFamily: '"Inter", sans-serif',
-                      }}
-                    >
-                      {/* {event.description} */}
-                    </Typography>
+                    {event.description && (
+                      <Typography
+                        component={motion.p}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.45 }}
+                        sx={{
+                          color: "rgba(255,255,255,0.85)",
+                          maxWidth: "550px",
+                          lineHeight: 1.7,
+                          fontSize: "0.9rem",
+                          display: { xs: "none", sm: "-webkit-box" },
+                          fontFamily: '"Inter", sans-serif',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {event.description}
+                      </Typography>
+                    )}
 
-                    {/* Premium Action Button */}
-                    <Button
-                      component={motion.button}
+                    {/* Action Buttons */}
+                    <Box
+                      component={motion.div}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate("/events");
-                      }}
                       sx={{
+                        display: "flex",
+                        gap: 2,
+                        flexWrap: "wrap",
                         mt: 1,
-                        background: "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
-                        color: "#FFFDFB",
-                        px: 4,
-                        py: 1.5,
-                        borderRadius: "50px",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.15em",
-                        fontSize: "0.75rem",
-                        fontFamily: '"Inter", sans-serif',
-                        boxShadow: "0 10px 30px rgba(217,167,86,0.35)",
-                        border: "1px solid rgba(255,255,255,0.2)",
-                        position: "relative",
-                        overflow: "hidden",
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          top: 0,
-                          left: "-100%",
-                          width: "100%",
-                          height: "100%",
-                          background:
-                            "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-                          transition: "left 0.5s ease",
-                        },
-                        "&:hover": {
-                          transform: "translateY(-3px)",
-                          boxShadow: "0 15px 40px rgba(217,167,86,0.45)",
-                          "&::before": {
-                            left: "100%",
-                          },
-                        },
                       }}
                     >
-                      View Details
-                    </Button>
+                      {/* Get Your Tickets Button - only show if ticketLink exists */}
+                      {event.ticketLink && (
+                        <Button
+                          component={motion.a}
+                          href={event.ticketLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                          whileHover={{ scale: 1.02, y: -2 }}
+                          whileTap={{ scale: 0.98 }}
+                          sx={{
+                            background:
+                              "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
+                            color: "#FFFDFB",
+                            px: 3,
+                            py: 1.25,
+                            borderRadius: "50px",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.12em",
+                            fontSize: "0.7rem",
+                            fontFamily: '"Inter", sans-serif',
+                            boxShadow: "0 10px 30px rgba(217,167,86,0.35)",
+                            border: "1px solid rgba(255,255,255,0.2)",
+                            textDecoration: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            position: "relative",
+                            overflow: "hidden",
+                            "&::before": {
+                              content: '""',
+                              position: "absolute",
+                              top: 0,
+                              left: "-100%",
+                              width: "100%",
+                              height: "100%",
+                              background:
+                                "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                              transition: "left 0.5s ease",
+                            },
+                            "&:hover": {
+                              boxShadow: "0 15px 40px rgba(217,167,86,0.45)",
+                              "&::before": {
+                                left: "100%",
+                              },
+                            },
+                          }}
+                        >
+                          Get Tickets
+                          <ConfirmationNumberOutlinedIcon
+                            sx={{ fontSize: 16 }}
+                          />
+                        </Button>
+                      )}
+
+                      {/* View Details Button */}
+                      <Button
+                        component={motion.button}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/events");
+                        }}
+                        sx={{
+                          background: event.ticketLink
+                            ? "transparent"
+                            : "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
+                          border: event.ticketLink
+                            ? "2px solid rgba(217,167,86,0.8)"
+                            : "1px solid rgba(255,255,255,0.2)",
+                          color: "#FFFDFB",
+                          px: event.ticketLink ? 3 : 4,
+                          py: event.ticketLink ? 1.1 : 1.5,
+                          borderRadius: "50px",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.15em",
+                          fontSize: "0.7rem",
+                          fontFamily: '"Inter", sans-serif',
+                          boxShadow: event.ticketLink
+                            ? "none"
+                            : "0 10px 30px rgba(217,167,86,0.35)",
+                          position: "relative",
+                          overflow: "hidden",
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            top: 0,
+                            left: "-100%",
+                            width: "100%",
+                            height: "100%",
+                            background:
+                              "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                            transition: "left 0.5s ease",
+                          },
+                          "&:hover": {
+                            background: event.ticketLink
+                              ? "rgba(217,167,86,0.15)"
+                              : "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
+                            boxShadow: event.ticketLink
+                              ? "0 5px 20px rgba(217,167,86,0.3)"
+                              : "0 15px 40px rgba(217,167,86,0.45)",
+                            "&::before": {
+                              left: "100%",
+                            },
+                          },
+                        }}
+                      >
+                        View Details
+                      </Button>
+                    </Box>
                   </Box>
                 )}
               </AnimatePresence>

@@ -126,12 +126,13 @@ export const typography = {
 
   // Letter Spacing
   letterSpacing: {
-    tighter: "-0.03em",
-    tight: "-0.02em",
+    tighter: "-0.02em",
+    tight: "-0.01em",
     normal: "0",
-    wide: "0.02em",
-    wider: "0.05em",
-    widest: "0.1em",
+    wide: "0.01em",
+    wider: "0.03em",
+    widest: "0.08em",
+    ultrawide: "0.15em", // For overlines and labels
   },
 } as const;
 

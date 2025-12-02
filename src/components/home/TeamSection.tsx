@@ -156,10 +156,10 @@ const TeamSection = () => {
               className="team-heading-animate"
               sx={{
                 color: "#D9A756",
-                letterSpacing: "0.3em",
+                letterSpacing: "0.35em",
                 fontSize: { xs: "0.7rem", sm: "0.8rem" },
                 fontFamily: '"Inter", sans-serif',
-                fontWeight: 700,
+                fontWeight: 600,
                 textTransform: "uppercase",
                 opacity: 0,
               }}
@@ -175,8 +175,8 @@ const TeamSection = () => {
                 color: "#3C1F0E",
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
                 fontWeight: 700,
-                letterSpacing: "-0.02em",
-                lineHeight: 1.2,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.15,
                 opacity: 0,
               }}
             >
@@ -202,7 +202,8 @@ const TeamSection = () => {
                 fontSize: { xs: "1rem", md: "1.1rem" },
                 color: "rgba(60,31,14,0.8)",
                 fontFamily: '"Inter", sans-serif',
-                lineHeight: 1.8,
+                lineHeight: 1.85,
+                letterSpacing: "0.01em",
                 opacity: 0,
               }}
             >
@@ -424,8 +425,8 @@ const TeamSection = () => {
                         color: "#D9A756",
                         fontSize: { xs: "0.7rem", md: "0.75rem" },
                         fontFamily: '"Inter", sans-serif',
-                        fontWeight: 700,
-                        letterSpacing: "0.2em",
+                        fontWeight: 600,
+                        letterSpacing: "0.18em",
                         textTransform: "uppercase",
                       }}
                     >
@@ -529,7 +530,7 @@ const TeamSection = () => {
                 fontSize: { xs: "0.7rem", md: "0.8rem" },
                 fontFamily: '"Inter", sans-serif',
                 fontWeight: 600,
-                letterSpacing: "0.25em",
+                letterSpacing: "0.3em",
                 textTransform: "uppercase",
                 px: 2,
               }}
