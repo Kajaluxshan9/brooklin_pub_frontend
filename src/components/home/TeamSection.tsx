@@ -316,11 +316,13 @@ const TeamSection = () => {
                           width: "100%",
                           height: "100%",
                           objectFit: "cover",
+                          // add top offset only in the initial (not-hovered) state
+                          mt: hoveredMember === member.id ? "30px" : "30px",
                           filter:
                             hoveredMember === member.id
                               ? "brightness(1.05)"
                               : "brightness(1)",
-                          transition: "filter 0.5s ease",
+                          transition: "filter 0.5s ease, margin-top 0.25s ease",
                         }}
                       />
 

@@ -1160,9 +1160,8 @@ const Events = () => {
                           }}
                         />
                         <Chip
-                          label={`${events.length} event${
-                            events.length > 1 ? "s" : ""
-                          }`}
+                          label={`${events.length} event${events.length > 1 ? "s" : ""
+                            }`}
                           size="small"
                           sx={{
                             background:
@@ -1237,7 +1236,8 @@ const Events = () => {
               fontWeight: 600,
               letterSpacing: "0.25em",
               textTransform: "uppercase",
-              px: 2,
+              // px: 2,
+              textAlign: "center",
             }}
           >
             More Events Coming Soon

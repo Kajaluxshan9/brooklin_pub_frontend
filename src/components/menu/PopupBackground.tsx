@@ -2,7 +2,14 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Box from "@mui/material/Box";
 
-export default function PopupBackground() {
+type PopupBackgroundProps = {
+  // When `scoped` is true the background is positioned absolutely
+  // inside its parent (so it sits behind content in that section).
+  // When false (default) it is full-window fixed.
+  scoped?: boolean;
+};
+
+export default function PopupBackground({ scoped = false }: PopupBackgroundProps) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -216,7 +223,7 @@ export default function PopupBackground() {
       <Box
         ref={containerRef}
         sx={{
-          position: "fixed",
+          position: scoped ? "absolute" : "fixed",
           top: 0,
           left: 0,
           width: "100%",

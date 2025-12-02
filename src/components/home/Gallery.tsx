@@ -2,6 +2,7 @@ import { useState, useRef, useLayoutEffect, useEffect, useMemo } from "react";
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { motion, useInView, useMotionValue, useTransform } from "framer-motion";
 import { gsap } from "gsap";
+import PopupBackground from "../menu/PopupBackground";
 import { useApiWithCache } from "../../hooks/useApi";
 import { storiesService } from "../../services/stories.service";
 import { getImageUrl } from "../../services/api";
@@ -20,6 +21,7 @@ interface GalleryRowProps {
   rowIndex: number;
   onCycleComplete?: () => void;
   isActive?: boolean;
+  isLast?: boolean;
 }
 
 function GalleryRow({
@@ -29,6 +31,7 @@ function GalleryRow({
   rowIndex,
   onCycleComplete,
   isActive = true,
+  isLast = false,
 }: GalleryRowProps) {
   const loopImages = [...images, ...images, ...images, ...images];
   const rowRef = useRef<HTMLDivElement | null>(null);
@@ -129,7 +132,7 @@ function GalleryRow({
         transition={{ duration: 0.6, delay: 0.1 }}
         sx={{
           px: 3,
-          mb: 6,
+          mb: isLast ? 0 : 6,
           display: "flex",
           flexDirection: "column",
           gap: 3,
@@ -318,13 +321,13 @@ function GalleryRow({
           </Box>
         </Box>
 
-        {/* Enhanced premium dots indicator */}
+        {/* Enhanced premium pagination with progress rings - showing 5 dots */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
             gap: 1.5,
-            p: 2.5,
+            p: 2,
             background:
               "linear-gradient(145deg, rgba(255,253,251,0.9) 0%, rgba(253,248,243,0.85) 100%)",
             backdropFilter: "blur(15px)",
@@ -333,32 +336,103 @@ function GalleryRow({
             boxShadow: "0 8px 25px rgba(60,31,14,0.08)",
           }}
         >
-          {images.map((_, idx) => (
+          {(() => {
+            // Calculate which 5 dots to show (sliding window)
+            const totalDots = images.length;
+            if (totalDots <= 5) {
+              // Show all dots if 5 or fewer
+              return images.map((_, idx) => idx);
+            }
+
+            // Show current + 2 on each side
+            const visibleIndices: number[] = [];
+            for (let i = -2; i <= 2; i++) {
+              let index = currentImageIndex + i;
+              // Wrap around
+              if (index < 0) index += totalDots;
+              if (index >= totalDots) index -= totalDots;
+              visibleIndices.push(index);
+            }
+            return visibleIndices;
+          })().map((idx) => (
             <Box
               key={idx}
               component={motion.div}
-              animate={{
-                scale: currentImageIndex === idx ? 1.3 : 1,
-                backgroundColor:
-                  currentImageIndex === idx
-                    ? "#D9A756"
-                    : "rgba(217,167,86,0.25)",
-              }}
               whileHover={{ scale: 1.2 }}
-              transition={{ duration: 0.3, type: "spring", stiffness: 350 }}
+              whileTap={{ scale: 0.85 }}
               onClick={() => setCurrentImageIndex(idx)}
               sx={{
-                width: currentImageIndex === idx ? 12 : 8,
-                height: currentImageIndex === idx ? 12 : 8,
-                borderRadius: "50%",
+                position: "relative",
+                width: 32,
+                height: 32,
                 cursor: "pointer",
-                boxShadow:
-                  currentImageIndex === idx
-                    ? "0 3px 12px rgba(217,167,86,0.5)"
-                    : "none",
-                transition: "width 0.3s, height 0.3s",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              {/* Animated SVG Progress Ring */}
+              <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 32 32"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  transform: "rotate(-90deg)",
+                }}
+              >
+                {/* Background circle */}
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="13"
+                  fill="none"
+                  stroke="rgba(217, 167, 86, 0.2)"
+                  strokeWidth="1.5"
+                />
+                {/* Progress circle - animates when active */}
+                <motion.circle
+                  cx="16"
+                  cy="16"
+                  r="13"
+                  fill="none"
+                  stroke={idx === currentImageIndex ? "#D9A756" : "rgba(217, 167, 86, 0.3)"}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  initial={{ pathLength: 0 }}
+                  animate={{
+                    pathLength: idx === currentImageIndex ? 1 : 0,
+                    opacity: idx === currentImageIndex ? 1 : 0.5,
+                  }}
+                  transition={{
+                    pathLength: { duration: 2.5, ease: "linear" },
+                    opacity: { duration: 0.3 },
+                  }}
+                  strokeDasharray="82"
+                />
+              </svg>
+              {/* Inner dot */}
+              <Box
+                component={motion.div}
+                animate={{
+                  scale: idx === currentImageIndex ? 1 : 0.6,
+                  backgroundColor:
+                    idx === currentImageIndex ? "#D9A756" : "rgba(217, 167, 86, 0.5)",
+                }}
+                transition={{ duration: 0.3 }}
+                sx={{
+                  width: 9,
+                  height: 9,
+                  borderRadius: "50%",
+                  boxShadow:
+                    idx === currentImageIndex
+                      ? "0 0 15px rgba(217, 167, 86, 0.6), 0 0 30px rgba(217, 167, 86, 0.3)"
+                      : "none",
+                }}
+              />
+            </Box>
           ))}
         </Box>
       </Box>
@@ -377,7 +451,8 @@ function GalleryRow({
         position: "relative",
         overflow: "hidden",
         width: "100vw",
-        mb: 14,
+        // Reduced bottom margin so gallery sits closer to previous section
+        mb: 6,
         display: "flex",
         flexDirection: "column",
         gap: 5,
@@ -399,9 +474,8 @@ function GalleryRow({
           width: 500,
           height: 500,
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${
-            rowIndex % 2 === 0 ? "#D9A756" : "#B08030"
-          } 0%, transparent 60%)`,
+          background: `radial-gradient(circle, ${rowIndex % 2 === 0 ? "#D9A756" : "#B08030"
+            } 0%, transparent 60%)`,
           pointerEvents: "none",
           zIndex: 0,
           filter: "blur(60px)",
@@ -575,73 +649,194 @@ function GalleryRow({
             <motion.div
               key={idx}
               whileHover={{
-                scale: 1.06,
-                y: -15,
+                scale: 1.08,
+                y: -30,
                 rotateY: 8,
-                rotateX: -3,
+                rotateX: -4,
+                rotateZ: idx % 2 === 0 ? 2 : -2,
               }}
               transition={{
                 type: "spring",
-                stiffness: 280,
-                damping: 22,
+                stiffness: 350,
+                damping: 20,
               }}
               style={{
                 flexShrink: 0,
-                perspective: 1200,
+                perspective: 2000,
               }}
             >
+              {/* Animated glow effect behind card */}
+              <Box
+                component={motion.div}
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: idx * 0.3,
+                }}
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "110%",
+                  height: "110%",
+                  background:
+                    "radial-gradient(circle, rgba(217, 167, 86, 0.4) 0%, rgba(217, 167, 86, 0.2) 40%, transparent 70%)",
+                  borderRadius: "32px",
+                  filter: "blur(40px)",
+                  zIndex: -1,
+                  pointerEvents: "none",
+                }}
+              />
+
+              {/* Thick gradient border wrapper with animated glow */}
               <Box
                 sx={{
                   position: "relative",
                   width: { sm: "42vw", md: "30vw", lg: "25vw" },
                   height: { sm: 320, md: 400, lg: 480 },
-                  borderRadius: 5,
-                  overflow: "hidden",
+                  borderRadius: "32px",
+                  padding: "6px",
+                  background:
+                    "linear-gradient(145deg, #D9A756 0%, #B08030 25%, #6A3A1E 50%, #B08030 75%, #D9A756 100%)",
+                  backgroundSize: "200% 200%",
+                  animation: "gradientShift 6s ease infinite",
                   boxShadow:
-                    "0 25px 70px rgba(60,31,14,0.18), 0 10px 30px rgba(217,167,86,0.12)",
-                  border: "3px solid rgba(255,253,251,0.9)",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background:
-                      "linear-gradient(135deg, rgba(217,167,86,0.12) 0%, transparent 40%, rgba(74,44,23,0.1) 100%)",
-                    pointerEvents: "none",
-                    zIndex: 1,
+                    "0 35px 90px rgba(60,31,14,0.35), 0 20px 50px rgba(217,167,86,0.25), 0 0 60px rgba(217,167,86,0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.2)",
+                  transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "&:hover": {
+                    boxShadow:
+                      "0 50px 120px rgba(60,31,14,0.45), 0 30px 70px rgba(217,167,86,0.35), 0 0 100px rgba(217,167,86,0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.4)",
+                    transform: "translateY(-5px)",
                   },
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "50%",
-                    background:
-                      "linear-gradient(180deg, rgba(255,253,251,0.15) 0%, transparent 100%)",
-                    pointerEvents: "none",
-                    zIndex: 2,
+                  "@keyframes gradientShift": {
+                    "0%, 100%": { backgroundPosition: "0% 50%" },
+                    "50%": { backgroundPosition: "100% 50%" },
                   },
                 }}
               >
+                {/* Inner glow ring */}
                 <Box
-                  component="img"
-                  src={src}
-                  alt={`Gallery-${idx}`}
-                  onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
                   sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    userSelect: "none",
-                    transition: "transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                      transform: "scale(1.1)",
-                    },
+                    position: "absolute",
+                    inset: "6px",
+                    borderRadius: "26px",
+                    background:
+                      "linear-gradient(145deg, rgba(255,253,251,0.3) 0%, transparent 50%, rgba(217,167,86,0.2) 100%)",
+                    pointerEvents: "none",
+                    zIndex: 10,
                   }}
                 />
+
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "26px",
+                    overflow: "hidden",
+                    backgroundColor: "#0a0a0a",
+                    // Dramatic gradient overlays
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background:
+                        "linear-gradient(135deg, rgba(217,167,86,0.25) 0%, transparent 25%, rgba(74,44,23,0.2) 100%)",
+                      pointerEvents: "none",
+                      zIndex: 1,
+                      mixBlendMode: "overlay",
+                    },
+                    // Animated light sweep
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      top: "-50%",
+                      left: "-50%",
+                      width: "200%",
+                      height: "200%",
+                      background:
+                        "linear-gradient(45deg, transparent 30%, rgba(255,253,251,0.3) 50%, transparent 70%)",
+                      animation: "lightSweep 8s ease-in-out infinite",
+                      pointerEvents: "none",
+                      zIndex: 2,
+                    },
+                    "@keyframes lightSweep": {
+                      "0%, 100%": { transform: "translate(-100%, -100%) rotate(45deg)" },
+                      "50%": { transform: "translate(100%, 100%) rotate(45deg)" },
+                    },
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={src}
+                    alt={`Gallery-${idx}`}
+                    onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      userSelect: "none",
+                      transition: "transform 0.9s cubic-bezier(0.4, 0, 0.2, 1), filter 0.6s ease",
+                      filter: "brightness(0.95) contrast(1.05)",
+                      "&:hover": {
+                        transform: "scale(1.15) rotate(1deg)",
+                        filter: "brightness(1.05) contrast(1.1)",
+                      },
+                    }}
+                  />
+
+                  {/* Corner accent highlights */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100px",
+                      height: "100px",
+                      background:
+                        "radial-gradient(circle at top left, rgba(217,167,86,0.4) 0%, transparent 60%)",
+                      pointerEvents: "none",
+                      zIndex: 3,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      right: 0,
+                      width: "120px",
+                      height: "120px",
+                      background:
+                        "radial-gradient(circle at bottom right, rgba(217,167,86,0.3) 0%, transparent 60%)",
+                      pointerEvents: "none",
+                      zIndex: 3,
+                    }}
+                  />
+
+                  {/* Bottom gradient for depth */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: "40%",
+                      background:
+                        "linear-gradient(to top, rgba(60,31,14,0.7) 0%, rgba(60,31,14,0.3) 50%, transparent 100%)",
+                      pointerEvents: "none",
+                      zIndex: 4,
+                    }}
+                  />
+                </Box>
               </Box>
             </motion.div>
           ))}
@@ -831,7 +1026,9 @@ export default function Gallery() {
       sx={{
         width: "100vw",
         overflowX: "hidden",
-        py: { xs: 10, md: 14 },
+        // keep top padding but remove bottom padding so there's no gap before footer
+        pt: { xs: 10, md: 14 },
+        pb: 0,
         display: "flex",
         flexDirection: "column",
         gap: { xs: 4, md: 6 },
@@ -873,39 +1070,9 @@ export default function Gallery() {
         `}
       </style>
 
-      {/* Premium animated geometric background */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 0,
-          pointerEvents: "none",
-          overflow: "hidden",
-        }}
-      >
-        {[...Array(15)].map((_, i) => (
-          <Box
-            key={i}
-            className="gallery-shape"
-            sx={{
-              position: "absolute",
-              width: i % 3 === 0 ? 140 : i % 3 === 1 ? 90 : 60,
-              height: i % 3 === 0 ? 140 : i % 3 === 1 ? 90 : 60,
-              borderRadius: i % 2 === 0 ? "50%" : "25%",
-              border: `1.5px solid ${i % 2 === 0 ? "#D9A756" : "#B08030"}`,
-              background:
-                i % 4 === 0
-                  ? `${i % 2 === 0 ? "#D9A756" : "#B08030"}12`
-                  : "transparent",
-              left: `${(i * 23 + 5) % 90}%`,
-              top: `${(i * 17 + 8) % 85}%`,
-              opacity: 0.06,
-            }}
-          />
-        ))}
+      {/* Popup animated background (scoped to gallery so it stays behind content) */}
+      <Box sx={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+        <PopupBackground scoped />
       </Box>
 
       {/* Premium Section Header */}
@@ -930,7 +1097,8 @@ export default function Gallery() {
             mx: "auto",
             mb: 3,
             position: "relative",
-            opacity: 0,
+            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            transition: "opacity 0.7s ease, transform 0.7s ease",
             "&::before, &::after": {
               content: '""',
               position: "absolute",
@@ -959,7 +1127,8 @@ export default function Gallery() {
             mb: 2,
             display: "block",
             textTransform: "uppercase",
-            opacity: 0,
+            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            transition: "opacity 0.7s ease, transform 0.7s ease",
             "&::before, &::after": {
               content: '"◆"',
               position: "relative",
@@ -988,7 +1157,8 @@ export default function Gallery() {
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
             textShadow: "none",
-            opacity: 0,
+            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         >
           A Glimpse Inside
@@ -1004,7 +1174,8 @@ export default function Gallery() {
             mx: "auto",
             lineHeight: 1.8,
             fontWeight: 400,
-            opacity: 0,
+            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         >
           Discover the warmth, character, and memories that make The Brooklin
@@ -1021,7 +1192,8 @@ export default function Gallery() {
               "linear-gradient(90deg, transparent, rgba(217,167,86,0.4), transparent)",
             mx: "auto",
             mt: 4,
-            opacity: 0,
+            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         />
       </Box>

@@ -848,28 +848,30 @@ const Nav = () => {
           top: 0,
           bgcolor: "transparent",
           zIndex: 1300,
+          // ensure AppBar respects iPhone notch area
+          paddingTop: "env(safe-area-inset-top, 0px)",
         }}
       >
-        <Toolbar sx={{ py: 0.8 }}>
-          <Box
-            sx={{
-              position: "fixed",
-              top: 12, // lifts the bar down a bit (floating look)
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "90%", // not full width → floating bar look
-              borderRadius: "50px",
-              backdropFilter: "blur(18px)",
-              background: "rgba(255, 255, 255, 0.69)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.20)", // elegant shadow
-              border: "1px solid rgba(255,255,255,0.35)", // glass highlight edge
-              transition: "0.25s ease-in-out",
-              zIndex: 9999,
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "8px 16px",
-            }}
-          >
+        <Toolbar sx={{ py: 0.8, pt: `calc(env(safe-area-inset-top, 0px) + 6px)` }}>
+            <Box
+              sx={{
+                position: "fixed",
+                top: `calc(env(safe-area-inset-top, 0px) + 12px)`, // safe-area aware lift
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "90%", // not full width → floating bar look
+                borderRadius: "50px",
+                backdropFilter: "blur(18px)",
+                background: "rgba(255, 255, 255, 0.69)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.20)", // elegant shadow
+                border: "1px solid rgba(255,255,255,0.35)", // glass highlight edge
+                transition: "0.25s ease-in-out",
+                zIndex: 9999,
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "8px 16px",
+              }}
+            >
             {/* LOGO + NAME */}
             <Box
               component={Link}
@@ -894,9 +896,9 @@ const Nav = () => {
               <Box
                 component="span"
                 sx={{
-                  fontFamily: '"Cormorant Garamond", Georgia, serif',
+                  fontFamily: '"Corinthia", cursive',
                   fontWeight: 700,
-                  fontSize: "1rem",
+                  fontSize: "0.8rem",
                   color: "#3C1F0E",
                   display: { xs: "block", md: "none" },
                   lineHeight: 1.1,
@@ -933,14 +935,14 @@ const Nav = () => {
         </Toolbar>
       </AppBar>
 
-      <Toolbar sx={{ minHeight: 70 }} />
+      <Toolbar sx={{ minHeight: `calc(70px + env(safe-area-inset-top, 0px))` }} />
 
       {/* FIXED BOTTOM NAV (GLASS FLOATING STYLE) */}
-      <Box
+        <Box
         sx={{
           position: "fixed",
-          // Safe area inset for iOS devices with home indicator/notch
-          bottom: "max(12px, calc(env(safe-area-inset-bottom, 0px) + 8px))",
+          // respect safe area inset for iPhone home indicator; keep a comfortable offset
+          bottom: `calc(env(safe-area-inset-bottom, 0px) + 12px)`,
           left: "50%",
           transform: "translateX(-50%)",
           width:

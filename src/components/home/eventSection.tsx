@@ -403,23 +403,24 @@ const EventsSection = () => {
                 }}
               />
 
-              {/* Main Image (Fully Visible) */}
+              {/* Main Image (Fully Visible) - show full image without cropping */}
               <Box
                 component={motion.div}
                 animate={{
-                  scale: isActive ? 1 : 1.08,
+                  scale: isActive ? 1 : 1.02,
                   filter: isActive
                     ? "brightness(1.05) saturate(1.1)"
-                    : "brightness(0.5) grayscale(0.3)",
+                    : "brightness(0.6) grayscale(0.2)",
                 }}
                 transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
                 sx={{
                   position: "absolute",
                   inset: 0,
                   backgroundImage: `url(${imageUrl})`,
-                  backgroundSize: isActive ? "cover" : "cover",
+                  backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
+                  backgroundColor: "#F5F0EC",
                   zIndex: 1,
                 }}
               />
@@ -555,7 +556,8 @@ const EventsSection = () => {
                     >
                       <Typography
                         sx={{
-                          color: "#D9A756",
+                          // color: "#D9A756",
+                          color:"white",
                           fontSize: "0.7rem",
                           fontWeight: 700,
                           textTransform: "uppercase",
@@ -678,7 +680,7 @@ const EventsSection = () => {
                         fontFamily: '"Inter", sans-serif',
                       }}
                     >
-                      {event.description}
+                      {/* {event.description} */}
                     </Typography>
 
                     {/* Premium Action Button */}
@@ -693,8 +695,7 @@ const EventsSection = () => {
                       }}
                       sx={{
                         mt: 1,
-                        background:
-                          "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
+                        background: "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
                         color: "#FFFDFB",
                         px: 4,
                         py: 1.5,

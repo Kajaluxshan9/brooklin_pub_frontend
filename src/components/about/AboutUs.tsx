@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,93 +34,34 @@ const pages = [
     image:
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
   },
+  {
+    id: 5,
+    title: "Community",
+    subtitle: "More than a pub – we're part of the Brooklin family.",
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+  },
 ];
 
 export default function AboutUs() {
   const [pageIndex, setPageIndex] = useState(0);
-  const [scrollEnabled, setScrollEnabled] = useState(true);
   const [direction, setDirection] = useState("left");
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isHovering, setIsHovering] = useState(false);
-
-  // Track which pages have been viewed
-  const [viewedPages, setViewedPages] = useState<Set<number>>(new Set([0]));
-  const [allPagesViewed, setAllPagesViewed] = useState(false);
-
-  // Track if component is fully visible in viewport
-  const [isFullyVisible, setIsFullyVisible] = useState(false);
-
-  // Intersection Observer to detect when component is fully visible
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Use lower threshold on mobile for better UX
-        const visibilityThreshold = isMobile ? 0.8 : 0.95;
-        setIsFullyVisible(entry.intersectionRatio >= visibilityThreshold);
-      },
-      {
-        threshold: [0, 0.25, 0.5, 0.75, 0.8, 0.95, 1],
-        rootMargin: "0px",
-      }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
-  }, [isMobile]);
-
-  // Update viewed pages when pageIndex changes
-  useEffect(() => {
-    setViewedPages((prev) => {
-      const newSet = new Set(prev);
-      newSet.add(pageIndex);
-      return newSet;
-    });
-  }, [pageIndex]);
-
-  // Check if all pages have been viewed
-  useEffect(() => {
-    if (viewedPages.size === pages.length && !allPagesViewed) {
-      setAllPagesViewed(true);
-    }
-  }, [viewedPages, allPagesViewed]);
-
-  // Prevent page scrolling ONLY when component is fully visible AND not all slides viewed
-  useEffect(() => {
-    // On mobile, be less aggressive with scroll locking to avoid confusion
-    const shouldLockScroll = isFullyVisible && !allPagesViewed && !isMobile;
-
-    if (shouldLockScroll) {
-      // Lock body scroll when component is visible and slides not complete (desktop only)
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-    } else {
-      // Allow body scroll otherwise
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, [isFullyVisible, allPagesViewed, isMobile]);
 
   const randomDirection = () => {
     const dirs = ["left", "right", "top", "bottom"];
     return dirs[Math.floor(Math.random() * dirs.length)];
   };
 
-  // Handle wheel event only when container is hovered (for desktop)
-  // We'll attach native (non-passive) listeners to the container element below
+  // Auto-change slides every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDirection(randomDirection());
+      setPageIndex((prev) => (prev + 1) % pages.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getVariants = (dir: string) => {
     switch (dir) {
@@ -155,242 +96,53 @@ export default function AboutUs() {
 
   const currentPage = pages[pageIndex];
 
-  // Touch swipe handling for mobile
-  const touchStartY = useRef<number | null>(null);
-  // We'll attach native touch handlers to the container element below
-
-  // Refs to hold latest state for native listeners
-  const isFullyVisibleRef = useRef(isFullyVisible);
-  const allPagesViewedRef = useRef(allPagesViewed);
-  const scrollEnabledRef = useRef(scrollEnabled);
-  const isHoveringRef = useRef(isHovering);
-  const isMobileRef = useRef(isMobile);
-
-  useEffect(() => {
-    isFullyVisibleRef.current = isFullyVisible;
-  }, [isFullyVisible]);
-  useEffect(() => {
-    allPagesViewedRef.current = allPagesViewed;
-  }, [allPagesViewed]);
-  useEffect(() => {
-    scrollEnabledRef.current = scrollEnabled;
-  }, [scrollEnabled]);
-  useEffect(() => {
-    isHoveringRef.current = isHovering;
-  }, [isHovering]);
-  useEffect(() => {
-    isMobileRef.current = isMobile;
-  }, [isMobile]);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const wheelHandler = (e: WheelEvent) => {
-      if (isFullyVisibleRef.current && !allPagesViewedRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!scrollEnabledRef.current || !isHoveringRef.current) return;
-
-        setScrollEnabled(false);
-        setDirection(randomDirection());
-
-        if (e.deltaY > 0) {
-          setPageIndex((prev) => (prev + 1) % pages.length);
-        } else {
-          setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
-        }
-
-        setTimeout(() => setScrollEnabled(true), 1000);
-      }
-    };
-
-    const touchStartHandler = (e: TouchEvent) => {
-      // On mobile, only prevent default if within the component
-      // Don't prevent default to allow users to scroll past the section
-      touchStartY.current = e.touches[0]?.clientY ?? null;
-    };
-
-    const touchMoveHandler = (e: TouchEvent) => {
-      // Only prevent scroll if we're in swipe mode and slides not complete
-      if (
-        isMobileRef.current &&
-        isFullyVisibleRef.current &&
-        !allPagesViewedRef.current &&
-        touchStartY.current !== null
-      ) {
-        const currentY = e.touches[0]?.clientY ?? null;
-        if (currentY === null) return;
-        const diff = Math.abs(touchStartY.current - currentY);
-        // Only prevent if it's a significant vertical swipe
-        if (diff > 10) {
-          e.preventDefault();
-        }
-      }
-    };
-
-    const touchEndHandler = (e: TouchEvent) => {
-      if (touchStartY.current === null) return;
-
-      const touchEndY = e.changedTouches[0]?.clientY ?? null;
-      if (touchEndY === null) {
-        touchStartY.current = null;
-        return;
-      }
-
-      const diff = touchStartY.current - touchEndY;
-
-      // Only change slides if swipe is significant enough
-      if (Math.abs(diff) > 60 && scrollEnabledRef.current) {
-        setScrollEnabled(false);
-        setDirection(randomDirection());
-
-        if (diff > 0) {
-          setPageIndex((prev) => (prev + 1) % pages.length);
-        } else {
-          setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
-        }
-
-        setTimeout(() => setScrollEnabled(true), 800);
-      }
-
-      touchStartY.current = null;
-    };
-
-    el.addEventListener("wheel", wheelHandler, { passive: false });
-    el.addEventListener("touchstart", touchStartHandler, { passive: true });
-    el.addEventListener("touchmove", touchMoveHandler, { passive: false });
-    el.addEventListener("touchend", touchEndHandler, { passive: true });
-
-    return () => {
-      el.removeEventListener("wheel", wheelHandler);
-      el.removeEventListener("touchstart", touchStartHandler);
-      el.removeEventListener("touchmove", touchMoveHandler);
-      el.removeEventListener("touchend", touchEndHandler);
-    };
-    // Intentionally do not include refs in deps — handlers read latest via refs
-  }, [pages.length]);
-
   return (
     <Box
-      ref={containerRef}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
       sx={{
-        height: { xs: "70vh", md: "80vh" },
+        height: { xs: "auto", md: "100vh" },
         width: "100%",
-        overflow: "hidden",
+        overflowY: { xs: "auto", md: "hidden" },
         position: "relative",
         backgroundColor: "transparent",
-        cursor: isHovering && !isMobile ? "ns-resize" : "default",
-        // Prevent overscroll effects on iOS
-        WebkitOverflowScrolling: "touch",
-        touchAction: allPagesViewed ? "auto" : "pan-x",
+        // hide native scrollbars but keep scrolling functional (mobile)
+        scrollbarWidth: "none",
+        "-ms-overflow-style": "none",
+        "&::-webkit-scrollbar": {
+          display: "none",
+        },
       }}
     >
-      {/* Mobile swipe hint - show until user has swiped */}
-      {isMobile && !allPagesViewed && pageIndex === 0 && (
-        <Box
-          component={motion.div}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 0.5 }}
-          sx={{
-            position: "absolute",
-            bottom: 100,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 15,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 0.5,
-          }}
-        >
-          <Box
-            component={motion.div}
-            animate={{ y: [0, -8, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            sx={{
-              width: 24,
-              height: 40,
-              borderRadius: 12,
-              border: "2px solid rgba(255,253,251,0.6)",
-              display: "flex",
-              justifyContent: "center",
-              paddingTop: "8px",
-            }}
-          >
-            <Box
-              sx={{
-                width: 4,
-                height: 8,
-                borderRadius: 2,
-                backgroundColor: "rgba(255,253,251,0.8)",
-              }}
-            />
-          </Box>
-          <Typography
-            sx={{
-              fontFamily: '"Inter", sans-serif',
-              fontSize: "0.7rem",
-              color: "rgba(255,253,251,0.7)",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-            }}
-          >
-            Swipe
-          </Typography>
-        </Box>
-      )}
-      {/* Pagination dots */}
+      {/* Simple Pagination Dots */}
       <Box
         sx={{
           position: "absolute",
-          // On mobile, position further from edge to avoid accidental taps near screen edge
-          right: isMobile ? 16 : 20,
+          right: isMobile ? 16 : 24,
           top: "50%",
           transform: "translateY(-50%)",
           display: "flex",
           flexDirection: "column",
-          gap: isMobile ? 1.5 : 1,
+          gap: 1.5,
           zIndex: 10,
-          // Add touch-friendly padding on mobile
-          padding: isMobile ? "8px" : 0,
         }}
       >
         {pages.map((_, idx) => (
           <Box
             key={idx}
             onClick={() => {
-              if (!scrollEnabled) return;
-              setScrollEnabled(false);
               setDirection(randomDirection());
               setPageIndex(idx);
-              setTimeout(() => setScrollEnabled(true), 800);
             }}
             sx={{
-              // Larger touch targets on mobile
-              width: isMobile ? 12 : 12,
-              height: isMobile ? 12 : 12,
+              width: 10,
+              height: 10,
               borderRadius: "50%",
               backgroundColor:
-                idx === pageIndex ? "#FFFDFB" : "rgba(255,253,251,0.6)",
+                idx === pageIndex ? "#D9A756" : "rgba(255, 253, 251, 0.5)",
               cursor: "pointer",
-              border: "1px solid rgba(106,58,30,0.3)",
-              boxShadow:
-                idx === pageIndex ? "0 2px 8px rgba(106,58,30,0.3)" : "none",
               transition: "all 0.3s ease",
-              // Add minimum touch area via pseudo-element
-              position: "relative",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: "-8px",
-                left: "-8px",
-                right: "-8px",
-                bottom: "-8px",
+              "&:hover": {
+                backgroundColor: idx === pageIndex ? "#D9A756" : "rgba(255, 253, 251, 0.8)",
+                transform: "scale(1.2)",
               },
             }}
           />
@@ -406,13 +158,13 @@ export default function AboutUs() {
           exit="exit"
           transition={{ duration: 1 }}
           style={{
-            position: "absolute",
+            position: isMobile ? "relative" : "absolute",
             width: "100%",
-            height: "100%",
-            background: currentPage.image
+            height: isMobile ? "auto" : "100%",
+            background: !isMobile && currentPage.image
               ? `linear-gradient(rgba(60,31,14,0.55), rgba(106,58,30,0.45)), url(${currentPage.image})`
-              : "linear-gradient(135deg, #6A3A1E 0%, #3C1F0E 100%)",
-            backgroundSize: "cover",
+              : undefined,
+            backgroundSize: !isMobile ? "cover" : undefined,
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
             display: "flex",
@@ -420,15 +172,75 @@ export default function AboutUs() {
             alignItems: "center",
             justifyContent: "center",
             textAlign: "center",
-            padding: isMobile ? "20px" : "60px",
+            padding: isMobile ? "0px" : "32px",
+            gap: isMobile ? 2 : 0,
           }}
         >
+          {/* On mobile render the image as an actual <img> with elegant styling */}
+          {isMobile && currentPage.image && (
+            <Box
+              component={motion.div}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              sx={{
+                width: "100%",
+                padding: "20px",
+                position: "relative",
+              }}
+            >
+              {/* Decorative gradient border container */}
+              <Box
+                sx={{
+                  position: "relative",
+                  borderRadius: "24px",
+                  padding: "3px",
+                  background:
+                    "linear-gradient(135deg, rgba(217, 167, 86, 0.6) 0%, rgba(106, 58, 30, 0.4) 50%, rgba(217, 167, 86, 0.6) 100%)",
+                  boxShadow:
+                    "0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={currentPage.image}
+                  alt={currentPage.title}
+                  sx={{
+                    width: "100%",
+                    height: "auto",
+                    objectFit: "cover",
+                    borderRadius: "21px",
+                    display: "block",
+                    backgroundColor: "#1a1a1a",
+                  }}
+                />
+              </Box>
+              {/* Subtle glow effect behind image */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "90%",
+                  height: "90%",
+                  background:
+                    "radial-gradient(circle, rgba(217, 167, 86, 0.15) 0%, transparent 70%)",
+                  borderRadius: "24px",
+                  filter: "blur(30px)",
+                  zIndex: -1,
+                }}
+              />
+            </Box>
+          )}
+
           {/* Text */}
           <motion.div
             initial={{ opacity: 0, x: -100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 1 }}
+            style={{ width: isMobile ? "100%" : undefined }}
           >
             <Typography
               sx={{
@@ -438,8 +250,9 @@ export default function AboutUs() {
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
                 textTransform: "uppercase",
                 fontSize: "clamp(1.8rem, 4vw, 3.5rem)",
-                color: "#F3E3CC",
-                textShadow: "0 2px 12px rgba(60,31,14,0.4)",
+                // Use darker, high-contrast color on mobile where background is light
+                color: isMobile ? "#3C1F0E" : "#F3E3CC",
+                textShadow: isMobile ? "none" : "0 2px 12px rgba(60,31,14,0.4)",
               }}
             >
               {currentPage.title}
@@ -448,9 +261,10 @@ export default function AboutUs() {
               sx={{
                 fontFamily: '"Inter", sans-serif',
                 fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
-                color: "rgba(243,227,204,0.9)",
+                color: isMobile ? "#4A2C17" : "rgba(243,227,204,0.9)",
                 maxWidth: "600px",
                 lineHeight: 1.6,
+                mx: "auto",
               }}
             >
               {currentPage.subtitle}

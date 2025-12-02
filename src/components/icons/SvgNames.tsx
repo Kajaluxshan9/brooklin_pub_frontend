@@ -25,11 +25,11 @@ export function DrawTextSVG({
   const isTablet = screenWidth >= 480 && screenWidth < 1024;
 
   // Adjust width & scale smoothly
-  const finalWidth = width ?? (isSmall ? 160 : isTablet ? 230 : 300);
-  const finalScale = scale ?? (isSmall ? 0.65 : isTablet ? 0.85 : 1);
+  const finalWidth = width ?? (isSmall ? 240 : isTablet ? 260 : 300);
+  const finalScale = scale ?? (isSmall ? 0.8 : isTablet ? 0.9 : 1);
 
-  // Estimate viewBox based on text length - increased multiplier for cursive font
-  const estimatedWidth = Math.max(400, text.length * 70);
+  // Fixed viewBox width so all text renders at the same size
+  const viewBoxWidth = 600;
   const viewBoxHeight = 160; // Increased height slightly to avoid vertical clipping of swashes
 
   // Calculate approximate path length for the text stroke animation
@@ -39,7 +39,7 @@ export function DrawTextSVG({
   return (
     <motion.svg
       width={finalWidth}
-      viewBox={`0 0 ${estimatedWidth} ${viewBoxHeight}`}
+      viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
       fill="none"
       preserveAspectRatio="xMidYMid meet"
       style={{
@@ -63,7 +63,7 @@ export function DrawTextSVG({
         strokeLinejoin="round"
         style={{
           fontFamily: "'Great Vibes', cursive",
-          fontSize: "72px",
+          fontSize: "90px",
           letterSpacing: "2px",
           paintOrder: "stroke fill",
         }}

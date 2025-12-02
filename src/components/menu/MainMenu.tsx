@@ -395,7 +395,7 @@ export default function MainMenu() {
                   {/* Category name with SVG draw effect */}
                   <Box
                     sx={{
-                      height: "50px",
+                      height: "70px",
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
@@ -404,9 +404,10 @@ export default function MainMenu() {
                   >
                     <DrawTextSVG
                       text={item.name}
-                      width={260}
+                      width={300}
                       stroke="#D9A756"
-                      scale={0.9}
+                      fill="#4A2C17"
+                      scale={1.1}
                     />
                   </Box>
 
@@ -414,7 +415,7 @@ export default function MainMenu() {
                   <Typography
                     sx={{
                       fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "0.8rem",
+                      fontSize: "1.1rem",
                       fontWeight: 500,
                       color: "#8B7355",
                       letterSpacing: "0.15em",
@@ -446,7 +447,7 @@ export default function MainMenu() {
                       <Typography
                         sx={{
                           fontFamily: "'Cormorant Garamond', serif",
-                          fontSize: "0.95rem",
+                          fontSize: "1.1rem",
                           fontWeight: 600,
                           color: "#D9A756",
                           letterSpacing: "0.15em",
