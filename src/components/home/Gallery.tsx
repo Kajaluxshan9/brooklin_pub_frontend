@@ -452,7 +452,7 @@ function GalleryRow({
         overflow: "hidden",
         width: "100vw",
         // Reduced bottom margin so gallery sits closer to previous section
-        mb: 6,
+        mb: isLast ? 0 : 6,
         display: "flex",
         flexDirection: "column",
         gap: 5,
@@ -570,7 +570,7 @@ function GalleryRow({
               pointerEvents: "none",
             }}
           >
-            0{rowIndex + 1}
+            {/* 0{rowIndex + 1} */}
           </Typography>
 
           <Typography
@@ -942,81 +942,7 @@ export default function Gallery() {
     }
   };
 
-  // Premium loading state
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          py: { xs: 10, md: 14 },
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 3,
-          background:
-            "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
-          minHeight: 400,
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Premium animated loading indicator */}
-        <Box sx={{ position: "relative", width: 80, height: 80 }}>
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            style={{
-              position: "absolute",
-              inset: 0,
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                border: "3px solid rgba(217,167,86,0.15)",
-                borderTop: "3px solid #D9A756",
-                borderRadius: "50%",
-              }}
-            />
-          </motion.div>
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            style={{
-              position: "absolute",
-              inset: 10,
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                border: "2px solid rgba(176,128,48,0.15)",
-                borderBottom: "2px solid #B08030",
-                borderRadius: "50%",
-              }}
-            />
-          </motion.div>
-        </Box>
-        <Typography
-          sx={{
-            fontFamily: '"Inter", sans-serif',
-            fontSize: "0.9rem",
-            color: "#6A3A1E",
-            fontWeight: 500,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-        >
-          Loading Gallery
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (galleryRows.length === 0) {
+  if (loading || galleryRows.length === 0) {
     return null;
   }
 
@@ -1026,12 +952,12 @@ export default function Gallery() {
       sx={{
         width: "100vw",
         overflowX: "hidden",
-        // keep top padding but remove bottom padding so there's no gap before footer
-        pt: { xs: 10, md: 14 },
+        // reduced top padding so header sits closer to gallery rows
+        pt: { xs: 8, md: 10 },
         pb: 0,
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 4, md: 6 },
+        gap: { xs: 3, md: 4 },
         background:
           "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 35%, #E8D5C4 65%, #F5EBE0 85%, #FDF8F3 100%)",
         minHeight: isMobile ? "100vh" : "auto",
@@ -1080,7 +1006,8 @@ export default function Gallery() {
         ref={headerRef}
         sx={{
           textAlign: "center",
-          mb: { xs: 4, md: 8 },
+          // tighten spacing between header and the following container
+          mb: { xs: 2, md: 1 },
           px: 3,
           position: "relative",
           zIndex: 1,
@@ -1097,7 +1024,7 @@ export default function Gallery() {
             mx: "auto",
             mb: 3,
             position: "relative",
-            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            opacity: 1,
             transition: "opacity 0.7s ease, transform 0.7s ease",
             "&::before, &::after": {
               content: '""',
@@ -1127,7 +1054,7 @@ export default function Gallery() {
             mb: 2,
             display: "block",
             textTransform: "uppercase",
-            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            opacity: 1,
             transition: "opacity 0.7s ease, transform 0.7s ease",
             "&::before, &::after": {
               content: '"◆"',
@@ -1157,7 +1084,7 @@ export default function Gallery() {
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
             textShadow: "none",
-            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            opacity: 1,
             transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         >
@@ -1174,7 +1101,7 @@ export default function Gallery() {
             mx: "auto",
             lineHeight: 1.8,
             fontWeight: 400,
-            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            opacity: 1,
             transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         >
@@ -1192,7 +1119,7 @@ export default function Gallery() {
               "linear-gradient(90deg, transparent, rgba(217,167,86,0.4), transparent)",
             mx: "auto",
             mt: 4,
-            opacity: { xs: 1, md: isHeaderInView ? 1 : 0 },
+            opacity: 1,
             transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         />
@@ -1208,6 +1135,7 @@ export default function Gallery() {
             description={row.description}
             rowIndex={rowIndex}
             isActive={true}
+            isLast={rowIndex === galleryRows.length - 1}
             onCycleComplete={
               isMobile && rowIndex === activeRowIndex
                 ? handleRowComplete

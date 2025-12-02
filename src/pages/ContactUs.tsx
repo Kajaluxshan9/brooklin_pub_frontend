@@ -553,8 +553,8 @@ const ContactUs = () => {
       const subjectLine = isReservation
         ? `Party Reservation - ${formData.reservationDate}`
         : isCareers
-        ? `Careers Application`
-        : subjectOptions.find((opt) => opt.value === formData.subject)?.label ||
+          ? `Careers Application`
+          : subjectOptions.find((opt) => opt.value === formData.subject)?.label ||
           "Contact from website";
 
       let fullMessage = formData.message;
@@ -562,19 +562,16 @@ const ContactUs = () => {
         fullMessage = `PARTY RESERVATION REQUEST\n\nDate: ${formData.reservationDate}\nTime: ${formData.reservationTime}\nNumber of Guests: ${formData.guestCount}\n\nAdditional Notes:\n${formData.message}`;
       }
       if (isCareers) {
-        fullMessage = `CAREERS APPLICATION\n\nCover Letter / Message:\n${
-          formData.message
-        }${
-          formData.cvFile
+        fullMessage = `CAREERS APPLICATION\n\nCover Letter / Message:\n${formData.message
+          }${formData.cvFile
             ? "\n\n[CV Attached: " + formData.cvFile.name + "]"
             : ""
-        }`;
+          }`;
       }
 
       const subject = encodeURIComponent(subjectLine);
       const body = encodeURIComponent(
-        `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${
-          formData.phone || "N/A"
+        `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone || "N/A"
         }\n\n${fullMessage}`
       );
       window.location.href = `mailto:brooklinpub@gmail.com?subject=${subject}&body=${body}`;
@@ -678,8 +675,8 @@ const ContactUs = () => {
         {isReservation
           ? "Reservation Request Sent!"
           : isCareers
-          ? "Application Submitted!"
-          : "Message Sent!"}
+            ? "Application Submitted!"
+            : "Message Sent!"}
       </Typography>
 
       <Typography
@@ -698,8 +695,8 @@ const ContactUs = () => {
         {isReservation
           ? "Thank you! We'll confirm your party reservation shortly via email."
           : isCareers
-          ? "Thank you for your interest! Our team will review your application and get back to you soon."
-          : "Thank you for reaching out! We'll get back to you within 24 hours."}
+            ? "Thank you for your interest! Our team will review your application and get back to you soon."
+            : "Thank you for reaching out! We'll get back to you within 24 hours."}
       </Typography>
 
       <Box
@@ -1107,27 +1104,7 @@ const ContactUs = () => {
                   </Box>
                 </ContactInfoCard>
 
-                {/* Lottie Animation */}
-                <Box
-                  component={motion.div}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  sx={{
-                    display: { xs: "none", md: "flex" },
-                    justifyContent: "center",
-                    mt: 2,
-                  }}
-                >
-                  <Box sx={{ width: 280, height: 220 }}>
-                    <Lottie
-                      animationData={contactAnimation}
-                      loop
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </Box>
-                </Box>
+                {/* Lottie animation removed from left column — moved beside form header */}
               </Box>
 
               {/* ═══════════════════════════════════════════════════════════
@@ -1206,46 +1183,88 @@ const ContactUs = () => {
                       exit={{ opacity: 0 }}
                       onSubmit={handleSubmit}
                     >
-                      {/* Form Header */}
+                      {/* Form Header with chef Lottie on both sides */}
                       <Box
                         sx={{
-                          textAlign: "center",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
                           mb: { xs: 2.5, sm: 3, md: 4 },
                         }}
                       >
-                        <Typography
+                        <Box
                           sx={{
-                            fontFamily: '"Cormorant Garamond", Georgia, serif',
-                            fontSize: {
-                              xs: "1.35rem",
-                              sm: "1.6rem",
-                              md: "2.2rem",
-                            },
-                            fontWeight: 700,
-                            color: "#3C1F0E",
-                            mb: { xs: 1, md: 1.5 },
+                            display: "flex",
+                            flexDirection: { xs: "column", sm: "row" },
+                            alignItems: "center",
+                            gap: 2,
+                            width: "100%",
+                            justifyContent: "center",
                           }}
                         >
-                          Let's Talk
-                        </Typography>
-                        <Typography
-                          sx={{
-                            color: "#6A3A1E",
-                            fontSize: {
-                              xs: "0.85rem",
-                              sm: "0.9rem",
-                              md: "1rem",
-                            },
-                            lineHeight: 1.6,
-                            mb: { xs: 1.5, md: 2 },
-                            maxWidth: "480px",
-                            mx: "auto",
-                          }}
-                        >
-                          We'd love to hear from you! Whether you're planning a
-                          visit, looking to join our team, or just want to say
-                          hi — drop us a line.
-                        </Typography>
+                          <Box
+                            sx={{
+                              width: { xs: 120, sm: 56, md: 72 },
+                              height: { xs: 120, sm: 56, md: 72 },
+                              display: "block",
+                            }}
+                          >
+                            <Lottie
+                              animationData={contactAnimation}
+                              loop
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          </Box>
+
+                          <Box sx={{ textAlign: "center", maxWidth: 520 }}>
+                            <Typography
+                              sx={{
+                                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                                fontSize: {
+                                  xs: "1.35rem",
+                                  sm: "1.6rem",
+                                  md: "2.2rem",
+                                },
+                                fontWeight: 700,
+                                color: "#3C1F0E",
+                                mb: { xs: 1, md: 1.5 },
+                              }}
+                            >
+                              Let's Talk
+                            </Typography>
+                            <Typography
+                              sx={{
+                                color: "#6A3A1E",
+                                fontSize: {
+                                  xs: "0.85rem",
+                                  sm: "0.9rem",
+                                  md: "1rem",
+                                },
+                                lineHeight: 1.6,
+                                mb: { xs: 1.5, md: 2 },
+                              }}
+                            >
+                              We'd love to hear from you! Whether you're planning a
+                              visit, looking to join our team, or just want to say
+                              hi — drop us a line.
+                            </Typography>
+                          </Box>
+
+                          <Box
+                            sx={{
+                              width: { xs: 48, sm: 56, md: 72 },
+                              height: { xs: 48, sm: 56, md: 72 },
+                              display: { xs: "none", sm: "block" },
+                            }}
+                          >
+                            <Lottie
+                              animationData={contactAnimation}
+                              loop
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          </Box>
+                        </Box>
+
                         <Box
                           sx={{
                             display: "inline-flex",
@@ -1256,6 +1275,7 @@ const ContactUs = () => {
                             borderRadius: "20px",
                             background: "rgba(217,167,86,0.1)",
                             border: "1px solid rgba(217,167,86,0.25)",
+                            mt: 1,
                           }}
                         >
                           <Box
@@ -1672,8 +1692,8 @@ const ContactUs = () => {
                             isReservation
                               ? "Special Requests / Notes"
                               : isCareers
-                              ? "Cover Letter / Why you want to join us"
-                              : "Your Message"
+                                ? "Cover Letter / Why you want to join us"
+                                : "Your Message"
                           }
                           name="message"
                           value={formData.message}
@@ -1685,8 +1705,8 @@ const ContactUs = () => {
                             isReservation
                               ? "Any dietary restrictions, special occasions, seating preferences..."
                               : isCareers
-                              ? "Tell us about yourself, your experience, and why you'd be a great fit for Brooklin Pub..."
-                              : "Tell us how we can help you..."
+                                ? "Tell us about yourself, your experience, and why you'd be a great fit for Brooklin Pub..."
+                                : "Tell us how we can help you..."
                           }
                           error={!!errors.message}
                           helperText={errors.message}
@@ -1704,6 +1724,9 @@ const ContactUs = () => {
                           sx={{
                             mt: 1,
                             py: { xs: 2.25, md: 2 },
+                            px: { xs: 3, md: 4 },
+                            width: "auto",
+                            alignSelf: "center",
                             borderRadius: "16px",
                             background:
                               "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
@@ -1713,7 +1736,7 @@ const ContactUs = () => {
                             fontFamily: '"Inter", sans-serif',
                             textTransform: "none",
                             boxShadow: "0 10px 30px rgba(217,167,86,0.4)",
-                            display: "flex",
+                            display: "inline-flex",
                             alignItems: "center",
                             justifyContent: "center",
                             gap: 1.5,
@@ -1741,8 +1764,8 @@ const ContactUs = () => {
                               {isReservation
                                 ? "Request Reservation"
                                 : isCareers
-                                ? "Submit Application"
-                                : "Send Message"}
+                                  ? "Submit Application"
+                                  : "Send Message"}
                             </>
                           )}
                         </Button>

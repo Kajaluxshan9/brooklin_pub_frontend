@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
+import FrontView from "../../assets/images/Story/Brookli-pub-front-view.jpg";
+import DancingInFunction from "../../assets/images/Story/brooklin-pub-dancing-in-function 1.jpg";
+import ShowCase from "../../assets/images/Story/brooklin-pub-show-case.jpg";
+import BrooklinPubPillers from "../../assets/images/Story/brooklin-pub-eligent.jpg";
+import IndoorView from "../../assets/images/Story/brooklin-pub-indoor-view.jpg";
+
 
 // Real content for the About section
 const pages = [
@@ -9,37 +15,32 @@ const pages = [
     title: "Our Story",
     subtitle:
       "Serving Brooklin since 2014 with passion, pride, and great food.",
-    image:
-      "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&q=80",
+    image: FrontView,
   },
   {
     id: 2,
     title: "The Pub",
     subtitle:
       "A welcoming neighborhood gathering place for friends and family.",
-    image:
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80",
+    image: DancingInFunction,
   },
   {
     id: 3,
     title: "Our Kitchen",
     subtitle: "Fresh ingredients, homemade recipes, and dishes made with love.",
-    image:
-      "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=1200&q=80",
+    image: ShowCase,
   },
   {
     id: 4,
     title: "Community",
     subtitle: "More than a pub – we're part of the Brooklin family.",
-    image:
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+    image: BrooklinPubPillers,
   },
   {
     id: 5,
     title: "Community",
     subtitle: "More than a pub – we're part of the Brooklin family.",
-    image:
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+    image: IndoorView,
   },
 ];
 

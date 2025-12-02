@@ -58,9 +58,10 @@ export default function HeroSection({
         id={id}
         aria-labelledby={`${id || "hero"}-title`}
         sx={{
-          pt: { xs: 16, md: 20 },
-          pb: { xs: 10, md: 14 },
-          minHeight: { xs: "60vh", sm: "55vh", md: "50vh" },
+          pt: { xs: 12, md: 20 },
+          // Reduce bottom padding on small screens so the hero has a smaller gap
+          pb: { xs: 6, md: 14 },
+          minHeight: { xs: "40vh", sm: "55vh", md: "50vh" },
           background:
             "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
           position: "relative",

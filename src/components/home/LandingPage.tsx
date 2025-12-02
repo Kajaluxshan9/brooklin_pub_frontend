@@ -2,19 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import { Box, Typography, Button } from "@mui/material";
+import Image1 from "../../assets/images/Landing page/item1.jpg";
+import Image2 from "../../assets/images/Landing page/item2.jpg";
+import Image3 from "../../assets/images/Landing page/item3.jpg";
+import Image4 from "../../assets/images/Landing page/item4.jpg";
+import Image5 from "../../assets/images/Landing page/item5.jpg";
+import Image6 from "../../assets/images/Landing page/item6.jpg";
+import Image7 from "../../assets/images/Landing page/item7.jpg";
+import Image8 from "../../assets/images/Landing page/item8.jpg";
 
-const images = [
-  "https://i.pinimg.com/736x/8b/b4/c5/8bb4c59a46590ce36065bf3b60c8b3e1.jpg",
-  "https://i.pinimg.com/736x/6d/31/89/6d3189d24742473a6b3187fc48dffdd6.jpg",
-  "https://i.pinimg.com/736x/52/1a/01/521a01d28f8bc09a8042ee20a0f6451c.jpg",
-  "https://i.pinimg.com/736x/57/58/8b/57588b32c55b721df9710bfe1093fe1f.jpg",
-  "https://i.pinimg.com/736x/85/c3/de/85c3dec46e77529ddc41c788d23193ef.jpg",
-  "https://i.pinimg.com/736x/26/a7/0e/26a70e2ddd9a68f19c12f2dbce11d0dc.jpg",
-  "https://i.pinimg.com/736x/5c/7a/43/5c7a43138d9740941d0326a156551135.jpg",
-  "https://i.pinimg.com/736x/fd/62/8f/fd628f20363bdb533e548ece109407f3.jpg",
-  "https://i.pinimg.com/736x/c3/8c/c2/c38cc2d23a8b71091a6f72dd01f35294.jpg",
-  "https://i.pinimg.com/736x/5f/66/39/5f66391ae599dfeb0b9338bef8e81897.jpg",
-];
+
+const images = [Image1,Image2,Image3,Image4,Image5,Image6,Image7,Image8];
+
 
 const LandingPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);

@@ -147,7 +147,7 @@ const Nav = () => {
     },
     {
       label: "Special",
-      path: "/special/daily", // Default path when clicking Special
+      path: undefined, // Do not navigate when clicking parent; open dropdown instead
       dropdown: specialTypes.length > 0 ? specialTypes : [],
     },
     { label: "Contact Us", path: "/contactus" },

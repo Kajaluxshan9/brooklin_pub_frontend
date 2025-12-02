@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { DrawTextSVG } from "../icons/SvgNames";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Box from "@mui/material/Box";
@@ -392,23 +391,62 @@ export default function MainMenu() {
                     textAlign: "center",
                   }}
                 >
-                  {/* Category name with SVG draw effect */}
+                  {/* Category name */}
                   <Box
                     sx={{
-                      height: "70px",
+                      minHeight: { xs: "auto", md: "70px" },
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
                       mb: 1,
+                      px: 2,
                     }}
                   >
-                    <DrawTextSVG
-                      text={item.name}
-                      width={300}
-                      stroke="#D9A756"
-                      fill="#4A2C17"
-                      scale={1.1}
-                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.3 }}
+                      transition={{
+                        duration: 0.8,
+                        delay: idx * 0.1,
+                        ease: [0.215, 0.61, 0.355, 1],
+                      }}
+                      style={{ width: "100%" }}
+                    >
+                      <Typography
+                        component={motion.div}
+                        initial={{ backgroundPosition: "0% 50%" }}
+                        animate={{ backgroundPosition: "100% 50%" }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          ease: "easeInOut",
+                        }}
+                        sx={{
+                          fontFamily: "'Great Vibes', cursive",
+                          fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                          fontWeight: 400,
+                          background: `linear-gradient(90deg, #4A2C17 0%, #6A3A1E 25%, #D9A756 50%, #6A3A1E 75%, #4A2C17 100%)`,
+                          backgroundSize: "200% 100%",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                          textAlign: "center",
+                          filter: `drop-shadow(-1px -1px 0 #D9A75640) 
+                                   drop-shadow(1px -1px 0 #D9A75640) 
+                                   drop-shadow(-1px 1px 0 #D9A75640) 
+                                   drop-shadow(1px 1px 0 #D9A75640)
+                                   drop-shadow(0 0 8px rgba(217, 167, 86, 0.2))`,
+                          lineHeight: 1.2,
+                          wordWrap: "break-word",
+                          overflowWrap: "break-word",
+                          hyphens: "auto",
+                        }}
+                      >
+                        {item.name}
+                      </Typography>
+                    </motion.div>
                   </Box>
 
                   {/* Item count - minimal style */}
@@ -487,6 +525,44 @@ export default function MainMenu() {
                   }}
                 />
               </Box>
+
+              {/* Mobile divider - only show on xs screens and not on last item */}
+              {idx < filteredMenu.length - 1 && (
+                <Box
+                  sx={{
+                    display: { xs: "flex", sm: "none" },
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
+                    my: 3,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      flex: 1,
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, #D9A756, transparent)",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: "#D9A756",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      flex: 1,
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, #D9A756, transparent)",
+                    }}
+                  />
+                </Box>
+              )}
             </motion.div>
           );
         })}
