@@ -1282,7 +1282,7 @@ const ContactUs = () => {
                               fontWeight: 600,
                             }}
                           >
-                            We typically respond within 24 hours
+                            We typically respond within 48 hours
                           </Typography>
                         </Box>
                       </Box>

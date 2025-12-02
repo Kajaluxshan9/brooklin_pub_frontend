@@ -7,7 +7,7 @@ export interface Special {
   // Either use `status: 'new'` to mark a new special, or keep `active` for older code.
   status?: string;
   active?: boolean; // legacy flag
-  category?: 'daily' | 'chef'; // category for tracking
+  category?: "daily" | "chef" | "other"; // category for tracking
 }
 
 // Example specials list — in a real app this could come from an API or CMS
@@ -33,22 +33,28 @@ export function getNewSpecialsCount(): number {
   return specials.filter((s) => s.status === "new").length;
 }
 
-export function getNewSpecialsByCategory(category: 'daily' | 'chef'): Special[] {
+export function getNewSpecialsByCategory(
+  category: "daily" | "chef" | "other"
+): Special[] {
   // Get all new specials for a specific category
   return specials.filter((s) => s.status === "new" && s.category === category);
 }
 
-export function getNewSpecialsCountByCategory(category: 'daily' | 'chef'): number {
+export function getNewSpecialsCountByCategory(
+  category: "daily" | "chef" | "other"
+): number {
   // Count new specials for a specific category
-  return specials.filter((s) => s.status === "new" && s.category === category).length;
+  return specials.filter((s) => s.status === "new" && s.category === category)
+    .length;
 }
 
-export function getLatestSpecialByCategory(category: 'daily' | 'chef'): Special | null {
+export function getLatestSpecialByCategory(
+  category: "daily" | "chef" | "other"
+): Special | null {
   // Get the most recent new special for a category
   const items = getNewSpecialsByCategory(category);
   return items.length > 0 ? items[items.length - 1] : null;
 }
-
 
 export function addSpecial(s: Special) {
   // dedupe by id — replace existing or push new
@@ -75,22 +81,22 @@ export function addSpecial(s: Special) {
 export async function loadInitialSpecials(): Promise<void> {
   try {
     let daily: any[] = [];
-    let chef: any[] = [];
+    let other: any[] = [];
 
     // Try importing component modules that now export their `cards` arrays.
     try {
       const specialComp = await import("../components/special/SpecialDisplay");
       daily = specialComp.exportedDailySpecials || [];
-      chef = specialComp.exportedChefSpecials || [];
+      other = specialComp.exportedChefSpecials || []; // exportedChefSpecials now contains "other" specials
     } catch (e) {
       daily = [];
-      chef = [];
+      other = [];
     }
 
     // Register items with the same id pattern used in the component registration
     daily.forEach((d: any, idx: number) => {
       addSpecial({
-        id: d.id ?? `special-${idx}`,
+        id: d.id ?? `daily-${idx}`,
         title: d.title,
         desc: d.desc,
         bg: d.bg,
@@ -100,15 +106,15 @@ export async function loadInitialSpecials(): Promise<void> {
       });
     });
 
-    chef.forEach((c: any, idx: number) => {
+    other.forEach((c: any, idx: number) => {
       addSpecial({
-        id: c.id ?? `chef-${idx}`,
+        id: c.id ?? `other-${idx}`,
         title: c.title,
         desc: c.desc,
         bg: c.bg,
         popupImg: c.popupImg,
         status: c.status ?? "new",
-        category: "chef",
+        category: "other",
       });
     });
   } catch (err) {

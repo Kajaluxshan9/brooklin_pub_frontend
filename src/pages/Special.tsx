@@ -16,6 +16,8 @@ const Special = () => {
   // Generate appropriate title based on special type
   const getTitle = () => {
     if (specialType === "daily") return "Daily Specials";
+    if (specialType === "other") return "Specials";
+    // Legacy support for other types
     if (specialType === "chef") return "Chef's Specials";
     if (specialType === "night") return "Night Specials";
     // Capitalize first letter for other types
@@ -26,7 +28,9 @@ const Special = () => {
 
   const getSubtitle = () => {
     if (specialType === "daily")
-      return "Discover our chef's handpicked selections and daily delights";
+      return "Discover our daily delights, late night treats, and all-day favorites";
+    if (specialType === "other")
+      return "Seasonal highlights, game time specials, and chef's exclusive creations";
     if (specialType === "chef")
       return "Exquisite creations crafted with passion by our master chef";
     if (specialType === "night")

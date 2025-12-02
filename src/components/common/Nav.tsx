@@ -84,36 +84,45 @@ const Nav = () => {
     return specialsData.filter(isSpecialVisible);
   }, [specialsData]);
 
-  // Extract unique special types from visible specials only
+  // Create two categories: "Daily Specials" (daily + late_night + all_day) and "Specials" (everything else)
   const specialTypes = useMemo(() => {
     if (!visibleSpecials || visibleSpecials.length === 0) return [];
 
-    // Get unique types that have at least one visible special
-    const typeMap = new Map<
-      string,
-      { label: string; path: string; id: string }
-    >();
+    // Check if there are daily specials (daily type, late_night category, or day_time type)
+    const hasDailySpecials = visibleSpecials.some(
+      (s) =>
+        s.type === "daily" ||
+        s.type === "day_time" ||
+        s.specialCategory === "late_night"
+    );
 
-    visibleSpecials.forEach((s) => {
-      if (!typeMap.has(s.type)) {
-        const label =
-          s.type.charAt(0).toUpperCase() + s.type.slice(1).replace(/_/g, " ");
-        typeMap.set(s.type, {
-          label,
-          path: `/special/${s.type}`,
-          id: s.type,
-        });
-      }
-    });
+    // Check if there are other specials (game_time, chef, seasonal, etc.)
+    const hasOtherSpecials = visibleSpecials.some(
+      (s) =>
+        s.type !== "daily" &&
+        s.type !== "day_time" &&
+        s.specialCategory !== "late_night"
+    );
 
-    // Sort to ensure 'daily' comes first
-    const sorted = Array.from(typeMap.values()).sort((a, b) => {
-      if (a.id === "daily") return -1;
-      if (b.id === "daily") return 1;
-      return a.label.localeCompare(b.label);
-    });
+    const categories: { label: string; path: string; id: string }[] = [];
 
-    return sorted;
+    if (hasDailySpecials) {
+      categories.push({
+        label: "Daily Specials",
+        path: "/special/daily",
+        id: "daily",
+      });
+    }
+
+    if (hasOtherSpecials) {
+      categories.push({
+        label: "Specials",
+        path: "/special/other",
+        id: "other",
+      });
+    }
+
+    return categories;
   }, [visibleSpecials]);
 
   // Build navigation links dynamically

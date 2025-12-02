@@ -18,6 +18,7 @@ type Card = {
   status?: string;
   type?: string;
 };
+
 // Transform backend Special entities to Card format
 function transformSpecialsToCards(specials: Special[]): Card[] {
   return specials.map((special) => ({
@@ -33,23 +34,27 @@ function transformSpecialsToCards(specials: Special[]): Card[] {
     status: "new",
   }));
 }
-// Transform for chef specials (filters by type)
-function transformChefSpecialsToCards(specials: Special[]): Card[] {
-  return specials
-    .filter((special) => special.type === "chef")
-    .map((special) => ({
-      title: special.title,
-      desc: special.description || "Chef's handcrafted creation",
-      bg:
-        getImageUrl(special.imageUrls?.[0]) ||
-        "https://i.pinimg.com/736x/42/2c/2e/422c2e649799697f1d1355ba8f308edd.jpg",
-      popupImg:
-        getImageUrl(special.imageUrls?.[1]) ||
-        getImageUrl(special.imageUrls?.[0]) ||
-        "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-      status: "new",
-    }));
+
+// Filter for daily specials (daily type, day_time type, or late_night category)
+function filterDailySpecials(specials: Special[]): Special[] {
+  return specials.filter(
+    (special) =>
+      special.type === "daily" ||
+      special.type === "day_time" ||
+      special.specialCategory === "late_night"
+  );
 }
+
+// Filter for other specials (everything that's not daily)
+function filterOtherSpecials(specials: Special[]): Special[] {
+  return specials.filter(
+    (special) =>
+      special.type !== "daily" &&
+      special.type !== "day_time" &&
+      special.specialCategory !== "late_night"
+  );
+}
+
 // Export for preloading - will be populated by the component
 export let exportedDailySpecials: Card[] = [];
 export let exportedChefSpecials: Card[] = [];
@@ -61,44 +66,53 @@ export default function CylinderMenuPopup() {
   const [lastX, setLastX] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
+
   // Fetch specials from backend
   const { data: specialsData } = useApiWithCache<Special[]>(
     "active-specials",
     () => specialsService.getActiveSpecials()
   );
-  // Fetch all specials to derive chef specials (kept separate to avoid breaking existing API behavior)
-  const { data: allSpecialsData } = useApiWithCache<Special[]>(
-    "chef-specials",
-    () => specialsService.getAllSpecials()
-  );
-  // Transform backend data to cards format (no fallback - purely backend data)
+
+  // Transform backend data to cards based on route type
+  // "daily" route: daily + day_time + late_night specials
+  // "other" route: all other specials (game_time, chef, seasonal, etc.)
   const dailyCards =
     specialsData && specialsData.length > 0
-      ? transformSpecialsToCards(specialsData)
+      ? transformSpecialsToCards(filterDailySpecials(specialsData))
       : [];
-  const chefCards =
-    allSpecialsData && allSpecialsData.length > 0
-      ? transformChefSpecialsToCards(allSpecialsData)
+
+  const otherCards =
+    specialsData && specialsData.length > 0
+      ? transformSpecialsToCards(filterOtherSpecials(specialsData))
       : [];
 
   // Determine which cards to render based on the route param `/special/:type`.
   const getCardsForRouteType = (typeParam?: string): Card[] => {
     const t = typeParam ? String(typeParam).toLowerCase() : "";
+
+    // Daily route: show daily + day_time + late_night specials
     if (!t || t === "daily") return dailyCards;
-    // Filter by type from API data
-    const fromApi = (allSpecialsData || []).filter(
+
+    // Other route: show all other specials
+    if (t === "other") return otherCards;
+
+    // Legacy support: filter by specific type from API data
+    const fromApi = (specialsData || []).filter(
       (s) => String(s.type || "").toLowerCase() === t
     );
     if (fromApi.length > 0) return transformSpecialsToCards(fromApi);
+
     // Nothing matched — show daily by default
     return dailyCards;
   };
+
   const cards = getCardsForRouteType(routeType);
+
   // Update exported specials for preloading
   useEffect(() => {
     if (dailyCards && dailyCards.length > 0) exportedDailySpecials = dailyCards;
-    if (chefCards && chefCards.length > 0) exportedChefSpecials = chefCards;
-  }, [dailyCards, chefCards]);
+    if (otherCards && otherCards.length > 0) exportedChefSpecials = otherCards;
+  }, [dailyCards, otherCards]);
   const containerRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number | null>(null);
   const startYRef = useRef<number | null>(null);
@@ -111,24 +125,45 @@ export default function CylinderMenuPopup() {
     ? Math.max(120, Math.min(screenWidth * 0.6, 320)) // mobile
     : Math.max(180, Math.min(screenWidth * 0.3, 300)); // desktop
   const cardHeight = cardWidth * 1.05;
-  const radius = cardWidth * 1.7;
   const total = cards.length;
-  const isCylinder = total > 2;
-  const isTwo = total === 2;
+
+  // Always use cylinder/spiral for 2+ cards, single card centered
+  const isCylinder = total >= 2;
   const isSingle = total === 1;
-  const anglePerCard = 360 / total;
+
+  // Dynamic radius based on card count - smaller count = smaller radius to avoid gaps
+  const getRadius = () => {
+    if (total <= 2) return cardWidth * 0.8;
+    if (total === 3) return cardWidth * 1.0;
+    if (total === 4) return cardWidth * 1.2;
+    if (total === 5) return cardWidth * 1.4;
+    return cardWidth * 1.7; // 6+ cards
+  };
+  const radius = getRadius();
+
+  // For small card counts, spread them evenly but not full 360 degrees
+  // This prevents excessive gaps between cards
+  const getAnglePerCard = () => {
+    if (total <= 2) return 180 / total; // 2 cards: 90 degrees apart
+    if (total === 3) return 120; // 3 cards: 120 degrees apart (triangle)
+    if (total === 4) return 90; // 4 cards: 90 degrees apart (square)
+    if (total === 5) return 72; // 5 cards: 72 degrees apart (pentagon)
+    return 360 / total; // 6+ cards: full circle
+  };
+  const anglePerCard = getAnglePerCard();
   // Detect mobile / tablet
   useEffect(() => {
     const checkMobile = () =>
       /Android|iPhone|iPad|iPod|Tablet|Mobile/i.test(navigator.userAgent);
     setIsMobile(checkMobile());
   }, []);
-  // Register daily specials and chef specials into shared specials list
+
+  // Register daily specials into shared specials list
   useEffect(() => {
     dailyCards.forEach((c: Card, idx: number) => {
       try {
         addSpecial({
-          id: `special-${idx}`,
+          id: `daily-${idx}`,
           title: c.title,
           desc: c.desc,
           bg: c.bg,
@@ -141,23 +176,25 @@ export default function CylinderMenuPopup() {
       }
     });
   }, [dailyCards]);
+
+  // Register other specials into shared specials list
   useEffect(() => {
-    chefCards.forEach((c: Card, idx: number) => {
+    otherCards.forEach((c: Card, idx: number) => {
       try {
         addSpecial({
-          id: `chef-${idx}`,
+          id: `other-${idx}`,
           title: c.title,
           desc: c.desc,
           bg: c.bg,
           popupImg: c.popupImg,
           status: "new",
-          category: "chef",
+          category: "other",
         });
       } catch (err) {
         // swallow errors — this is just a simple registration
       }
     });
-  }, [chefCards]);
+  }, [otherCards]);
   // intro slideshow removed
   // Auto rotate
   useEffect(() => {
@@ -306,9 +343,8 @@ export default function CylinderMenuPopup() {
           position: "relative",
           touchAction: "pan-y",
           userSelect: "none",
-          background: "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 100%)",
+          background: "transparent",
           marginTop: `${verticalGap}px`,
-
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -392,7 +428,7 @@ export default function CylinderMenuPopup() {
           ))}
         </div>
 
-        {/* Cylinder */}
+        {/* Cylinder or Single Card */}
         <motion.div
           onMouseEnter={() => setIsHoveringCylinder(true)}
           onMouseLeave={() => setIsHoveringCylinder(false)}
@@ -401,26 +437,17 @@ export default function CylinderMenuPopup() {
             transformStyle: isCylinder ? "preserve-3d" : "flat",
             width: isCylinder
               ? `${cardWidth}px`
-              : isTwo
-                ? isMobile
-                  ? "90%"
-                  : `${cardWidth * 2 + 16}px`
-                : "min(1100px, 92%)",
-            height: isCylinder
-              ? `${cardHeight}px`
-              : isTwo
-                ? isMobile
-                  ? "auto"
-                  : `${cardHeight}px`
-                : "auto",
+              : isSingle
+              ? "min(400px, 92%)"
+              : `${cardWidth}px`,
+            height: isCylinder ? `${cardHeight}px` : "auto",
             position: "relative",
             transition: isCylinder ? "rotateY 0.1s linear" : "none",
             marginTop: 0,
-            padding: isMobile ? "0 20px" : "0",
+            padding: isMobile ? "0 10px" : "0",
             display: isCylinder ? undefined : "flex",
-            flexDirection: isTwo ? (isMobile ? "column" : "row") : "column",
-            flexWrap: isTwo ? "wrap" : undefined,
-            gap: isTwo ? "1rem" : undefined,
+            flexDirection: "column",
+            gap: "1rem",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 10,
@@ -452,6 +479,8 @@ export default function CylinderMenuPopup() {
                     cursor: "pointer",
                     filter: "brightness(1)",
                   } as React.CSSProperties;
+
+                  // Cylinder/spiral layout for 2+ cards
                   if (isCylinder) {
                     return {
                       ...base,
@@ -463,16 +492,16 @@ export default function CylinderMenuPopup() {
                       transform: `rotateY(${rotateY}deg) translateZ(${radius}px)`,
                     };
                   }
-                  // two or single: layout in flow
-                  // Keep exact card dimensions on desktop for two cards (side-by-side).
+
+                  // Single card layout
                   const flowWidth = isSingle
-                    ? isMobile
+                    ? mobile
                       ? "92%"
                       : `${cardWidth}px`
-                    : isMobile
-                      ? "92%"
-                      : `${cardWidth}px`;
-                  const flowHeight = isMobile ? "auto" : `${cardHeight}px`;
+                    : mobile
+                    ? "92%"
+                    : `${cardWidth}px`;
+                  const flowHeight = mobile ? "auto" : `${cardHeight}px`;
                   return {
                     ...base,
                     position: "relative",
@@ -547,17 +576,18 @@ export default function CylinderMenuPopup() {
                           i % 3 === 0
                             ? "150px"
                             : i % 3 === 1
-                              ? "100px"
-                              : "50px",
+                            ? "100px"
+                            : "50px",
                         height:
                           i % 3 === 0
                             ? "150px"
                             : i % 3 === 1
-                              ? "100px"
-                              : "50px",
+                            ? "100px"
+                            : "50px",
                         borderRadius: i % 2 === 0 ? "50%" : "10%",
-                        border: `2px solid ${i % 2 === 0 ? "#B08030" : "#D9A756"
-                          }`,
+                        border: `2px solid ${
+                          i % 2 === 0 ? "#B08030" : "#D9A756"
+                        }`,
                         background:
                           i % 4 === 0
                             ? `${i % 2 === 0 ? "#B08030" : "#D9A756"}20`
