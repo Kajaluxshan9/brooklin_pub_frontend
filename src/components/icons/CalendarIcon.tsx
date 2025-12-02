@@ -18,29 +18,32 @@ const CallButton = () => {
       }}
     >
       <Button
-        href="tel:+94779123456"
+        href="tel:+19054253055"
         variant="contained"
         sx={{
           width: size,
-            background: "rgba(255,255,255,0.35)",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0px 6px 14px rgba(0,0,0,0.3)",
-              transition: "all 0.3s ease",
+          background: "rgba(255,255,255,0.35)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0px 6px 14px rgba(0,0,0,0.3)",
+          transition: "all 0.3s ease",
 
-                      height: size,
+          height: size,
           borderRadius: "50%",
           minWidth: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-                      "&:hover": {
-              transform: "scale(1.15)",
-              background: "rgba(255,255,255,0.55)",
-            },
-            color: "#8B4513",
+          "&:hover": {
+            transform: "scale(1.15)",
+            background: "rgba(255,255,255,0.55)",
+          },
+          color: "#8B4513",
         }}
       >
-        <FontAwesomeIcon icon={faPhone} style={{ fontSize: isMobile ? 18 : 22 }} />
+        <FontAwesomeIcon
+          icon={faPhone}
+          style={{ fontSize: isMobile ? 18 : 22 }}
+        />
       </Button>
     </Box>
   );

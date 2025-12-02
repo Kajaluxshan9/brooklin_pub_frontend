@@ -125,7 +125,7 @@ function GalleryRow({
       <Box
         component={motion.div}
         initial={{ opacity: 0, y: 50 }}
-        animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0.3, y: 0 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
         sx={{
           px: 3,
@@ -138,9 +138,7 @@ function GalleryRow({
         {/* Premium Glassmorphic Title Card */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
-          animate={
-            isActive ? { scale: 1, opacity: 1 } : { scale: 0.9, opacity: 0.3 }
-          }
+          animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Box
@@ -1037,7 +1035,7 @@ export default function Gallery() {
             title={row.title}
             description={row.description}
             rowIndex={rowIndex}
-            isActive={isMobile ? rowIndex === activeRowIndex : true}
+            isActive={true}
             onCycleComplete={
               isMobile && rowIndex === activeRowIndex
                 ? handleRowComplete

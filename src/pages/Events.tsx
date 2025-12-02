@@ -821,7 +821,6 @@ const Events = () => {
               {[
                 { value: displayableEvents.length, label: "Upcoming Events" },
                 { value: "Live", label: "Entertainment" },
-                { value: "Free", label: "Entry" },
               ].map((stat, i) => (
                 <Box
                   key={i}
@@ -1250,7 +1249,7 @@ const Events = () => {
         </Box>
       </Box>
 
-      {/* Bottom CTA Section */}
+      {/* Host Your Event Section */}
       <Box
         sx={{
           py: { xs: 10, md: 14 },
@@ -1271,7 +1270,7 @@ const Events = () => {
           }}
         />
 
-        <Container maxWidth="md">
+        <Container maxWidth="lg">
           <Box
             component={motion.div}
             initial={{ opacity: 0, y: 40 }}
@@ -1279,115 +1278,304 @@ const Events = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
             sx={{
-              textAlign: "center",
               position: "relative",
               zIndex: 1,
             }}
           >
-            {/* Decorative element */}
+            {/* Section Header */}
+            <Box sx={{ textAlign: "center", mb: { xs: 5, md: 6 } }}>
+              <Typography
+                sx={{
+                  color: "#D9A756",
+                  fontSize: "0.8rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.25em",
+                  textTransform: "uppercase",
+                  mb: 2,
+                }}
+              >
+                ◆ Book Brooklin Pub ◆
+              </Typography>
+              <Typography
+                sx={{
+                  fontFamily: '"Cormorant Garamond", Georgia, serif',
+                  fontSize: { xs: "2rem", md: "3rem" },
+                  fontWeight: 700,
+                  color: "#4A2C17",
+                  mb: 2,
+                  lineHeight: 1.2,
+                }}
+              >
+                Host Your Next{" "}
+                <Box component="span" sx={{ color: "#D9A756" }}>
+                  Celebration
+                </Box>
+              </Typography>
+              <Typography
+                sx={{
+                  fontFamily: '"Inter", sans-serif',
+                  fontSize: { xs: "1rem", md: "1.1rem" },
+                  color: "#6A3A1E",
+                  lineHeight: 1.8,
+                  maxWidth: 600,
+                  mx: "auto",
+                }}
+              >
+                From milestone birthdays to corporate team building, we've got
+                the space, the food, and the atmosphere to make your event
+                unforgettable.
+              </Typography>
+            </Box>
+
+            {/* Event Types Grid */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(4, 1fr)",
+                },
+                gap: 3,
+                mb: { xs: 5, md: 6 },
+              }}
+            >
+              {[
+                {
+                  icon: "🎂",
+                  title: "Birthday Parties",
+                  desc: "Make it a birthday to remember",
+                },
+                {
+                  icon: "🎓",
+                  title: "Graduations",
+                  desc: "Celebrate their achievement",
+                },
+                {
+                  icon: "💼",
+                  title: "Corporate Events",
+                  desc: "Team building & client entertainment",
+                },
+                {
+                  icon: "🎉",
+                  title: "Special Occasions",
+                  desc: "Anniversaries, reunions & more",
+                },
+              ].map((item, i) => (
+                <Box
+                  key={i}
+                  component={motion.div}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  sx={{
+                    p: 3,
+                    borderRadius: "20px",
+                    background: "rgba(255,255,255,0.8)",
+                    backdropFilter: "blur(10px)",
+                    border: "1px solid rgba(217,167,86,0.2)",
+                    textAlign: "center",
+                    transition: "all 0.3s ease",
+                    cursor: "pointer",
+                    "&:hover": {
+                      boxShadow: "0 15px 40px rgba(106,58,30,0.15)",
+                      borderColor: "rgba(217,167,86,0.4)",
+                    },
+                  }}
+                >
+                  <Typography sx={{ fontSize: "2.5rem", mb: 1.5 }}>
+                    {item.icon}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: '"Cormorant Garamond", Georgia, serif',
+                      fontSize: "1.2rem",
+                      fontWeight: 700,
+                      color: "#3C1F0E",
+                      mb: 0.5,
+                    }}
+                  >
+                    {item.title}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: '"Inter", sans-serif',
+                      fontSize: "0.85rem",
+                      color: "#6A3A1E",
+                    }}
+                  >
+                    {item.desc}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+
+            {/* Features & CTA */}
             <Box
               sx={{
                 display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: "center",
                 justifyContent: "center",
-                mb: 3,
+                gap: { xs: 4, md: 6 },
+                p: { xs: 3, md: 5 },
+                borderRadius: "24px",
+                background:
+                  "linear-gradient(145deg, rgba(255,255,255,0.9), rgba(253,248,243,0.8))",
+                border: "2px solid rgba(217,167,86,0.3)",
+                boxShadow: "0 20px 60px rgba(106,58,30,0.1)",
               }}
             >
+              {/* What We Offer */}
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  sx={{
+                    fontFamily: '"Cormorant Garamond", Georgia, serif',
+                    fontSize: { xs: "1.5rem", md: "1.8rem" },
+                    fontWeight: 700,
+                    color: "#3C1F0E",
+                    mb: 2,
+                  }}
+                >
+                  What We Offer
+                </Typography>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+                >
+                  {[
+                    "Private & semi-private spaces for 20-100 guests",
+                    "Customizable food & drink packages",
+                    "AV equipment for presentations",
+                    "Dedicated event coordinator",
+                    "Flexible booking times",
+                  ].map((feature, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #D9A756, #B08030)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: "#fff",
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                          }}
+                        >
+                          ✓
+                        </Typography>
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontFamily: '"Inter", sans-serif',
+                          fontSize: "0.95rem",
+                          color: "#4A2C17",
+                        }}
+                      >
+                        {feature}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* CTA Box */}
               <Box
                 sx={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: "50%",
+                  flex: { md: "0 0 auto" },
+                  textAlign: "center",
+                  p: { xs: 3, md: 4 },
+                  borderRadius: "20px",
                   background:
                     "linear-gradient(135deg, #6A3A1E 0%, #4A2C17 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 10px 30px rgba(106, 58, 30, 0.3)",
+                  boxShadow: "0 15px 40px rgba(106,58,30,0.35)",
+                  minWidth: { md: 280 },
                 }}
               >
-                <CalendarTodayOutlinedIcon
-                  sx={{ fontSize: 28, color: "#FFFDFB" }}
-                />
+                <Box
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: "50%",
+                    background: "rgba(217,167,86,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mx: "auto",
+                    mb: 2,
+                  }}
+                >
+                  <CalendarTodayOutlinedIcon
+                    sx={{ fontSize: 28, color: "#D9A756" }}
+                  />
+                </Box>
+                <Typography
+                  sx={{
+                    fontFamily: '"Cormorant Garamond", Georgia, serif',
+                    fontSize: "1.4rem",
+                    fontWeight: 700,
+                    color: "#FFFDFB",
+                    mb: 1,
+                  }}
+                >
+                  Ready to Plan?
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: '"Inter", sans-serif',
+                    fontSize: "0.9rem",
+                    color: "rgba(255,253,251,0.8)",
+                    mb: 3,
+                  }}
+                >
+                  Let's make your event special
+                </Typography>
+                <Box
+                  component={motion.a}
+                  href="/contactus?subject=event"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    px: 4,
+                    py: 1.5,
+                    background:
+                      "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
+                    borderRadius: "50px",
+                    color: "#FFFDFB",
+                    fontFamily: '"Inter", sans-serif',
+                    fontSize: "0.9rem",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    boxShadow: "0 8px 25px rgba(217,167,86,0.4)",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  Book Your Event
+                  <ArrowForwardIcon sx={{ fontSize: 18 }} />
+                </Box>
               </Box>
-            </Box>
-
-            <Typography
-              sx={{
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontSize: { xs: "2rem", md: "3rem" },
-                fontWeight: 700,
-                color: "#4A2C17",
-                mb: 2,
-                lineHeight: 1.2,
-              }}
-            >
-              Want to Host a{" "}
-              <Box component="span" sx={{ color: "#D9A756" }}>
-                Private Event?
-              </Box>
-            </Typography>
-
-            <Typography
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: { xs: "1rem", md: "1.1rem" },
-                color: "#6A3A1E",
-                mb: 5,
-                lineHeight: 1.8,
-                maxWidth: 550,
-                mx: "auto",
-              }}
-            >
-              The Brooklin Pub is the perfect venue for your next celebration.
-              From birthdays to corporate gatherings, we'll make your event
-              unforgettable.
-            </Typography>
-
-            <Box
-              component={motion.a}
-              href="/contactus"
-              whileHover={{ scale: 1.05, y: -3 }}
-              whileTap={{ scale: 0.98 }}
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 2,
-                px: 6,
-                py: 2.5,
-                background: "linear-gradient(135deg, #6A3A1E 0%, #4A2C17 100%)",
-                borderRadius: "50px",
-                color: "#FFFDFB",
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "1rem",
-                fontWeight: 700,
-                textDecoration: "none",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                boxShadow: "0 15px 40px rgba(106,58,30,0.35)",
-                transition: "all 0.3s ease",
-                position: "relative",
-                overflow: "hidden",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: "-100%",
-                  width: "100%",
-                  height: "100%",
-                  background:
-                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-                  transition: "left 0.5s ease",
-                },
-                "&:hover": {
-                  boxShadow: "0 20px 50px rgba(106,58,30,0.4)",
-                  "&::before": {
-                    left: "100%",
-                  },
-                },
-              }}
-            >
-              Get In Touch
-              <ArrowForwardIcon sx={{ fontSize: 20 }} />
             </Box>
           </Box>
         </Container>

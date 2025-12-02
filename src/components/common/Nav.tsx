@@ -3,14 +3,14 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
-// Modern, distinctive icons for bottom navigation
-import CottageRoundedIcon from "@mui/icons-material/CottageRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
-import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
-// Icons used inline elsewhere — legacy icons removed
-import AlternateEmailRoundedIcon from "@mui/icons-material/AlternateEmailRounded";
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
+// Modern, sleek icons for bottom navigation
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import RestaurantMenuRoundedIcon from "@mui/icons-material/RestaurantMenuRounded";
+import EventRoundedIcon from "@mui/icons-material/EventRounded";
+// Icons used inline elsewhere
+import MailRoundedIcon from "@mui/icons-material/MailRounded";
+import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
 import { Link } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -127,13 +127,13 @@ const Nav = () => {
       dropdown:
         primaryCategories && primaryCategories.length > 0
           ? primaryCategories
-            .filter((pc) => pc.isActive)
-            .sort((a, b) => a.sortOrder - b.sortOrder)
-            .map((pc) => ({
-              label: pc.name,
-              path: `/menu?category=${pc.id}`,
-              id: pc.id,
-            }))
+              .filter((pc) => pc.isActive)
+              .sort((a, b) => a.sortOrder - b.sortOrder)
+              .map((pc) => ({
+                label: pc.name,
+                path: `/menu?category=${pc.id}`,
+                id: pc.id,
+              }))
           : [],
     },
     {
@@ -327,17 +327,26 @@ const Nav = () => {
                       if (!item.path) return false;
                       try {
                         // Parse the item's path to handle query params (e.g. /menu?category=...)
-                        const parsed = new URL(item.path, window.location.origin);
+                        const parsed = new URL(
+                          item.path,
+                          window.location.origin
+                        );
                         // Match when pathname matches (or startsWith for nested routes)
-                        if (location.pathname.startsWith(parsed.pathname)) return true;
+                        if (location.pathname.startsWith(parsed.pathname))
+                          return true;
                         // If the item's path included a search (query), also compare search strings
-                        if (parsed.search && location.pathname === parsed.pathname) {
+                        if (
+                          parsed.search &&
+                          location.pathname === parsed.pathname
+                        ) {
                           return location.search.startsWith(parsed.search);
                         }
                         return false;
                       } catch (e) {
                         // Fallback: plain startsWith if URL parsing fails
-                        return location.pathname.startsWith(item.path as string);
+                        return location.pathname.startsWith(
+                          item.path as string
+                        );
                       }
                     })
                   : false;
@@ -921,19 +930,22 @@ const Nav = () => {
       <Box
         sx={{
           position: "fixed",
-          bottom: 12,
+          // Safe area inset for iOS devices with home indicator/notch
+          bottom: "max(12px, calc(env(safe-area-inset-bottom, 0px) + 8px))",
           left: "50%",
           transform: "translateX(-50%)",
-          width: "90%",
+          width:
+            "calc(90% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))",
           borderRadius: "50px",
-          background: "rgba(255, 255, 255, 0.69)",
+          background: "rgba(255, 255, 255, 0.85)",
           backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)", // Safari support
           boxShadow: "0 4px 24px rgba(0,0,0,0.20)",
           border: "1px solid rgba(255,255,255,0.35)",
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
-          height: "65px",
+          height: "50px",
           padding: "0 10px",
           zIndex: 2000,
         }}
@@ -944,17 +956,24 @@ const Nav = () => {
           component={Link}
           to="/"
           disableRipple
+          aria-label="Home"
           sx={{
-            minWidth: 0,
+            minWidth: 40,
+            minHeight: 40,
             color: location.pathname === "/" ? "#D9A756" : "#6A3A1E",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: 0,
+            p: 0.5,
+            borderRadius: "50%",
+            transition: "background-color 0.2s ease",
+            "&:active": {
+              backgroundColor: "rgba(217, 167, 86, 0.15)",
+            },
           }}
         >
-          <CottageRoundedIcon fontSize="medium" />
+          <HomeRoundedIcon sx={{ fontSize: 22 }} />
         </Button>
 
         {/* About */}
@@ -962,8 +981,10 @@ const Nav = () => {
           component={Link}
           to="/about"
           disableRipple
+          aria-label="About Us"
           sx={{
-            minWidth: 0,
+            minWidth: 40,
+            minHeight: 40,
             color: location.pathname.startsWith("/about")
               ? "#D9A756"
               : "#6A3A1E",
@@ -971,10 +992,15 @@ const Nav = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: 0,
+            p: 0.5,
+            borderRadius: "50%",
+            transition: "background-color 0.2s ease",
+            "&:active": {
+              backgroundColor: "rgba(217, 167, 86, 0.15)",
+            },
           }}
         >
-          <InfoOutlinedIcon fontSize="medium" />
+          <InfoRoundedIcon sx={{ fontSize: 22 }} />
         </Button>
 
         {/* Events */}
@@ -982,8 +1008,10 @@ const Nav = () => {
           component={Link}
           to="/events"
           disableRipple
+          aria-label="Events"
           sx={{
-            minWidth: 0,
+            minWidth: 40,
+            minHeight: 40,
             color: location.pathname.startsWith("/events")
               ? "#D9A756"
               : "#6A3A1E",
@@ -991,18 +1019,25 @@ const Nav = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: 0,
+            p: 0.5,
+            borderRadius: "50%",
+            transition: "background-color 0.2s ease",
+            "&:active": {
+              backgroundColor: "rgba(217, 167, 86, 0.15)",
+            },
           }}
         >
-          <CalendarMonthRoundedIcon fontSize="medium" />
+          <EventRoundedIcon sx={{ fontSize: 22 }} />
         </Button>
 
         {/* Menu */}
         <Button
           onClick={() => setMobileOpenParent("Menu")}
           disableRipple
+          aria-label="Menu"
           sx={{
-            minWidth: 0,
+            minWidth: 40,
+            minHeight: 40,
             color: location.pathname.startsWith("/menu")
               ? "#D9A756"
               : "#6A3A1E",
@@ -1010,19 +1045,25 @@ const Nav = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: 0,
+            p: 0.5,
+            borderRadius: "50%",
+            transition: "background-color 0.2s ease",
+            "&:active": {
+              backgroundColor: "rgba(217, 167, 86, 0.15)",
+            },
           }}
         >
-          <MenuBookRoundedIcon fontSize="medium" />
+          <RestaurantMenuRoundedIcon sx={{ fontSize: 22 }} />
         </Button>
 
         {/* Special */}
         <Button
-          component={Link}
-          to="/special/daily"
+          onClick={() => setMobileOpenParent("Special")}
           disableRipple
+          aria-label="Specials"
           sx={{
-            minWidth: 0,
+            minWidth: 40,
+            minHeight: 40,
             color: location.pathname.startsWith("/special")
               ? "#D9A756"
               : "#6A3A1E",
@@ -1030,10 +1071,15 @@ const Nav = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: 0,
+            p: 0.5,
+            borderRadius: "50%",
+            transition: "background-color 0.2s ease",
+            "&:active": {
+              backgroundColor: "rgba(217, 167, 86, 0.15)",
+            },
           }}
         >
-          <StarRoundedIcon fontSize="medium" />
+          <LocalFireDepartmentRoundedIcon sx={{ fontSize: 22 }} />
         </Button>
 
         {/* Contact */}
@@ -1041,8 +1087,10 @@ const Nav = () => {
           component={Link}
           to="/contactus"
           disableRipple
+          aria-label="Contact Us"
           sx={{
-            minWidth: 0,
+            minWidth: 40,
+            minHeight: 40,
             color: location.pathname.startsWith("/contactus")
               ? "#D9A756"
               : "#6A3A1E",
@@ -1050,10 +1098,15 @@ const Nav = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: 0,
+            p: 0.5,
+            borderRadius: "50%",
+            transition: "background-color 0.2s ease",
+            "&:active": {
+              backgroundColor: "rgba(217, 167, 86, 0.15)",
+            },
           }}
         >
-          <AlternateEmailRoundedIcon fontSize="medium" />
+          <MailRoundedIcon sx={{ fontSize: 22 }} />
         </Button>
       </Box>
 
@@ -1097,13 +1150,13 @@ const Nav = () => {
                       <ListItemButton
                         onClick={() => {
                           const targetPath = d.path;
+                          // Close dialog and navigate immediately
                           setMobileOpenParent(null);
                           setExpandedCategory(null);
-                          setTimeout(() => {
-                            if (targetPath) {
-                              navigate(targetPath);
-                            }
-                          }, 100);
+                          if (targetPath) {
+                            // Navigate immediately without timeout
+                            navigate(targetPath);
+                          }
                         }}
                         sx={{
                           justifyContent: "center",
@@ -1123,9 +1176,7 @@ const Nav = () => {
                               fontFamily: '"Inter", sans-serif',
                               fontWeight: 500,
                               fontSize: "1rem",
-                              color: isSelectedByQuery
-                                ? "#D9A756"
-                                : "#3C1F0E",
+                              color: isSelectedByQuery ? "#D9A756" : "#3C1F0E",
                             },
                           }}
                         />
@@ -1137,8 +1188,10 @@ const Nav = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Spacer */}
-      <Toolbar sx={{ minHeight: 75 }} />
+      {/* Spacer to account for bottom nav with safe area */}
+      <Toolbar
+        sx={{ minHeight: "calc(60px + env(safe-area-inset-bottom, 0px))" }}
+      />
     </>
   );
 };

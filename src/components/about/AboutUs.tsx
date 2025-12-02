@@ -55,11 +55,12 @@ export default function AboutUs() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Component is fully visible when intersection ratio is >= 95%
-        setIsFullyVisible(entry.intersectionRatio >= 0.95);
+        // Use lower threshold on mobile for better UX
+        const visibilityThreshold = isMobile ? 0.8 : 0.95;
+        setIsFullyVisible(entry.intersectionRatio >= visibilityThreshold);
       },
       {
-        threshold: [0, 0.25, 0.5, 0.75, 0.95, 1], // Multiple thresholds for smooth detection
+        threshold: [0, 0.25, 0.5, 0.75, 0.8, 0.95, 1],
         rootMargin: "0px",
       }
     );
@@ -73,7 +74,7 @@ export default function AboutUs() {
         observer.unobserve(containerRef.current);
       }
     };
-  }, []);
+  }, [isMobile]);
 
   // Update viewed pages when pageIndex changes
   useEffect(() => {
@@ -93,10 +94,11 @@ export default function AboutUs() {
 
   // Prevent page scrolling ONLY when component is fully visible AND not all slides viewed
   useEffect(() => {
-    const shouldLockScroll = isFullyVisible && !allPagesViewed;
+    // On mobile, be less aggressive with scroll locking to avoid confusion
+    const shouldLockScroll = isFullyVisible && !allPagesViewed && !isMobile;
 
     if (shouldLockScroll) {
-      // Lock body scroll when component is visible and slides not complete
+      // Lock body scroll when component is visible and slides not complete (desktop only)
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
     } else {
@@ -110,7 +112,7 @@ export default function AboutUs() {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     };
-  }, [isFullyVisible, allPagesViewed]);
+  }, [isFullyVisible, allPagesViewed, isMobile]);
 
   const randomDirection = () => {
     const dirs = ["left", "right", "top", "bottom"];
@@ -162,6 +164,7 @@ export default function AboutUs() {
   const allPagesViewedRef = useRef(allPagesViewed);
   const scrollEnabledRef = useRef(scrollEnabled);
   const isHoveringRef = useRef(isHovering);
+  const isMobileRef = useRef(isMobile);
 
   useEffect(() => {
     isFullyVisibleRef.current = isFullyVisible;
@@ -175,6 +178,9 @@ export default function AboutUs() {
   useEffect(() => {
     isHoveringRef.current = isHovering;
   }, [isHovering]);
+  useEffect(() => {
+    isMobileRef.current = isMobile;
+  }, [isMobile]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -201,46 +207,66 @@ export default function AboutUs() {
     };
 
     const touchStartHandler = (e: TouchEvent) => {
-      if (isFullyVisibleRef.current && !allPagesViewedRef.current) {
-        e.preventDefault();
-      }
+      // On mobile, only prevent default if within the component
+      // Don't prevent default to allow users to scroll past the section
       touchStartY.current = e.touches[0]?.clientY ?? null;
     };
 
-    const touchEndHandler = (e: TouchEvent) => {
-      if (isFullyVisibleRef.current && !allPagesViewedRef.current) {
-        e.preventDefault();
-
-        if (!scrollEnabledRef.current || touchStartY.current === null) return;
-
-        const touchEndY = e.changedTouches[0]?.clientY ?? null;
-        if (touchEndY === null) return;
-        const diff = touchStartY.current - touchEndY;
-
-        if (Math.abs(diff) > 50) {
-          setScrollEnabled(false);
-          setDirection(randomDirection());
-
-          if (diff > 0) {
-            setPageIndex((prev) => (prev + 1) % pages.length);
-          } else {
-            setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
-          }
-
-          setTimeout(() => setScrollEnabled(true), 1000);
+    const touchMoveHandler = (e: TouchEvent) => {
+      // Only prevent scroll if we're in swipe mode and slides not complete
+      if (
+        isMobileRef.current &&
+        isFullyVisibleRef.current &&
+        !allPagesViewedRef.current &&
+        touchStartY.current !== null
+      ) {
+        const currentY = e.touches[0]?.clientY ?? null;
+        if (currentY === null) return;
+        const diff = Math.abs(touchStartY.current - currentY);
+        // Only prevent if it's a significant vertical swipe
+        if (diff > 10) {
+          e.preventDefault();
         }
-
-        touchStartY.current = null;
       }
     };
 
+    const touchEndHandler = (e: TouchEvent) => {
+      if (touchStartY.current === null) return;
+
+      const touchEndY = e.changedTouches[0]?.clientY ?? null;
+      if (touchEndY === null) {
+        touchStartY.current = null;
+        return;
+      }
+
+      const diff = touchStartY.current - touchEndY;
+
+      // Only change slides if swipe is significant enough
+      if (Math.abs(diff) > 60 && scrollEnabledRef.current) {
+        setScrollEnabled(false);
+        setDirection(randomDirection());
+
+        if (diff > 0) {
+          setPageIndex((prev) => (prev + 1) % pages.length);
+        } else {
+          setPageIndex((prev) => (prev === 0 ? pages.length - 1 : prev - 1));
+        }
+
+        setTimeout(() => setScrollEnabled(true), 800);
+      }
+
+      touchStartY.current = null;
+    };
+
     el.addEventListener("wheel", wheelHandler, { passive: false });
-    el.addEventListener("touchstart", touchStartHandler, { passive: false });
-    el.addEventListener("touchend", touchEndHandler, { passive: false });
+    el.addEventListener("touchstart", touchStartHandler, { passive: true });
+    el.addEventListener("touchmove", touchMoveHandler, { passive: false });
+    el.addEventListener("touchend", touchEndHandler, { passive: true });
 
     return () => {
       el.removeEventListener("wheel", wheelHandler);
       el.removeEventListener("touchstart", touchStartHandler);
+      el.removeEventListener("touchmove", touchMoveHandler);
       el.removeEventListener("touchend", touchEndHandler);
     };
     // Intentionally do not include refs in deps — handlers read latest via refs
@@ -252,34 +278,102 @@ export default function AboutUs() {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       sx={{
-        height: "100vh",
+        height: { xs: "70vh", md: "80vh" },
         width: "100%",
         overflow: "hidden",
         position: "relative",
         backgroundColor: "transparent",
-        cursor: isHovering ? "ns-resize" : "default",
+        cursor: isHovering && !isMobile ? "ns-resize" : "default",
+        // Prevent overscroll effects on iOS
+        WebkitOverflowScrolling: "touch",
+        touchAction: allPagesViewed ? "auto" : "pan-x",
       }}
     >
+      {/* Mobile swipe hint - show until user has swiped */}
+      {isMobile && !allPagesViewed && pageIndex === 0 && (
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
+          sx={{
+            position: "absolute",
+            bottom: 100,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 15,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0.5,
+          }}
+        >
+          <Box
+            component={motion.div}
+            animate={{ y: [0, -8, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            sx={{
+              width: 24,
+              height: 40,
+              borderRadius: 12,
+              border: "2px solid rgba(255,253,251,0.6)",
+              display: "flex",
+              justifyContent: "center",
+              paddingTop: "8px",
+            }}
+          >
+            <Box
+              sx={{
+                width: 4,
+                height: 8,
+                borderRadius: 2,
+                backgroundColor: "rgba(255,253,251,0.8)",
+              }}
+            />
+          </Box>
+          <Typography
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: "0.7rem",
+              color: "rgba(255,253,251,0.7)",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+            }}
+          >
+            Swipe
+          </Typography>
+        </Box>
+      )}
       {/* Pagination dots */}
       <Box
         sx={{
           position: "absolute",
-          right: isMobile ? 10 : 20,
+          // On mobile, position further from edge to avoid accidental taps near screen edge
+          right: isMobile ? 16 : 20,
           top: "50%",
           transform: "translateY(-50%)",
           display: "flex",
           flexDirection: "column",
-          gap: 1,
+          gap: isMobile ? 1.5 : 1,
           zIndex: 10,
+          // Add touch-friendly padding on mobile
+          padding: isMobile ? "8px" : 0,
         }}
       >
         {pages.map((_, idx) => (
           <Box
             key={idx}
-            onClick={() => setPageIndex(idx)}
+            onClick={() => {
+              if (!scrollEnabled) return;
+              setScrollEnabled(false);
+              setDirection(randomDirection());
+              setPageIndex(idx);
+              setTimeout(() => setScrollEnabled(true), 800);
+            }}
             sx={{
-              width: isMobile ? 8 : 12,
-              height: isMobile ? 8 : 12,
+              // Larger touch targets on mobile
+              width: isMobile ? 12 : 12,
+              height: isMobile ? 12 : 12,
               borderRadius: "50%",
               backgroundColor:
                 idx === pageIndex ? "#FFFDFB" : "rgba(255,253,251,0.6)",
@@ -288,6 +382,16 @@ export default function AboutUs() {
               boxShadow:
                 idx === pageIndex ? "0 2px 8px rgba(106,58,30,0.3)" : "none",
               transition: "all 0.3s ease",
+              // Add minimum touch area via pseudo-element
+              position: "relative",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: "-8px",
+                left: "-8px",
+                right: "-8px",
+                bottom: "-8px",
+              },
             }}
           />
         ))}

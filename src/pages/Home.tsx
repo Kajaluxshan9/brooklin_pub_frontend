@@ -4,7 +4,13 @@ import EventsSection from "../components/home/eventSection";
 import TeamSection from "../components/home/TeamSection";
 import Footer from "../components/common/Footer";
 import { HomeSEO } from "../config/seo.presets";
-import { Box, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import BgImage from "../assets/images/hero-bg.jpg";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
@@ -80,6 +86,11 @@ const HeroMiddleSection = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // Reduce particle count on mobile for performance
+  const particleCount = isMobile ? 8 : 20;
 
   useEffect(() => {
     if (isInView && contentRef.current) {
@@ -117,7 +128,8 @@ const HeroMiddleSection = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        backgroundAttachment: { md: "fixed" },
+        // Fixed attachment doesn't work on iOS Safari, use scroll on mobile
+        backgroundAttachment: { xs: "scroll", md: "fixed" },
         position: "relative",
         overflow: "hidden",
         "&::before": {
@@ -133,7 +145,7 @@ const HeroMiddleSection = () => {
         },
       }}
     >
-      {/* Decorative floating particles */}
+      {/* Decorative floating particles - reduced on mobile */}
       <Box
         sx={{
           position: "absolute",
@@ -143,7 +155,7 @@ const HeroMiddleSection = () => {
           overflow: "hidden",
         }}
       >
-        {[...Array(20)].map((_, i) => (
+        {[...Array(particleCount)].map((_, i) => (
           <Box
             key={i}
             component={motion.div}
@@ -164,42 +176,46 @@ const HeroMiddleSection = () => {
               height: `${3 + (i % 4) * 2}px`,
               borderRadius: "50%",
               background: i % 3 === 0 ? "#D9A756" : "rgba(255,253,251,0.4)",
-              top: `${5 + i * 4.5}%`,
-              left: `${3 + i * 5}%`,
+              top: `${5 + i * (isMobile ? 10 : 4.5)}%`,
+              left: `${3 + i * (isMobile ? 10 : 5)}%`,
             }}
           />
         ))}
       </Box>
 
-      {/* Decorative Rings */}
-      <Box
-        component={motion.div}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
-        sx={{
-          position: "absolute",
-          width: { xs: "300px", md: "500px" },
-          height: { xs: "300px", md: "500px" },
-          border: "1px solid rgba(217,167,86,0.15)",
-          borderRadius: "50%",
-          zIndex: 2,
-          pointerEvents: "none",
-        }}
-      />
-      <Box
-        component={motion.div}
-        animate={{ rotate: -360 }}
-        transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
-        sx={{
-          position: "absolute",
-          width: { xs: "350px", md: "600px" },
-          height: { xs: "350px", md: "600px" },
-          border: "1px solid rgba(217,167,86,0.08)",
-          borderRadius: "50%",
-          zIndex: 2,
-          pointerEvents: "none",
-        }}
-      />
+      {/* Decorative Rings - hide on mobile for performance */}
+      {!isMobile && (
+        <>
+          <Box
+            component={motion.div}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
+            sx={{
+              position: "absolute",
+              width: { xs: "300px", md: "500px" },
+              height: { xs: "300px", md: "500px" },
+              border: "1px solid rgba(217,167,86,0.15)",
+              borderRadius: "50%",
+              zIndex: 2,
+              pointerEvents: "none",
+            }}
+          />
+          <Box
+            component={motion.div}
+            animate={{ rotate: -360 }}
+            transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
+            sx={{
+              position: "absolute",
+              width: { xs: "350px", md: "600px" },
+              height: { xs: "350px", md: "600px" },
+              border: "1px solid rgba(217,167,86,0.08)",
+              borderRadius: "50%",
+              zIndex: 2,
+              pointerEvents: "none",
+            }}
+          />
+        </>
+      )}
 
       {/* Content */}
       <Box
@@ -345,13 +361,14 @@ const HeroMiddleSection = () => {
             onClick={() => navigate("/menu")}
             sx={{
               px: { xs: 4, md: 5 },
-              py: { xs: 1.5, md: 2 },
+              py: { xs: 1.75, md: 2 },
+              minHeight: { xs: 52, md: "auto" }, // Touch-friendly height
               background: "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
               border: "none",
               borderRadius: "50px",
               color: "#FFFDFB",
               fontFamily: '"Inter", sans-serif',
-              fontSize: { xs: "0.85rem", md: "0.95rem" },
+              fontSize: { xs: "0.9rem", md: "0.95rem" },
               fontWeight: 700,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
@@ -376,6 +393,9 @@ const HeroMiddleSection = () => {
                   left: "100%",
                 },
               },
+              "&:active": {
+                boxShadow: "0 5px 20px rgba(217,167,86,0.4)",
+              },
             }}
           >
             Explore Menu
@@ -388,13 +408,14 @@ const HeroMiddleSection = () => {
             onClick={() => navigate("/about")}
             sx={{
               px: { xs: 4, md: 5 },
-              py: { xs: 1.5, md: 2 },
+              py: { xs: 1.75, md: 2 },
+              minHeight: { xs: 52, md: "auto" }, // Touch-friendly height
               background: "transparent",
               border: "2px solid rgba(217,167,86,0.6)",
               borderRadius: "50px",
               color: "#D9A756",
               fontFamily: '"Inter", sans-serif',
-              fontSize: { xs: "0.85rem", md: "0.95rem" },
+              fontSize: { xs: "0.9rem", md: "0.95rem" },
               fontWeight: 700,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
@@ -404,6 +425,9 @@ const HeroMiddleSection = () => {
                 background: "rgba(217,167,86,0.15)",
                 borderColor: "#D9A756",
                 boxShadow: "0 8px 25px rgba(217,167,86,0.2)",
+              },
+              "&:active": {
+                background: "rgba(217,167,86,0.25)",
               },
             }}
           >
@@ -447,6 +471,12 @@ const HeroMiddleSection = () => {
 };
 
 const Home = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // Reduce popup particle count on mobile for performance
+  const popupParticleCount = isMobile ? 6 : 15;
+
   // Fetch active specials from backend
   const { data: specialsData } = useApiWithCache<Special[]>(
     "active-specials-popup",
@@ -517,87 +547,90 @@ const Home = () => {
                 top: 0,
                 left: 0,
                 width: "100vw",
-                height: "100vh",
+                height: "100dvh", // Use dvh for better mobile viewport handling
                 background: "rgba(26, 13, 10, 0.85)",
                 backdropFilter: "blur(20px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 zIndex: 999999999,
+                padding: isMobile ? "16px" : "24px",
               }}
               onClick={() => setShowSlideshow(false)}
             >
-              {/* Animated background elements */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  pointerEvents: "none",
-                  overflow: "hidden",
-                }}
-              >
-                {/* Floating gold particles */}
-                {[...Array(15)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={{
-                      y: [0, -30, 0],
-                      x: [0, i % 2 === 0 ? 15 : -15, 0],
-                      opacity: [0.1, 0.4, 0.1],
-                    }}
-                    transition={{
-                      duration: 4 + i * 0.3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: i * 0.15,
-                    }}
+              {/* Animated background elements - reduced on mobile */}
+              {!isMobile && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.8 }}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    pointerEvents: "none",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Floating gold particles */}
+                  {[...Array(popupParticleCount)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{
+                        y: [0, -30, 0],
+                        x: [0, i % 2 === 0 ? 15 : -15, 0],
+                        opacity: [0.1, 0.4, 0.1],
+                      }}
+                      transition={{
+                        duration: 4 + i * 0.3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: i * 0.15,
+                      }}
+                      style={{
+                        position: "absolute",
+                        width: `${4 + (i % 3) * 2}px`,
+                        height: `${4 + (i % 3) * 2}px`,
+                        borderRadius: "50%",
+                        background: "#D9A756",
+                        top: `${8 + i * 6}%`,
+                        left: `${5 + i * 6}%`,
+                        boxShadow: "0 0 10px rgba(217,167,86,0.5)",
+                      }}
+                    />
+                  ))}
+
+                  {/* Large ambient glow */}
+                  <div
                     style={{
                       position: "absolute",
-                      width: `${4 + (i % 3) * 2}px`,
-                      height: `${4 + (i % 3) * 2}px`,
+                      top: "20%",
+                      left: "10%",
+                      width: "400px",
+                      height: "400px",
+                      background:
+                        "radial-gradient(circle, rgba(217,167,86,0.15) 0%, transparent 70%)",
                       borderRadius: "50%",
-                      background: "#D9A756",
-                      top: `${8 + i * 6}%`,
-                      left: `${5 + i * 6}%`,
-                      boxShadow: "0 0 10px rgba(217,167,86,0.5)",
+                      filter: "blur(60px)",
                     }}
                   />
-                ))}
-
-                {/* Large ambient glow */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "20%",
-                    left: "10%",
-                    width: "400px",
-                    height: "400px",
-                    background:
-                      "radial-gradient(circle, rgba(217,167,86,0.15) 0%, transparent 70%)",
-                    borderRadius: "50%",
-                    filter: "blur(60px)",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "10%",
-                    right: "10%",
-                    width: "350px",
-                    height: "350px",
-                    background:
-                      "radial-gradient(circle, rgba(139,90,43,0.12) 0%, transparent 70%)",
-                    borderRadius: "50%",
-                    filter: "blur(60px)",
-                  }}
-                />
-              </motion.div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "10%",
+                      right: "10%",
+                      width: "350px",
+                      height: "350px",
+                      background:
+                        "radial-gradient(circle, rgba(139,90,43,0.12) 0%, transparent 70%)",
+                      borderRadius: "50%",
+                      filter: "blur(60px)",
+                    }}
+                  />
+                </motion.div>
+              )}
 
               <motion.div
                 onClick={(e) => e.stopPropagation()}
@@ -607,15 +640,16 @@ const Home = () => {
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
                 style={{
                   position: "relative",
-                  width: "min(900px, 90vw)",
-                  maxHeight: "88vh",
+                  width: isMobile ? "100%" : "min(900px, 90vw)",
+                  maxWidth: "900px",
+                  maxHeight: isMobile ? "calc(100dvh - 32px)" : "88vh",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   background:
                     "linear-gradient(180deg, rgba(255,253,251,0.98) 0%, rgba(250,247,242,0.98) 100%)",
-                  borderRadius: "32px",
-                  padding: "24px",
+                  borderRadius: isMobile ? "24px" : "32px",
+                  padding: isMobile ? "16px" : "24px",
                   boxShadow:
                     "0 40px 100px rgba(0,0,0,0.4), 0 0 0 1px rgba(217,167,86,0.3), inset 0 1px 0 rgba(255,255,255,0.8)",
                   overflow: "hidden",
@@ -636,57 +670,61 @@ const Home = () => {
                   }}
                 />
 
-                {/* Corner decorations */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "16px",
-                    left: "16px",
-                    width: "40px",
-                    height: "40px",
-                    borderLeft: "2px solid rgba(217,167,86,0.4)",
-                    borderTop: "2px solid rgba(217,167,86,0.4)",
-                    borderRadius: "8px 0 0 0",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "16px",
-                    right: "16px",
-                    width: "40px",
-                    height: "40px",
-                    borderRight: "2px solid rgba(217,167,86,0.4)",
-                    borderTop: "2px solid rgba(217,167,86,0.4)",
-                    borderRadius: "0 8px 0 0",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "16px",
-                    left: "16px",
-                    width: "40px",
-                    height: "40px",
-                    borderLeft: "2px solid rgba(217,167,86,0.4)",
-                    borderBottom: "2px solid rgba(217,167,86,0.4)",
-                    borderRadius: "0 0 0 8px",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "16px",
-                    right: "16px",
-                    width: "40px",
-                    height: "40px",
-                    borderRight: "2px solid rgba(217,167,86,0.4)",
-                    borderBottom: "2px solid rgba(217,167,86,0.4)",
-                    borderRadius: "0 0 8px 0",
-                  }}
-                />
+                {/* Corner decorations - hide on mobile */}
+                {!isMobile && (
+                  <>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "16px",
+                        left: "16px",
+                        width: "40px",
+                        height: "40px",
+                        borderLeft: "2px solid rgba(217,167,86,0.4)",
+                        borderTop: "2px solid rgba(217,167,86,0.4)",
+                        borderRadius: "8px 0 0 0",
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "16px",
+                        right: "16px",
+                        width: "40px",
+                        height: "40px",
+                        borderRight: "2px solid rgba(217,167,86,0.4)",
+                        borderTop: "2px solid rgba(217,167,86,0.4)",
+                        borderRadius: "0 8px 0 0",
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "16px",
+                        left: "16px",
+                        width: "40px",
+                        height: "40px",
+                        borderLeft: "2px solid rgba(217,167,86,0.4)",
+                        borderBottom: "2px solid rgba(217,167,86,0.4)",
+                        borderRadius: "0 0 0 8px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "16px",
+                        right: "16px",
+                        width: "40px",
+                        height: "40px",
+                        borderRight: "2px solid rgba(217,167,86,0.4)",
+                        borderBottom: "2px solid rgba(217,167,86,0.4)",
+                        borderRadius: "0 0 8px 0",
+                      }}
+                    />
+                  </>
+                )}
 
-                {/* Close button - premium style */}
+                {/* Close button - premium style with larger touch target on mobile */}
                 <motion.button
                   onClick={() => setShowSlideshow(false)}
                   aria-label="Close popup"
@@ -694,10 +732,10 @@ const Home = () => {
                   whileTap={{ scale: 0.9 }}
                   style={{
                     position: "absolute",
-                    top: "20px",
-                    right: "20px",
-                    width: "44px",
-                    height: "44px",
+                    top: isMobile ? "12px" : "20px",
+                    right: isMobile ? "12px" : "20px",
+                    width: isMobile ? "48px" : "44px",
+                    height: isMobile ? "48px" : "44px",
                     borderRadius: "50%",
                     background:
                       "linear-gradient(135deg, rgba(106,58,30,0.1) 0%, rgba(106,58,30,0.05) 100%)",
@@ -780,7 +818,7 @@ const Home = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: "12px",
+                    padding: isMobile ? "8px" : "12px",
                   }}
                 >
                   <AnimatePresence mode="wait">
@@ -794,30 +832,34 @@ const Home = () => {
                       transition={{ duration: 0.4 }}
                       style={{
                         maxWidth: "100%",
-                        maxHeight: "calc(88vh - 200px)",
+                        maxHeight: isMobile
+                          ? "calc(100dvh - 260px)"
+                          : "calc(88vh - 200px)",
                         objectFit: "contain",
-                        borderRadius: "20px",
+                        borderRadius: isMobile ? "16px" : "20px",
                         boxShadow:
                           "0 20px 60px rgba(106,58,30,0.25), 0 0 0 1px rgba(217,167,86,0.2)",
                       }}
                     />
                   </AnimatePresence>
 
-                  {/* Image glow effect */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "0",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "60%",
-                      height: "40px",
-                      background:
-                        "radial-gradient(ellipse, rgba(217,167,86,0.2) 0%, transparent 70%)",
-                      filter: "blur(15px)",
-                      pointerEvents: "none",
-                    }}
-                  />
+                  {/* Image glow effect - hide on mobile */}
+                  {!isMobile && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "0",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: "60%",
+                        height: "40px",
+                        background:
+                          "radial-gradient(ellipse, rgba(217,167,86,0.2) 0%, transparent 70%)",
+                        filter: "blur(15px)",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
                 </motion.div>
 
                 {/* Card info and navigation - premium style */}
@@ -830,12 +872,12 @@ const Home = () => {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    marginTop: "16px",
-                    paddingTop: "16px",
+                    marginTop: isMobile ? "12px" : "16px",
+                    paddingTop: isMobile ? "12px" : "16px",
                     borderTop: "1px solid rgba(217,167,86,0.2)",
                   }}
                 >
-                  {/* Left arrow - premium */}
+                  {/* Left arrow - premium with larger touch target on mobile */}
                   <motion.button
                     aria-label="Previous slide"
                     whileHover={{ scale: 1.1, x: -3 }}
@@ -847,8 +889,8 @@ const Home = () => {
                       );
                     }}
                     style={{
-                      width: "50px",
-                      height: "50px",
+                      width: isMobile ? "52px" : "50px",
+                      height: isMobile ? "52px" : "50px",
                       borderRadius: "50%",
                       background:
                         "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
@@ -859,6 +901,7 @@ const Home = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       boxShadow: "0 8px 24px rgba(217,167,86,0.35)",
+                      flexShrink: 0,
                     }}
                   >
                     <svg
@@ -879,7 +922,8 @@ const Home = () => {
                     style={{
                       textAlign: "center",
                       flex: 1,
-                      padding: "0 20px",
+                      padding: isMobile ? "0 12px" : "0 20px",
+                      minWidth: 0,
                     }}
                   >
                     <AnimatePresence mode="wait">
@@ -892,10 +936,15 @@ const Home = () => {
                         style={{
                           margin: "0 0 12px 0",
                           fontFamily: '"Cormorant Garamond", Georgia, serif',
-                          fontSize: "clamp(1.3rem, 3vw, 1.8rem)",
+                          fontSize: isMobile
+                            ? "clamp(1.1rem, 4vw, 1.4rem)"
+                            : "clamp(1.3rem, 3vw, 1.8rem)",
                           fontWeight: 700,
                           color: "#3C1F0E",
                           letterSpacing: "-0.01em",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {popupCards[slideshowIndex].title}
@@ -908,7 +957,7 @@ const Home = () => {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          gap: "10px",
+                          gap: isMobile ? "8px" : "10px",
                           alignItems: "center",
                         }}
                       >
@@ -923,7 +972,14 @@ const Home = () => {
                             whileHover={{ scale: 1.2 }}
                             whileTap={{ scale: 0.9 }}
                             animate={{
-                              width: idx === slideshowIndex ? 28 : 10,
+                              width:
+                                idx === slideshowIndex
+                                  ? isMobile
+                                    ? 24
+                                    : 28
+                                  : isMobile
+                                  ? 12
+                                  : 10,
                               background:
                                 idx === slideshowIndex
                                   ? "linear-gradient(90deg, #D9A756, #B08030)"
@@ -931,14 +987,16 @@ const Home = () => {
                             }}
                             transition={{ duration: 0.3 }}
                             style={{
-                              height: "10px",
-                              borderRadius: "5px",
+                              height: isMobile ? "12px" : "10px",
+                              borderRadius: "6px",
                               border: "none",
                               cursor: "pointer",
                               boxShadow:
                                 idx === slideshowIndex
                                   ? "0 2px 8px rgba(217,167,86,0.4)"
                                   : "none",
+                              // Larger touch target with padding
+                              padding: isMobile ? "4px" : 0,
                             }}
                           />
                         ))}
@@ -946,7 +1004,7 @@ const Home = () => {
                     )}
                   </div>
 
-                  {/* Right arrow - premium */}
+                  {/* Right arrow - premium with larger touch target on mobile */}
                   <motion.button
                     aria-label="Next slide"
                     whileHover={{ scale: 1.1, x: 3 }}
@@ -956,8 +1014,8 @@ const Home = () => {
                       setSlideshowIndex((i) => (i + 1) % popupCards.length);
                     }}
                     style={{
-                      width: "50px",
-                      height: "50px",
+                      width: isMobile ? "52px" : "50px",
+                      height: isMobile ? "52px" : "50px",
                       borderRadius: "50%",
                       background:
                         "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
@@ -968,6 +1026,7 @@ const Home = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       boxShadow: "0 8px 24px rgba(217,167,86,0.35)",
+                      flexShrink: 0,
                     }}
                   >
                     <svg
@@ -990,20 +1049,23 @@ const Home = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                   style={{
-                    marginTop: "16px",
+                    marginTop: isMobile ? "12px" : "16px",
                     textAlign: "center",
+                    paddingBottom: isMobile ? "env(safe-area-inset-bottom)" : 0,
                   }}
                 >
                   <p
                     style={{
                       margin: 0,
                       fontFamily: '"Inter", sans-serif',
-                      fontSize: "0.8rem",
+                      fontSize: isMobile ? "0.75rem" : "0.8rem",
                       color: "rgba(106,58,30,0.6)",
                       letterSpacing: "0.05em",
                     }}
                   >
-                    Click anywhere to continue
+                    {isMobile
+                      ? "Tap anywhere to continue"
+                      : "Click anywhere to continue"}
                   </p>
                 </motion.div>
               </motion.div>

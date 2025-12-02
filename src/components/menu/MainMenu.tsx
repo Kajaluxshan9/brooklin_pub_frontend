@@ -6,6 +6,8 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import { useApiWithCache } from "../../hooks/useApi";
 import { menuService } from "../../services/menu.service";
 import { getImageUrl } from "../../services/api";
@@ -55,6 +57,8 @@ const imageVariants = {
 
 export default function MainMenu() {
   const ref = useRef<HTMLDivElement | null>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Fetch data from backend
   const { data: categories } = useApiWithCache<MenuCategory[]>(
@@ -91,6 +95,7 @@ export default function MainMenu() {
 
   const [selectedItem, setSelectedItem] = useState<MenuEntry | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [activeCard, setActiveCard] = useState<number | null>(null); // For touch devices
 
   // Transform backend data to UI format
   const transformedMenuData = useMemo((): MenuEntry[] => {
@@ -254,7 +259,7 @@ export default function MainMenu() {
         }}
       >
         {filteredMenu.map((item: MenuEntry, idx: number) => {
-          const isHovered = hoveredCard === idx;
+          const isHovered = hoveredCard === idx || activeCard === idx;
           const cardColors = [
             {
               bg: "linear-gradient(145deg, #6A3A1E 0%, #4A2C17 100%)",
@@ -278,9 +283,18 @@ export default function MainMenu() {
               initial="hidden"
               animate="visible"
               whileHover="hover"
+              whileTap={{ scale: 0.98 }}
               variants={cardVariants}
               onHoverStart={() => setHoveredCard(idx)}
               onHoverEnd={() => setHoveredCard(null)}
+              onTouchStart={() => {
+                // On touch, show hover state briefly
+                setActiveCard(idx);
+              }}
+              onTouchEnd={() => {
+                // Keep active briefly for visual feedback
+                setTimeout(() => setActiveCard(null), 150);
+              }}
               onClick={() => setSelectedItem(item)}
               style={{ cursor: "pointer" }}
             >
@@ -484,6 +498,7 @@ export default function MainMenu() {
             open={!!selectedItem}
             onClose={() => setSelectedItem(null)}
             fullWidth
+            fullScreen={isMobile}
             maxWidth="lg"
             sx={{ zIndex: 14000 }}
             PaperProps={{
@@ -491,8 +506,12 @@ export default function MainMenu() {
                 background: "transparent",
                 boxShadow: "none",
                 overflow: "visible",
-                maxHeight: "90vh",
-                borderRadius: { xs: "16px", md: "24px" },
+                // Account for mobile browser chrome and safe areas
+                maxHeight: isMobile
+                  ? "100%"
+                  : "calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+                borderRadius: isMobile ? 0 : { xs: "16px", md: "24px" },
+                margin: isMobile ? 0 : undefined,
               },
             }}
           >
@@ -518,27 +537,40 @@ export default function MainMenu() {
                 transition={{ duration: 0.4, ease: [0.215, 0.61, 0.355, 1] }}
                 style={{
                   width: "100%",
+                  height: isMobile ? "100%" : "auto",
                   display: "flex",
                   justifyContent: "center",
-                  alignItems: "flex-start",
-                  padding: "40px 16px 24px",
+                  alignItems: isMobile ? "stretch" : "flex-start",
+                  padding: isMobile ? "0" : "40px 16px 24px",
                 }}
               >
                 <Box
                   sx={{
                     position: "relative",
-                    width: "min(1400px, 98vw)",
+                    width: isMobile ? "100%" : "min(1400px, 98vw)",
+                    height: isMobile ? "100%" : "auto",
                     background:
                       "linear-gradient(180deg, rgba(253, 248, 243, 0.98) 0%, rgba(245, 235, 224, 0.98) 100%)",
                     backdropFilter: "blur(20px)",
-                    borderRadius: { xs: "16px", md: "24px" },
-                    border: "1px solid rgba(217, 167, 86, 0.3)",
-                    boxShadow: `
+                    borderRadius: isMobile ? 0 : { xs: "16px", md: "24px" },
+                    border: isMobile
+                      ? "none"
+                      : "1px solid rgba(217, 167, 86, 0.3)",
+                    boxShadow: isMobile
+                      ? "none"
+                      : `
                       0 32px 64px -16px rgba(106, 58, 30, 0.3),
                       0 0 0 1px rgba(255,255,255,0.5) inset,
                       0 2px 0 rgba(255,255,255,0.2) inset
                     `,
                     overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    // Safe area padding for mobile
+                    paddingTop: isMobile ? "env(safe-area-inset-top, 0px)" : 0,
+                    paddingBottom: isMobile
+                      ? "env(safe-area-inset-bottom, 0px)"
+                      : 0,
                     "&::before": {
                       content: '""',
                       position: "absolute",
@@ -650,41 +682,6 @@ export default function MainMenu() {
                           {selectedItem.description}
                         </Typography>
                       )}
-
-                    {/* Item count */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        mt: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 1,
-                          px: 2.5,
-                          py: 0.75,
-                          borderRadius: "20px",
-                          background: "rgba(217, 167, 86, 0.15)",
-                          border: "1px solid rgba(217, 167, 86, 0.3)",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: "0.8rem",
-                            fontWeight: 600,
-                            color: "#6A3A1E",
-                            letterSpacing: "0.1em",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          {selectedItem.menuItems.length} Selections Available
-                        </Typography>
-                      </Box>
-                    </Box>
                   </Box>
 
                   {/* Menu Items Grid */}
@@ -693,7 +690,12 @@ export default function MainMenu() {
                       p: { xs: 2, sm: 3, md: 4 },
                       pt: { xs: 2, md: 3 },
                       overflowY: "auto",
-                      maxHeight: "calc(90vh - 260px)",
+                      // Better height calculation for mobile
+                      maxHeight: isMobile
+                        ? "calc(100vh - 200px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))"
+                        : "calc(90vh - 260px)",
+                      flex: isMobile ? 1 : "none",
+                      WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
                     }}
                   >
                     <Box

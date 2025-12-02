@@ -59,19 +59,7 @@ const subjectOptions = [
   { value: "other", label: "Other", icon: "📝" },
 ];
 
-const careerPositions = [
-  "Server / Waitstaff",
-  "Bartender",
-  "Host / Hostess",
-  "Line Cook",
-  "Prep Cook",
-  "Kitchen Manager",
-  "Dishwasher",
-  "Busser",
-  "Manager",
-  "Assistant Manager",
-  "Other",
-];
+// Career positions removed - now using CV upload instead
 
 // ═══════════════════════════════════════════════════════════════════
 // PREMIUM STYLING
@@ -81,8 +69,9 @@ const premiumTextFieldSx = {
   "& .MuiOutlinedInput-root": {
     bgcolor: "rgba(255,255,255,0.95)",
     borderRadius: "16px",
-    fontSize: "1rem",
+    fontSize: { xs: "16px", md: "1rem" }, // 16px prevents iOS zoom on focus
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    minHeight: { xs: 56, md: "auto" }, // Larger touch target on mobile
     "&:hover": {
       bgcolor: "rgba(255,255,255,1)",
       boxShadow: "0 4px 20px rgba(217,167,86,0.15)",
@@ -116,6 +105,8 @@ const premiumTextFieldSx = {
   "& .MuiOutlinedInput-input": {
     color: "#3C1F0E",
     fontFamily: '"Inter", sans-serif',
+    fontSize: { xs: "16px", md: "1rem" }, // 16px prevents iOS zoom
+    py: { xs: 2, md: 1.5 }, // Better touch area
   },
 };
 
@@ -124,8 +115,9 @@ const premiumPickerSx = {
   "& .MuiOutlinedInput-root": {
     bgcolor: "rgba(255,255,255,0.95)",
     borderRadius: "16px",
-    fontSize: "1rem",
+    fontSize: { xs: "16px", md: "1rem" }, // 16px prevents iOS zoom on focus
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    minHeight: { xs: 56, md: "auto" }, // Larger touch target on mobile
     "&:hover": {
       bgcolor: "rgba(255,255,255,1)",
       boxShadow: "0 4px 20px rgba(217,167,86,0.15)",
@@ -159,9 +151,13 @@ const premiumPickerSx = {
   "& .MuiOutlinedInput-input": {
     color: "#3C1F0E",
     fontFamily: '"Inter", sans-serif',
+    fontSize: { xs: "16px", md: "1rem" }, // 16px prevents iOS zoom
+    py: { xs: 2, md: 1.5 }, // Better touch area
   },
   "& .MuiIconButton-root": {
     color: "#D9A756",
+    minWidth: 48, // Touch-friendly
+    minHeight: 48,
   },
 };
 
@@ -189,7 +185,7 @@ const ContactInfoCard = ({
     whileHover={{ y: -5, scale: 1.02 }}
     sx={{
       position: "relative",
-      p: { xs: 2.5, md: 3 },
+      p: { xs: 3, md: 3 },
       borderRadius: "24px",
       background:
         "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(253,248,243,0.9) 100%)",
@@ -218,11 +214,11 @@ const ContactInfoCard = ({
       },
     }}
   >
-    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+    <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 2.5, md: 2 } }}>
       <Box
         sx={{
-          width: 56,
-          height: 56,
+          width: { xs: 52, md: 56 },
+          height: { xs: 52, md: 56 },
           borderRadius: "16px",
           background: "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
           display: "flex",
@@ -238,7 +234,7 @@ const ContactInfoCard = ({
         <Typography
           sx={{
             fontFamily: '"Cormorant Garamond", Georgia, serif',
-            fontSize: { xs: "1.25rem", md: "1.4rem" },
+            fontSize: { xs: "1.3rem", md: "1.4rem" },
             fontWeight: 700,
             color: "#3C1F0E",
             mb: 1,
@@ -257,6 +253,7 @@ const ContactInfoCard = ({
 // ═══════════════════════════════════════════════════════════════════
 
 const ContactUs = () => {
+
   const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
@@ -267,6 +264,7 @@ const ContactUs = () => {
     guestCount: undefined,
     position: "",
     message: "",
+    cvFile: undefined,
   });
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [selectedTime, setSelectedTime] = useState<Dayjs | null>(null);
@@ -357,10 +355,10 @@ const ContactUs = () => {
           (val, i, arr) => i === 0 || val === arr[i - 1] + 1
         );
 
-        if (isConsecutive && days.length > 2) {
+        if (isConsecutive && days.length >= 2) {
           daysStr = `${days[0]} - ${days[days.length - 1]}`;
         } else {
-          daysStr = days.join(", ");
+          daysStr = days.join(" - ");
         }
       }
 
@@ -444,12 +442,22 @@ const ContactUs = () => {
         newErrors.reservationDate = "Please select a date";
       if (!formData.reservationTime)
         newErrors.reservationTime = "Please select a time";
-      if (!formData.guestCount || formData.guestCount < 1) {
-        newErrors.guestCount = "Please enter number of guests (1-10000)";
+      // Guest count is optional - only validate if provided
+      if (formData.guestCount !== undefined && formData.guestCount < 1) {
+        newErrors.guestCount = "Number of guests must be at least 1";
       }
     }
-    if (isCareers && !formData.position) {
-      newErrors.position = "Please select a position";
+    if (isCareers) {
+      // CV file is optional but validate if provided
+      if (formData.cvFile) {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (formData.cvFile.size > maxSize) {
+          newErrors.cvFile = "File size must be less than 5MB";
+        } else if (!allowedTypes.includes(formData.cvFile.type)) {
+          newErrors.cvFile = "Please upload a PDF, DOC, or DOCX file";
+        }
+      }
     }
     if (!formData.message || formData.message.trim().length < 10) {
       newErrors.message = "Message should be at least 10 characters";
@@ -495,6 +503,7 @@ const ContactUs = () => {
             guestCount: undefined,
             position: "",
             message: "",
+            cvFile: undefined,
           });
           setSelectedDate(null);
           setSelectedTime(null);
@@ -506,7 +515,7 @@ const ContactUs = () => {
       const subjectLine = isReservation
         ? `Party Reservation - ${formData.reservationDate}`
         : isCareers
-        ? `Careers Application - ${formData.position}`
+        ? `Careers Application`
         : subjectOptions.find((opt) => opt.value === formData.subject)?.label ||
           "Contact from website";
 
@@ -515,7 +524,7 @@ const ContactUs = () => {
         fullMessage = `PARTY RESERVATION REQUEST\n\nDate: ${formData.reservationDate}\nTime: ${formData.reservationTime}\nNumber of Guests: ${formData.guestCount}\n\nAdditional Notes:\n${formData.message}`;
       }
       if (isCareers) {
-        fullMessage = `CAREERS APPLICATION\n\nPosition: ${formData.position}\n\nCover Letter / Message:\n${formData.message}`;
+        fullMessage = `CAREERS APPLICATION\n\nCover Letter / Message:\n${formData.message}${formData.cvFile ? '\n\n[CV Attached: ' + formData.cvFile.name + ']' : ''}`;
       }
 
       const subject = encodeURIComponent(subjectLine);
@@ -736,7 +745,7 @@ const ContactUs = () => {
                   mb: 2,
                 }}
               >
-                ◆ Reach Out ◆
+                ◆ Your Table's Waiting ◆
               </Typography>
               <Typography
                 variant="h2"
@@ -745,6 +754,7 @@ const ContactUs = () => {
                   fontSize: { xs: "2rem", md: "2.8rem" },
                   fontWeight: 700,
                   color: "#3C1F0E",
+                  mb: 2,
                 }}
               >
                 How Can We{" "}
@@ -758,6 +768,20 @@ const ContactUs = () => {
                 >
                   Help You?
                 </Box>
+              </Typography>
+              <Typography
+                sx={{
+                  color: "#6A3A1E",
+                  fontSize: "1.05rem",
+                  lineHeight: 1.7,
+                  maxWidth: "600px",
+                  mx: "auto",
+                  fontFamily: '"Inter", sans-serif',
+                }}
+              >
+                From reservations to private events, feedback to career
+                opportunities — our door is always open. Where every stranger's
+                a friend you haven't met.
               </Typography>
             </Box>
 
@@ -826,7 +850,7 @@ const ContactUs = () => {
                   delay={0.2}
                 >
                   <Box
-                    sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+                    sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 1.5 } }}
                   >
                     <Box
                       component={motion.a}
@@ -839,23 +863,25 @@ const ContactUs = () => {
                         textDecoration: "none",
                         color: "#4A2C17",
                         transition: "color 0.3s",
+                        py: { xs: 0.75, md: 0 }, // Better touch area
                         "&:hover": { color: "#D9A756" },
+                        "&:active": { color: "#B08030" },
                       }}
                     >
                       <Box
                         sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: "10px",
+                          width: { xs: 44, md: 36 },
+                          height: { xs: 44, md: 36 },
+                          borderRadius: { xs: "12px", md: "10px" },
                           bgcolor: "rgba(217,167,86,0.15)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <PhoneIcon sx={{ fontSize: 18, color: "#D9A756" }} />
+                        <PhoneIcon sx={{ fontSize: { xs: 22, md: 18 }, color: "#D9A756" }} />
                       </Box>
-                      <Typography sx={{ fontWeight: 600 }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: { xs: "1.05rem", md: "1rem" } }}>
                         (905) 655-3513
                       </Typography>
                     </Box>
@@ -870,23 +896,25 @@ const ContactUs = () => {
                         textDecoration: "none",
                         color: "#4A2C17",
                         transition: "color 0.3s",
+                        py: { xs: 0.75, md: 0 }, // Better touch area
                         "&:hover": { color: "#D9A756" },
+                        "&:active": { color: "#B08030" },
                       }}
                     >
                       <Box
                         sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: "10px",
+                          width: { xs: 44, md: 36 },
+                          height: { xs: 44, md: 36 },
+                          borderRadius: { xs: "12px", md: "10px" },
                           bgcolor: "rgba(217,167,86,0.15)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <EmailIcon sx={{ fontSize: 18, color: "#D9A756" }} />
+                        <EmailIcon sx={{ fontSize: { xs: 22, md: 18 }, color: "#D9A756" }} />
                       </Box>
-                      <Typography sx={{ fontWeight: 600 }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: { xs: "1.05rem", md: "1rem" } }}>
                         brooklinpub@gmail.com
                       </Typography>
                     </Box>
@@ -1043,20 +1071,60 @@ const ContactUs = () => {
                             fontSize: { xs: "1.8rem", md: "2.2rem" },
                             fontWeight: 700,
                             color: "#3C1F0E",
-                            mb: 1,
+                            mb: 1.5,
                           }}
                         >
-                          Send Us a Message
+                          Let's Talk
                         </Typography>
                         <Typography
                           sx={{
                             color: "#6A3A1E",
-                            fontSize: "0.95rem",
-                            lineHeight: 1.6,
+                            fontSize: "1rem",
+                            lineHeight: 1.7,
+                            mb: 2,
+                            maxWidth: "480px",
+                            mx: "auto",
                           }}
                         >
-                          We'll get back to you within 24 hours
+                          We'd love to hear from you! Whether you're planning a
+                          visit, looking to join our team, or just want to say
+                          hi — drop us a line.
                         </Typography>
+                        <Box
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 1,
+                            px: 2.5,
+                            py: 1,
+                            borderRadius: "20px",
+                            background: "rgba(217,167,86,0.1)",
+                            border: "1px solid rgba(217,167,86,0.25)",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              background: "#22C55E",
+                              animation: "pulse 2s infinite",
+                              "@keyframes pulse": {
+                                "0%, 100%": { opacity: 1 },
+                                "50%": { opacity: 0.5 },
+                              },
+                            }}
+                          />
+                          <Typography
+                            sx={{
+                              color: "#6A3A1E",
+                              fontSize: "0.85rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            We typically respond within 24 hours
+                          </Typography>
+                        </Box>
                       </Box>
 
                       <Box
@@ -1279,7 +1347,7 @@ const ContactUs = () => {
                           )}
                         </AnimatePresence>
 
-                        {/* Careers Fields */}
+                        {/* Careers Fields - CV Upload */}
                         <AnimatePresence>
                           {isCareers && (
                             <Box
@@ -1324,43 +1392,67 @@ const ContactUs = () => {
                                     fontSize: "1.1rem",
                                   }}
                                 >
-                                  Careers Application
+                                  Upload Your CV
                                 </Typography>
                               </Box>
 
-                              <TextField
-                                select
-                                fullWidth
-                                label="Position Applying For"
-                                name="position"
-                                value={formData.position}
-                                onChange={handleChange}
-                                required
-                                error={!!errors.position}
-                                helperText={
-                                  errors.position ||
-                                  "Select the position you're interested in"
-                                }
-                                sx={premiumTextFieldSx}
+                              <Box
+                                sx={{
+                                  border: "2px dashed rgba(217,167,86,0.4)",
+                                  borderRadius: "16px",
+                                  p: 3,
+                                  textAlign: "center",
+                                  bgcolor: "rgba(255,255,255,0.5)",
+                                  cursor: "pointer",
+                                  transition: "all 0.3s ease",
+                                  "&:hover": {
+                                    borderColor: "#D9A756",
+                                    bgcolor: "rgba(217,167,86,0.05)",
+                                  },
+                                }}
+                                onClick={() => document.getElementById('cv-upload')?.click()}
                               >
-                                <MenuItem value="" disabled>
-                                  Select a position
-                                </MenuItem>
-                                {careerPositions.map((pos) => (
-                                  <MenuItem
-                                    key={pos}
-                                    value={pos}
-                                    sx={{
-                                      py: 1.5,
-                                      "&:hover": {
-                                        bgcolor: "rgba(217,167,86,0.1)",
-                                      },
-                                    }}
-                                  >
-                                    {pos}
-                                  </MenuItem>
-                                ))}
-                              </TextField>
+                                <input
+                                  type="file"
+                                  id="cv-upload"
+                                  name="cvFile"
+                                  accept=".pdf,.doc,.docx"
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      setFormData({ ...formData, cvFile: file });
+                                    }
+                                  }}
+                                />
+                                {formData.cvFile ? (
+                                  <Box>
+                                    <Typography sx={{ color: "#4CAF50", fontWeight: 600, mb: 1 }}>
+                                      ✓ {formData.cvFile.name}
+                                    </Typography>
+                                    <Typography sx={{ color: "#6A3A1E", fontSize: "0.85rem" }}>
+                                      Click to change file
+                                    </Typography>
+                                  </Box>
+                                ) : (
+                                  <Box>
+                                    <Typography sx={{ color: "#D9A756", fontSize: "2rem", mb: 1 }}>
+                                      📄
+                                    </Typography>
+                                    <Typography sx={{ color: "#3C1F0E", fontWeight: 600, mb: 0.5 }}>
+                                      Click to upload your CV
+                                    </Typography>
+                                    <Typography sx={{ color: "#6A3A1E", fontSize: "0.85rem" }}>
+                                      PDF, DOC, or DOCX (Max 5MB)
+                                    </Typography>
+                                  </Box>
+                                )}
+                              </Box>
+                              {errors.cvFile && (
+                                <Typography sx={{ color: "#d32f2f", fontSize: "0.75rem", mt: 1, ml: 2 }}>
+                                  {errors.cvFile}
+                                </Typography>
+                              )}
                             </Box>
                           )}
                         </AnimatePresence>
@@ -1403,12 +1495,12 @@ const ContactUs = () => {
                           whileTap={{ scale: 0.98 }}
                           sx={{
                             mt: 1,
-                            py: 2,
+                            py: { xs: 2.25, md: 2 },
                             borderRadius: "16px",
                             background:
                               "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
                             color: "#FFFDFB",
-                            fontSize: "1.1rem",
+                            fontSize: { xs: "1.05rem", md: "1.1rem" },
                             fontWeight: 700,
                             fontFamily: '"Inter", sans-serif',
                             textTransform: "none",
@@ -1418,6 +1510,7 @@ const ContactUs = () => {
                             justifyContent: "center",
                             gap: 1.5,
                             transition: "all 0.3s ease",
+                            minHeight: { xs: 56, md: "auto" }, // Touch-friendly height
                             "&:hover": {
                               background:
                                 "linear-gradient(135deg, #E5B566 0%, #C49040 100%)",
@@ -1493,16 +1586,16 @@ const ContactUs = () => {
               <Box
                 sx={{
                   position: "relative",
-                  borderRadius: "32px",
+                  borderRadius: { xs: "24px", md: "32px" },
                   overflow: "hidden",
                   boxShadow: "0 20px 60px rgba(106,58,30,0.15)",
-                  height: { xs: 300, sm: 400, md: 500 },
+                  height: { xs: 350, sm: 400, md: 500 },
                   "&::before": {
                     content: '""',
                     position: "absolute",
                     inset: 0,
-                    border: "4px solid rgba(217,167,86,0.4)",
-                    borderRadius: "32px",
+                    border: { xs: "3px solid rgba(217,167,86,0.4)", md: "4px solid rgba(217,167,86,0.4)" },
+                    borderRadius: { xs: "24px", md: "32px" },
                     pointerEvents: "none",
                     zIndex: 2,
                   },
@@ -1529,6 +1622,9 @@ const ContactUs = () => {
           autoHideDuration={6000}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          sx={{
+            bottom: { xs: 'calc(80px + env(safe-area-inset-bottom))', md: 24 }, // Clear bottom nav on mobile
+          }}
         >
           <Alert
             onClose={() => setSnackbar({ ...snackbar, open: false })}
@@ -1538,6 +1634,7 @@ const ContactUs = () => {
               borderRadius: "16px",
               fontWeight: 600,
               boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+              mx: { xs: 2, md: 0 },
             }}
           >
             {snackbar.message}

@@ -7,7 +7,9 @@ import {
   IconButton,
   Button,
   Divider,
+  useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useApiWithCache } from "../../hooks/useApi";
 import { openingHoursService } from "../../services/opening-hours.service";
 import type { OpeningHours } from "../../types/api.types";
@@ -39,10 +41,12 @@ const TikTokIcon = () => (
 
 const Footer = () => {
   const bgRef = useRef<HTMLDivElement>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Animate background shapes
+  // Animate background shapes - disable on mobile for performance
   useEffect(() => {
-    if (!bgRef.current) return;
+    if (!bgRef.current || isMobile) return;
 
     const ctx = gsap.context(() => {
       const shapes = bgRef.current?.querySelectorAll(".footer-bg-shape");
@@ -74,7 +78,7 @@ const Footer = () => {
     }, bgRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]);
 
   // Geometric shapes for footer background
   const footerShapes = [
@@ -136,6 +140,9 @@ const Footer = () => {
     { label: "Events", to: "/events", icon: "→" },
     { label: "Contact Us", to: "/contactus", icon: "→" },
   ];
+
+  // Menu PDF download link
+  const menuPdfUrl = "/menu/Main Menu - Brooklin Pub.pdf";
 
   // Fetch opening hours from backend (cached for 5 mins)
   const { data: openingHoursData } = useApiWithCache<OpeningHours[]>(
@@ -339,43 +346,50 @@ const Footer = () => {
         overflow: "hidden",
       }}
     >
-      {/* Animated Geometric Background */}
-      <Box
-        ref={bgRef}
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
-        }}
-      >
-        {footerShapes.map((shape, i) => (
-          <Box
-            key={`footer-shape-${i}`}
-            className="footer-bg-shape"
-            sx={{
-              position: "absolute",
-              width: shape.size,
-              height: shape.size,
-              top: shape.top,
-              left: shape.left,
-              borderRadius: shape.type === "circle" ? "50%" : "20%",
-              border: `2px solid ${shape.color}`,
-              background: `${shape.color}10`,
-              transform: `rotate(${shape.rotation}deg)`,
-              opacity: 0.05,
-            }}
-          />
-        ))}
-      </Box>
+      {/* Animated Geometric Background - hide on mobile for performance */}
+      {!isMobile && (
+        <Box
+          ref={bgRef}
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: "hidden",
+            pointerEvents: "none",
+          }}
+        >
+          {footerShapes.map((shape, i) => (
+            <Box
+              key={`footer-shape-${i}`}
+              className="footer-bg-shape"
+              sx={{
+                position: "absolute",
+                width: shape.size,
+                height: shape.size,
+                top: shape.top,
+                left: shape.left,
+                borderRadius: shape.type === "circle" ? "50%" : "20%",
+                border: `2px solid ${shape.color}`,
+                background: `${shape.color}10`,
+                transform: `rotate(${shape.rotation}deg)`,
+                opacity: 0.05,
+              }}
+            />
+          ))}
+        </Box>
+      )}
 
       {/* Main Footer Content */}
       <Container
         maxWidth="lg"
-        sx={{ pt: { xs: 5, md: 6 }, pb: { xs: 4, md: 5 } }}
+        sx={{
+          pt: { xs: 4, md: 6 },
+          pb: { xs: 3, md: 5 },
+          // Account for bottom nav on mobile
+          mb: { xs: "calc(80px + env(safe-area-inset-bottom, 0px))", md: 0 },
+        }}
       >
         <Box
           component={motion.div}
@@ -385,19 +399,23 @@ const Footer = () => {
           viewport={{ once: true, margin: "-30px" }}
           sx={{
             display: "grid",
+            // On mobile, stack in 2 columns for better spacing
             gridTemplateColumns: {
-              xs: "1fr",
+              xs: "1fr 1fr",
               sm: "1fr 1fr",
               lg: "1.2fr 1fr 1fr 1fr",
             },
-            gap: { xs: 4, md: 5 },
+            gap: { xs: 3, sm: 4, md: 5 },
           }}
         >
-          {/* Brand Section */}
+          {/* Brand Section - full width on mobile */}
           <Box
             component={motion.div}
             variants={itemVariants}
-            sx={{ textAlign: { xs: "center", lg: "left" } }}
+            sx={{
+              textAlign: { xs: "center", lg: "left" },
+              gridColumn: { xs: "1 / -1", sm: "auto" }, // Full width on xs
+            }}
           >
             <Box
               sx={{
@@ -434,39 +452,28 @@ const Footer = () => {
                 >
                   BROOKLIN PUB
                 </Typography>
-                <Typography
-                  sx={{
-                    color: "#D9A756",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    letterSpacing: 2,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  & Grill
-                </Typography>
               </Box>
             </Box>
 
             <Typography
               sx={{
                 color: "rgba(245, 239, 230, 0.8)",
-                fontSize: "0.9rem",
+                fontSize: { xs: "0.85rem", sm: "0.9rem" },
                 lineHeight: 1.7,
                 mb: 2.5,
-                maxWidth: 280,
+                maxWidth: { xs: "100%", sm: 280 },
                 mx: { xs: "auto", lg: 0 },
               }}
             >
-              Your neighborhood pub serving delicious food, refreshing drinks,
-              and good times since the heart of Brooklin.
+              Where Brooklin gathers since 2014. Craft beer, homemade food, and
+              good times — where every stranger's a friend you haven't met.
             </Typography>
 
-            {/* Social Icons */}
+            {/* Social Icons - larger touch targets */}
             <Box
               sx={{
                 display: "flex",
-                gap: 1.5,
+                gap: { xs: 2, sm: 1.5 },
                 justifyContent: { xs: "center", lg: "flex-start" },
               }}
             >
@@ -481,8 +488,8 @@ const Footer = () => {
                 sx={{
                   bgcolor: "rgba(217, 167, 86, 0.15)",
                   color: "#D9A756",
-                  width: 44,
-                  height: 44,
+                  width: { xs: 48, sm: 44 },
+                  height: { xs: 48, sm: 44 },
                   border: "1px solid rgba(217, 167, 86, 0.3)",
                   "&:hover": {
                     bgcolor: "#D9A756",
@@ -490,7 +497,7 @@ const Footer = () => {
                   },
                 }}
               >
-                <FacebookIcon sx={{ fontSize: 22 }} />
+                <FacebookIcon sx={{ fontSize: { xs: 24, sm: 22 } }} />
               </IconButton>
               <IconButton
                 component={motion.a}
@@ -503,8 +510,8 @@ const Footer = () => {
                 sx={{
                   bgcolor: "rgba(217, 167, 86, 0.15)",
                   color: "#D9A756",
-                  width: 44,
-                  height: 44,
+                  width: { xs: 48, sm: 44 },
+                  height: { xs: 48, sm: 44 },
                   border: "1px solid rgba(217, 167, 86, 0.3)",
                   "&:hover": {
                     bgcolor: "#D9A756",
@@ -512,7 +519,7 @@ const Footer = () => {
                   },
                 }}
               >
-                <InstagramIcon sx={{ fontSize: 22 }} />
+                <InstagramIcon sx={{ fontSize: { xs: 24, sm: 22 } }} />
               </IconButton>
               <IconButton
                 component={motion.a}
@@ -525,8 +532,8 @@ const Footer = () => {
                 sx={{
                   bgcolor: "rgba(217, 167, 86, 0.15)",
                   color: "#D9A756",
-                  width: 44,
-                  height: 44,
+                  width: { xs: 48, sm: 44 },
+                  height: { xs: 48, sm: 44 },
                   border: "1px solid rgba(217, 167, 86, 0.3)",
                   "&:hover": {
                     bgcolor: "#D9A756",
@@ -543,15 +550,15 @@ const Footer = () => {
           <Box
             component={motion.div}
             variants={itemVariants}
-            sx={{ textAlign: { xs: "center", sm: "left" } }}
+            sx={{ textAlign: { xs: "left", sm: "left" } }}
           >
             <Typography
               sx={{
                 fontFamily: '"Cormorant Garamond", serif',
                 fontWeight: 700,
-                fontSize: "1.15rem",
+                fontSize: { xs: "1rem", sm: "1.15rem" },
                 color: "#D9A756",
-                mb: 2.5,
+                mb: { xs: 1.5, sm: 2.5 },
                 letterSpacing: 1,
                 textTransform: "uppercase",
               }}
@@ -562,8 +569,8 @@ const Footer = () => {
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 1.3,
-                alignItems: { xs: "center", sm: "flex-start" },
+                gap: { xs: 1, sm: 1.3 },
+                alignItems: { xs: "flex-start", sm: "flex-start" },
               }}
             >
               {quickLinks.map((link) => (
@@ -574,15 +581,19 @@ const Footer = () => {
                   underline="none"
                   sx={{
                     color: "rgba(245, 239, 230, 0.85)",
-                    fontSize: "0.95rem",
+                    fontSize: { xs: "0.9rem", sm: "0.95rem" },
                     fontWeight: 500,
                     transition: "all 0.2s ease",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 1,
+                    py: { xs: 0.3, sm: 0 }, // Extra padding for touch on mobile
                     "&:hover": {
                       color: "#D9A756",
                       transform: "translateX(5px)",
+                    },
+                    "&:active": {
+                      color: "#D9A756",
                     },
                   }}
                 >
@@ -593,29 +604,87 @@ const Footer = () => {
                 </MUILink>
               ))}
             </Box>
+
+            {/* Download Menu PDF */}
+            <Typography
+              sx={{
+                fontFamily: '"Cormorant Garamond", serif',
+                fontWeight: 700,
+                fontSize: { xs: "0.9rem", sm: "1rem" },
+                color: "#D9A756",
+                mt: { xs: 2, sm: 3 },
+                mb: { xs: 1, sm: 1.5 },
+                letterSpacing: 1,
+                textTransform: "uppercase",
+                opacity: 0.9,
+              }}
+            >
+              Download Menu
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.2,
+                alignItems: { xs: "flex-start", sm: "flex-start" },
+              }}
+            >
+              <MUILink
+                href={menuPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download="Main Menu - Brooklin Pub.pdf"
+                underline="none"
+                sx={{
+                  color: "rgba(245, 239, 230, 0.95)",
+                  fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                  fontWeight: 600,
+                  transition: "all 0.2s ease",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  px: { xs: 1.5, sm: 2 },
+                  py: { xs: 0.8, sm: 1 },
+                  borderRadius: "8px",
+                  background: "rgba(217, 167, 86, 0.15)",
+                  border: "1px solid rgba(217, 167, 86, 0.3)",
+                  "&:hover, &:active": {
+                    color: "#FFFDFB",
+                    background: "rgba(217, 167, 86, 0.3)",
+                    transform: "translateX(5px)",
+                    borderColor: "#D9A756",
+                  },
+                }}
+              >
+                <Box component="span" sx={{ fontSize: "1rem" }}>
+                  📄
+                </Box>
+                Menu (PDF)
+              </MUILink>
+            </Box>
           </Box>
 
           {/* Opening Hours Section */}
           <Box
             component={motion.div}
             variants={itemVariants}
-            sx={{ textAlign: { xs: "center", sm: "left" } }}
+            sx={{ textAlign: { xs: "left", sm: "left" } }}
           >
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                mb: 2.5,
-                justifyContent: { xs: "center", sm: "flex-start" },
+                mb: { xs: 1.5, sm: 2.5 },
+                justifyContent: { xs: "flex-start", sm: "flex-start" },
               }}
             >
-              <AccessTimeIcon sx={{ fontSize: 20, color: "#D9A756" }} />
+              <AccessTimeIcon sx={{ fontSize: { xs: 18, sm: 20 }, color: "#D9A756" }} />
               <Typography
                 sx={{
                   fontFamily: '"Cormorant Garamond", serif',
                   fontWeight: 700,
-                  fontSize: "1.15rem",
+                  fontSize: { xs: "1rem", sm: "1.15rem" },
                   color: "#D9A756",
                   letterSpacing: 1,
                   textTransform: "uppercase",
@@ -682,7 +751,7 @@ const Footer = () => {
             )}
 
             {/* Hours List - Compact */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.6 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.4, sm: 0.6 } }}>
               {sortedHours.length > 0 ? (
                 sortedHours.map((hours, index) => {
                   const isTodayRow = isToday(hours.dayOfWeek);
@@ -705,8 +774,8 @@ const Footer = () => {
                       key={hours.id || index}
                       sx={{
                         display: "flex",
-                        justifyContent: { xs: "center", sm: "flex-start" },
-                        gap: 2,
+                        justifyContent: { xs: "flex-start", sm: "flex-start" },
+                        gap: { xs: 1.5, sm: 2 },
                         py: 0.4,
                         px: isTodayRow ? 1 : 0,
                         borderRadius: "6px",
@@ -717,19 +786,19 @@ const Footer = () => {
                     >
                       <Typography
                         sx={{
-                          fontSize: "0.85rem",
+                          fontSize: { xs: "0.8rem", sm: "0.85rem" },
                           fontWeight: isTodayRow ? 700 : 500,
                           color: isTodayRow
                             ? "#D9A756"
                             : "rgba(245, 239, 230, 0.7)",
-                          minWidth: 40,
+                          minWidth: { xs: 32, sm: 40 },
                         }}
                       >
                         {dayName}
                       </Typography>
                       <Typography
                         sx={{
-                          fontSize: "0.85rem",
+                          fontSize: { xs: "0.8rem", sm: "0.85rem" },
                           fontWeight: isTodayRow ? 600 : 400,
                           color: isClosed
                             ? "rgba(239, 68, 68, 0.8)"
@@ -747,7 +816,7 @@ const Footer = () => {
                 <Typography
                   sx={{
                     color: "rgba(245, 239, 230, 0.6)",
-                    fontSize: "0.85rem",
+                    fontSize: { xs: "0.8rem", sm: "0.85rem" },
                   }}
                 >
                   Hours coming soon
@@ -756,26 +825,29 @@ const Footer = () => {
             </Box>
           </Box>
 
-          {/* Contact Section */}
+          {/* Contact Section - full width on mobile for better tap targets */}
           <Box
             component={motion.div}
             variants={itemVariants}
-            sx={{ textAlign: { xs: "center", sm: "left" } }}
+            sx={{
+              textAlign: { xs: "center", sm: "left" },
+              gridColumn: { xs: "1 / -1", sm: "auto" },
+            }}
           >
             <Typography
               sx={{
                 fontFamily: '"Cormorant Garamond", serif',
                 fontWeight: 700,
-                fontSize: "1.15rem",
+                fontSize: { xs: "1rem", sm: "1.15rem" },
                 color: "#D9A756",
-                mb: 2.5,
+                mb: { xs: 1.5, sm: 2.5 },
                 letterSpacing: 1,
                 textTransform: "uppercase",
               }}
             >
               Get in Touch
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, sm: 2 } }}>
               <Box
                 component={motion.a}
                 href="https://maps.google.com/?q=15+Baldwin+St,+Whitby,+ON+L1M+1A2"
@@ -930,7 +1002,7 @@ const Footer = () => {
             <Typography
               sx={{ color: "rgba(245, 239, 230, 0.5)", fontSize: "0.85rem" }}
             >
-              © {new Date().getFullYear()} Brooklin Pub & Grill. All rights
+              © {new Date().getFullYear()} Brooklin Pub. All rights
               reserved.
             </Typography>
           </Box>
@@ -939,7 +1011,9 @@ const Footer = () => {
           >
             Crafted with ♥ by{" "}
             <MUILink
-              href="#"
+              href="https://www.akvisionsystems.com/"
+              target="_blank"
+              rel="noopener noreferrer"
               underline="hover"
               sx={{ color: "#D9A756", fontWeight: 600 }}
             >

@@ -43,7 +43,7 @@ const Special = () => {
         overflow: "hidden",
       }}
     >
-      <AnimatedBackground variant="default" />
+      <AnimatedBackground />
       <SpecialsSEO type={specialType} />
       <Nav />
       <Callicon />

@@ -163,8 +163,8 @@ export default function CylinderMenuPopup() {
   useEffect(() => {
     if (!autoRotate || !isCylinder) return;
     const interval = setInterval(() => {
-      setAngle((prev) => (prev + 0.4) % 360);
-    }, 30);
+      setAngle((prev) => (prev + 0.2) % 360);
+    }, 40);
     return () => clearInterval(interval);
   }, [autoRotate]);
   // if not a cylinder (1-2 cards) keep angle fixed at 0

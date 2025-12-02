@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import { Box, Typography, Button } from "@mui/material";
@@ -21,6 +21,16 @@ const LandingPage = () => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const tinyRefs = useRef<(HTMLDivElement | null)[]>([]);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    // Detect iOS for specific optimizations
+    const iOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setIsIOS(iOS);
+  }, []);
 
   // Responsive radius and spacing based on viewport
   const getResponsiveValues = () => {
@@ -106,13 +116,18 @@ const LandingPage = () => {
     // Tiny floating images - reduce count on mobile for performance
     const tinyElements = tinyRefs.current;
     const isMobileView = window.innerWidth < 768;
+    const isIOSDevice =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
     tinyElements.forEach((el) => {
       if (!el || !containerRef.current) return;
 
       const vw = containerRef.current.clientWidth || window.innerWidth;
       const vh = containerRef.current.clientHeight || window.innerHeight;
-      const count = isMobileView ? 20 : 50; // Fewer particles on mobile
-      const imgSize = isMobileView ? 15 : 20;
+      // Fewer particles on mobile/iOS for better performance
+      const count = isIOSDevice ? 10 : isMobileView ? 15 : 50;
+      const imgSize = isMobileView ? 12 : 20;
 
       el!.innerHTML = ""; // clear previous tiny images
       for (let j = 0; j < count; j++) {
@@ -125,6 +140,9 @@ const LandingPage = () => {
           images[j % images.length]
         }) center/cover no-repeat`;
         imgEl.style.position = "absolute";
+        // Use will-change for GPU acceleration
+        imgEl.style.willChange = "transform";
+        imgEl.style.transform = "translateZ(0)";
 
         // random position constrained to container bounds
         const x = Math.random() * Math.max(0, vw - imgSize);
@@ -134,17 +152,13 @@ const LandingPage = () => {
 
         el!.appendChild(imgEl);
 
-        // random floating animation - slower on mobile for performance
+        // random floating animation - slower on mobile/iOS for performance
+        const duration = isIOSDevice ? 12 : isMobileView ? 10 : 5;
+        const movement = isIOSDevice ? 30 : isMobileView ? 40 : 100;
         gsap.to(imgEl, {
-          x:
-            "+=" +
-            (Math.random() * (isMobileView ? 50 : 100) -
-              (isMobileView ? 25 : 50)),
-          y:
-            "+=" +
-            (Math.random() * (isMobileView ? 50 : 100) -
-              (isMobileView ? 25 : 50)),
-          duration: (isMobileView ? 8 : 5) + Math.random() * 5,
+          x: "+=" + (Math.random() * movement - movement / 2),
+          y: "+=" + (Math.random() * movement - movement / 2),
+          duration: duration + Math.random() * 5,
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
@@ -182,10 +196,16 @@ const LandingPage = () => {
         perspective: "1500px",
         width: "100%",
         height: "100vh",
-        background:
-          "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
+        // iOS doesn't support background-attachment: fixed, use static gradient
+        background: isIOS
+          ? "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)"
+          : "linear-gradient(135deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
         overflow: "hidden",
         position: "relative",
+        // GPU acceleration for better mobile performance
+        transform: "translateZ(0)",
+        WebkitBackfaceVisibility: "hidden",
+        backfaceVisibility: "hidden",
       }}
     >
       {images.map((src, i) => (
@@ -442,7 +462,7 @@ const LandingPage = () => {
           </Button>
         </Box>
 
-        {/* Scroll Indicator */}
+        {/* Scroll Indicator - positioned to avoid bottom nav on mobile */}
         <Box
           component={motion.div}
           initial={{ opacity: 0 }}
@@ -453,12 +473,19 @@ const LandingPage = () => {
           }}
           sx={{
             position: "absolute",
-            bottom: { xs: 25, md: 40 },
+            // Account for bottom nav on mobile (safe area + nav height)
+            bottom: {
+              xs: "calc(90px + env(safe-area-inset-bottom, 0px))",
+              md: 40,
+            },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: 1,
             cursor: "pointer",
+            // Ensure clickable on mobile
+            zIndex: 20,
+            padding: "8px",
           }}
           onClick={() =>
             window.scrollBy({ top: window.innerHeight, behavior: "smooth" })
