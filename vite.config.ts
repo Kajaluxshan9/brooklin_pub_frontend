@@ -20,12 +20,15 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           // Core React libraries
+          // Keep the react-vendor chunk dedicated to core React and ReactDOM so we
+          // avoid cross-chunk imports that can create circular initialization issues
+          // (e.g. hot module re-ordering can cause vendor chunks to import each other).
+          // Libraries such as react-router and other libraries should live in the
+          // general vendor chunk instead to prevent React's runtime from importing
+          // other vendor code during module evaluation.
           if (
             id.includes("node_modules/react/") ||
-            id.includes("node_modules/react-dom/") ||
-            id.includes("node_modules/react-router-dom/") ||
-            id.includes("node_modules/react-router/") ||
-            id.includes("node_modules/@remix-run/")
+            id.includes("node_modules/react-dom/")
           ) {
             return "react-vendor";
           }
