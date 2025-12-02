@@ -127,19 +127,21 @@ const DiagonalEventItem = ({
         sx={{
           position: "relative",
           width: { xs: "100%", md: "50%" },
-          maxWidth: { xs: "450px", md: "none" },
+          maxWidth: { xs: "100%", sm: "450px", md: "none" },
           mx: { xs: "auto", md: 0 },
+          px: { xs: 1, sm: 0 },
         }}
       >
         {/* Decorative Frame */}
         <Box
           sx={{
+            display: { xs: "none", sm: "block" },
             position: "absolute",
-            top: { xs: -12, md: -16 },
-            left: isEven ? { xs: -12, md: -16 } : "auto",
-            right: isEven ? "auto" : { xs: -12, md: -16 },
-            width: { xs: "70%", md: "85%" },
-            height: { xs: "70%", md: "85%" },
+            top: { sm: -12, md: -16 },
+            left: isEven ? { sm: -12, md: -16 } : "auto",
+            right: isEven ? "auto" : { sm: -12, md: -16 },
+            width: { sm: "70%", md: "85%" },
+            height: { sm: "70%", md: "85%" },
             border: "2px solid",
             borderColor: isHovered
               ? "rgba(217,167,86,0.6)"
@@ -248,10 +250,10 @@ const DiagonalEventItem = ({
         <Box
           sx={{
             position: "absolute",
-            bottom: { xs: -20, md: -30 },
-            left: isEven ? "auto" : { xs: -20, md: -30 },
-            right: isEven ? { xs: -20, md: -30 } : "auto",
-            display: "grid",
+            bottom: { sm: -20, md: -30 },
+            left: isEven ? "auto" : { sm: -20, md: -30 },
+            right: isEven ? { sm: -20, md: -30 } : "auto",
+            display: { xs: "none", sm: "grid" },
             gridTemplateColumns: "repeat(3, 8px)",
             gap: "8px",
             opacity: isHovered ? 1 : 0.4,
@@ -282,11 +284,11 @@ const DiagonalEventItem = ({
           transition={{ duration: 0.4 }}
           sx={{
             position: "absolute",
-            bottom: { xs: 20, md: 40 },
-            left: isEven ? "auto" : { xs: 20, md: -35 },
-            right: isEven ? { xs: 20, md: -35 } : "auto",
-            width: { xs: 70, md: 85 },
-            height: { xs: 70, md: 85 },
+            bottom: { xs: 15, sm: 20, md: 40 },
+            left: isEven ? "auto" : { xs: 10, sm: 20, md: -35 },
+            right: isEven ? { xs: 10, sm: 20, md: -35 } : "auto",
+            width: { xs: 60, sm: 70, md: 85 },
+            height: { xs: 60, sm: 70, md: 85 },
             borderRadius: "50%",
             background: `linear-gradient(145deg, ${color} 0%, ${color}DD 100%)`,
             border: "4px solid #FFFDFB",
@@ -332,7 +334,7 @@ const DiagonalEventItem = ({
           flex: 1,
           width: { xs: "100%", md: "50%" },
           textAlign: { xs: "center", md: isEven ? "left" : "right" },
-          px: { xs: 2, md: 0 },
+          px: { xs: 1, sm: 2, md: 0 },
         }}
       >
         {/* Decorative Line */}
@@ -361,11 +363,11 @@ const DiagonalEventItem = ({
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
           sx={{
-            fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.5rem" },
+            fontSize: { xs: "1.4rem", sm: "1.8rem", md: "2.5rem" },
             fontFamily: '"Cormorant Garamond", Georgia, serif',
             fontWeight: 700,
             color: "#3C1F0E",
-            mb: 2,
+            mb: { xs: 1.5, md: 2 },
             lineHeight: 1.2,
           }}
         >
@@ -382,8 +384,8 @@ const DiagonalEventItem = ({
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 2,
-            mb: 3,
+            gap: { xs: 1, sm: 2 },
+            mb: { xs: 2, md: 3 },
             justifyContent: {
               xs: "center",
               md: isEven ? "flex-start" : "flex-end",
@@ -394,19 +396,21 @@ const DiagonalEventItem = ({
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1,
-              px: 2,
-              py: 0.75,
+              gap: { xs: 0.75, md: 1 },
+              px: { xs: 1.5, md: 2 },
+              py: { xs: 0.5, md: 0.75 },
               background: "rgba(217,167,86,0.12)",
               borderRadius: "20px",
               border: "1px solid rgba(217,167,86,0.25)",
             }}
           >
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: color }} />
+            <CalendarTodayOutlinedIcon
+              sx={{ fontSize: { xs: 14, md: 16 }, color: color }}
+            />
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "0.8rem",
+                fontSize: { xs: "0.7rem", md: "0.8rem" },
                 color: "#6A3A1E",
                 fontWeight: 600,
               }}
@@ -422,19 +426,21 @@ const DiagonalEventItem = ({
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1,
-              px: 2,
-              py: 0.75,
+              gap: { xs: 0.75, md: 1 },
+              px: { xs: 1.5, md: 2 },
+              py: { xs: 0.5, md: 0.75 },
               background: "rgba(217,167,86,0.12)",
               borderRadius: "20px",
               border: "1px solid rgba(217,167,86,0.25)",
             }}
           >
-            <AccessTimeOutlinedIcon sx={{ fontSize: 16, color: color }} />
+            <AccessTimeOutlinedIcon
+              sx={{ fontSize: { xs: 14, md: 16 }, color: color }}
+            />
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "0.8rem",
+                fontSize: { xs: "0.7rem", md: "0.8rem" },
                 color: "#6A3A1E",
                 fontWeight: 600,
               }}
@@ -446,19 +452,21 @@ const DiagonalEventItem = ({
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1,
-              px: 2,
-              py: 0.75,
+              gap: { xs: 0.75, md: 1 },
+              px: { xs: 1.5, md: 2 },
+              py: { xs: 0.5, md: 0.75 },
               background: "rgba(217,167,86,0.12)",
               borderRadius: "20px",
               border: "1px solid rgba(217,167,86,0.25)",
             }}
           >
-            <LocationOnOutlinedIcon sx={{ fontSize: 16, color: color }} />
+            <LocationOnOutlinedIcon
+              sx={{ fontSize: { xs: 14, md: 16 }, color: color }}
+            />
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "0.8rem",
+                fontSize: { xs: "0.7rem", md: "0.8rem" },
                 color: "#6A3A1E",
                 fontWeight: 600,
               }}
@@ -505,9 +513,9 @@ const DiagonalEventItem = ({
           sx={{
             display: "inline-flex",
             alignItems: "center",
-            gap: 1.5,
-            px: 4,
-            py: 1.5,
+            gap: { xs: 1, md: 1.5 },
+            px: { xs: 3, md: 4 },
+            py: { xs: 1.25, md: 1.5 },
             background: gradient,
             borderRadius: "50px",
             color: "#FFFDFB",
@@ -613,13 +621,15 @@ const Events = () => {
       <Box
         ref={heroRef}
         sx={{
-          minHeight: { xs: "70vh", md: "85vh" },
+          minHeight: { xs: "60vh", sm: "70vh", md: "85vh" },
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           position: "relative",
           overflow: "hidden",
           background: "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 100%)",
+          pt: { xs: 10, sm: 8, md: 0 },
+          pb: { xs: 6, sm: 4, md: 0 },
         }}
       >
         {/* Animated background shapes */}
@@ -691,7 +701,7 @@ const Events = () => {
         ))}
 
         {/* Hero Content */}
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
           <Box
             component={motion.div}
             style={{ y: heroY, opacity: heroOpacity }}
@@ -699,6 +709,7 @@ const Events = () => {
               textAlign: "center",
               position: "relative",
               zIndex: 2,
+              px: { xs: 1, sm: 2, md: 0 },
             }}
           >
             {/* Overline */}
@@ -751,11 +762,11 @@ const Events = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               sx={{
                 fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontSize: { xs: "3rem", sm: "4rem", md: "5.5rem" },
+                fontSize: { xs: "2.2rem", sm: "3.5rem", md: "5.5rem" },
                 fontWeight: 700,
                 color: "#4A2C17",
                 lineHeight: 1.1,
-                mb: 3,
+                mb: { xs: 2, md: 3 },
                 textShadow: "0 4px 30px rgba(74, 44, 23, 0.1)",
               }}
             >
@@ -792,12 +803,13 @@ const Events = () => {
               transition={{ duration: 0.8, delay: 0.4 }}
               sx={{
                 fontFamily: '"Inter", sans-serif',
-                fontSize: { xs: "1rem", md: "1.2rem" },
+                fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
                 color: "#6A3A1E",
                 maxWidth: 600,
                 mx: "auto",
-                lineHeight: 1.8,
-                mb: 4,
+                lineHeight: 1.7,
+                mb: { xs: 3, md: 4 },
+                px: { xs: 1, sm: 0 },
               }}
             >
               From live music to trivia nights, there's always something
@@ -814,7 +826,7 @@ const Events = () => {
               sx={{
                 display: "flex",
                 justifyContent: "center",
-                gap: { xs: 3, md: 6 },
+                gap: { xs: 2, sm: 3, md: 6 },
                 flexWrap: "wrap",
               }}
             >
@@ -826,12 +838,13 @@ const Events = () => {
                   key={i}
                   sx={{
                     textAlign: "center",
-                    px: 3,
-                    py: 2,
+                    px: { xs: 2, sm: 3 },
+                    py: { xs: 1.5, sm: 2 },
                     background: "rgba(255,255,255,0.6)",
                     backdropFilter: "blur(10px)",
-                    borderRadius: "20px",
+                    borderRadius: { xs: "16px", md: "20px" },
                     border: "1px solid rgba(217, 167, 86, 0.2)",
+                    minWidth: { xs: "120px", sm: "auto" },
                   }}
                 >
                   <Typography
@@ -871,11 +884,11 @@ const Events = () => {
                 y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
               }}
               sx={{
+                display: { xs: "none", sm: "flex" },
                 position: "absolute",
-                bottom: { xs: -60, md: -80 },
+                bottom: { sm: -60, md: -80 },
                 left: "50%",
                 transform: "translateX(-50%)",
-                display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 gap: 1,

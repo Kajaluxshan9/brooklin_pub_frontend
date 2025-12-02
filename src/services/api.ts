@@ -1,6 +1,5 @@
 // API Configuration and Utilities
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Helper function to get the full URL for an image.
@@ -9,20 +8,20 @@ const API_BASE_URL =
  * @returns The full URL to access the image
  */
 export const getImageUrl = (url: string | undefined | null): string => {
-  if (!url) return '';
+  if (!url) return "";
 
   // If it's already an absolute URL (http:// or https://), return as-is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
 
   // If it's a data URL (base64), return as-is
-  if (url.startsWith('data:')) {
+  if (url.startsWith("data:")) {
     return url;
   }
 
   // If it's a relative path starting with /, prepend the API base URL
-  if (url.startsWith('/')) {
+  if (url.startsWith("/")) {
     return `${API_BASE_URL}${url}`;
   }
 
@@ -76,6 +75,15 @@ class ApiService {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+    });
+    return this.handleResponse<T>(response);
+  }
+
+  async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: "POST",
+      // Don't set Content-Type header - browser will set it automatically with boundary
+      body: formData,
     });
     return this.handleResponse<T>(response);
   }

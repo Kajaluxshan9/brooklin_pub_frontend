@@ -178,25 +178,26 @@ const ContactInfoCard = ({
 }) => (
   <Box
     component={motion.div}
-    initial={{ opacity: 0, y: 30 }}
+    initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    transition={{ duration: 0.6, delay }}
-    whileHover={{ y: -5, scale: 1.02 }}
+    transition={{ duration: 0.5, delay }}
+    whileHover={{ y: -3, scale: 1.01 }}
     sx={{
       position: "relative",
-      p: { xs: 3, md: 3 },
-      borderRadius: "24px",
+      p: { xs: 2, sm: 2.5, md: 3 },
+      borderRadius: { xs: "16px", sm: "20px", md: "24px" },
       background:
-        "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(253,248,243,0.9) 100%)",
+        "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(253,248,243,0.95) 100%)",
       backdropFilter: "blur(20px)",
       border: "1px solid rgba(217,167,86,0.2)",
-      boxShadow: "0 10px 40px rgba(106,58,30,0.08)",
-      transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+      boxShadow: "0 8px 32px rgba(106,58,30,0.08)",
+      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       overflow: "hidden",
+      width: "100%",
       "&:hover": {
-        boxShadow: "0 20px 60px rgba(217,167,86,0.15)",
-        border: "1px solid rgba(217,167,86,0.4)",
+        boxShadow: "0 16px 48px rgba(217,167,86,0.15)",
+        border: "1px solid rgba(217,167,86,0.35)",
       },
       "&::before": {
         content: '""',
@@ -204,7 +205,7 @@ const ContactInfoCard = ({
         top: 0,
         left: 0,
         right: 0,
-        height: "4px",
+        height: "3px",
         background: "linear-gradient(90deg, #D9A756, #B08030, #D9A756)",
         opacity: 0,
         transition: "opacity 0.3s ease",
@@ -214,30 +215,36 @@ const ContactInfoCard = ({
       },
     }}
   >
-    <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 2.5, md: 2 } }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: { xs: 1.5, sm: 2, md: 2 },
+      }}
+    >
       <Box
         sx={{
-          width: { xs: 52, md: 56 },
-          height: { xs: 52, md: 56 },
-          borderRadius: "16px",
+          width: { xs: 44, sm: 48, md: 56 },
+          height: { xs: 44, sm: 48, md: 56 },
+          borderRadius: { xs: "12px", md: "16px" },
           background: "linear-gradient(135deg, #D9A756 0%, #B08030 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 8px 24px rgba(217,167,86,0.35)",
+          boxShadow: "0 6px 20px rgba(217,167,86,0.35)",
           flexShrink: 0,
         }}
       >
         {icon}
       </Box>
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
           sx={{
             fontFamily: '"Cormorant Garamond", Georgia, serif',
-            fontSize: { xs: "1.3rem", md: "1.4rem" },
+            fontSize: { xs: "1.15rem", sm: "1.25rem", md: "1.4rem" },
             fontWeight: 700,
             color: "#3C1F0E",
-            mb: 1,
+            mb: 0.75,
           }}
         >
           {title}
@@ -253,7 +260,6 @@ const ContactInfoCard = ({
 // ═══════════════════════════════════════════════════════════════════
 
 const ContactUs = () => {
-
   const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
@@ -294,6 +300,31 @@ const ContactUs = () => {
         { days: "FRI - SAT", time: "11 A.M. - 2 A.M." },
       ];
     }
+
+    // Helper function to convert 24-hour time to 12-hour A.M./P.M. format
+    const formatTimeTo12Hour = (time: string): string => {
+      // Handle formats like "11:00:00", "11:00", "23:00:00", "23:00"
+      const match = time.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+      if (!match) return time;
+
+      let hour = parseInt(match[1], 10);
+      const minutes = match[2];
+
+      const period = hour >= 12 ? "P.M." : "A.M.";
+
+      // Convert to 12-hour format
+      if (hour === 0) {
+        hour = 12;
+      } else if (hour > 12) {
+        hour = hour - 12;
+      }
+
+      // Only show minutes if they're not :00
+      if (minutes === "00") {
+        return `${hour} ${period}`;
+      }
+      return `${hour}:${minutes} ${period}`;
+    };
 
     // Group hours by time
     const timeGroups: { [key: string]: string[] } = {};
@@ -365,10 +396,13 @@ const ContactUs = () => {
       // Format time to A.M./P.M. format
       let formattedTime = time;
       if (time !== "Closed") {
-        formattedTime = time
-          .replace(/(\d{1,2}):00\s*(AM|PM)/gi, "$1 $2")
-          .replace(/AM/g, "A.M.")
-          .replace(/PM/g, "P.M.");
+        // Split by " - " to handle both times
+        const timeParts = time.split(" - ");
+        if (timeParts.length === 2) {
+          const openFormatted = formatTimeTo12Hour(timeParts[0].trim());
+          const closeFormatted = formatTimeTo12Hour(timeParts[1].trim());
+          formattedTime = `${openFormatted} - ${closeFormatted}`;
+        }
       }
 
       result.push({ days: daysStr, time: formattedTime });
@@ -451,7 +485,11 @@ const ContactUs = () => {
       // CV file is optional but validate if provided
       if (formData.cvFile) {
         const maxSize = 5 * 1024 * 1024; // 5MB
-        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        const allowedTypes = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ];
         if (formData.cvFile.size > maxSize) {
           newErrors.cvFile = "File size must be less than 5MB";
         } else if (!allowedTypes.includes(formData.cvFile.type)) {
@@ -524,7 +562,13 @@ const ContactUs = () => {
         fullMessage = `PARTY RESERVATION REQUEST\n\nDate: ${formData.reservationDate}\nTime: ${formData.reservationTime}\nNumber of Guests: ${formData.guestCount}\n\nAdditional Notes:\n${formData.message}`;
       }
       if (isCareers) {
-        fullMessage = `CAREERS APPLICATION\n\nCover Letter / Message:\n${formData.message}${formData.cvFile ? '\n\n[CV Attached: ' + formData.cvFile.name + ']' : ''}`;
+        fullMessage = `CAREERS APPLICATION\n\nCover Letter / Message:\n${
+          formData.message
+        }${
+          formData.cvFile
+            ? "\n\n[CV Attached: " + formData.cvFile.name + "]"
+            : ""
+        }`;
       }
 
       const subject = encodeURIComponent(subjectLine);
@@ -694,7 +738,9 @@ const ContactUs = () => {
           minHeight: "100vh",
           background: "#FDF8F3",
           position: "relative",
-          overflow: "hidden",
+          overflowX: "hidden",
+          width: "100%",
+          maxWidth: "100vw",
         }}
       >
         <AnimatedBackground variant="subtle" />
@@ -721,28 +767,45 @@ const ContactUs = () => {
           sx={{
             position: "relative",
             background: "#FDF8F3",
-            py: { xs: 6, md: 10 },
+            py: { xs: 4, sm: 6, md: 10 },
+            px: { xs: 0, sm: 0 },
+            width: "100%",
+            maxWidth: "100%",
+            overflowX: "hidden",
           }}
         >
           <MenuBackground />
 
-          <Container maxWidth="xl" sx={{ position: "relative", zIndex: 2 }}>
+          <Container
+            maxWidth="xl"
+            sx={{
+              position: "relative",
+              zIndex: 2,
+              px: { xs: 1.5, sm: 2, md: 4 },
+              width: "100%",
+              maxWidth: "100%",
+            }}
+          >
             {/* Section Header */}
             <Box
               component={motion.div}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              sx={{ textAlign: "center", mb: { xs: 6, md: 8 } }}
+              sx={{
+                textAlign: "center",
+                mb: { xs: 3, sm: 4, md: 8 },
+                px: { xs: 1, sm: 0 },
+              }}
             >
               <Typography
                 sx={{
                   color: "#D9A756",
-                  fontSize: "0.8rem",
+                  fontSize: { xs: "0.7rem", sm: "0.8rem" },
                   fontWeight: 700,
-                  letterSpacing: "0.25em",
+                  letterSpacing: { xs: "0.15em", sm: "0.25em" },
                   textTransform: "uppercase",
-                  mb: 2,
+                  mb: { xs: 1.5, md: 2 },
                 }}
               >
                 ◆ Your Table's Waiting ◆
@@ -751,10 +814,11 @@ const ContactUs = () => {
                 variant="h2"
                 sx={{
                   fontFamily: '"Cormorant Garamond", Georgia, serif',
-                  fontSize: { xs: "2rem", md: "2.8rem" },
+                  fontSize: { xs: "1.6rem", sm: "2rem", md: "2.8rem" },
                   fontWeight: 700,
                   color: "#3C1F0E",
-                  mb: 2,
+                  mb: { xs: 1.5, md: 2 },
+                  lineHeight: 1.2,
                 }}
               >
                 How Can We{" "}
@@ -772,11 +836,12 @@ const ContactUs = () => {
               <Typography
                 sx={{
                   color: "#6A3A1E",
-                  fontSize: "1.05rem",
+                  fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1.05rem" },
                   lineHeight: 1.7,
                   maxWidth: "600px",
                   mx: "auto",
                   fontFamily: '"Inter", sans-serif',
+                  px: { xs: 0.5, sm: 0 },
                 }}
               >
                 From reservations to private events, feedback to career
@@ -787,26 +852,42 @@ const ContactUs = () => {
 
             <Box
               sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", lg: "1fr 1.3fr" },
-                gap: { xs: 4, md: 6 },
-                alignItems: "start",
+                display: "flex",
+                flexDirection: { xs: "column", lg: "row" },
+                gap: { xs: 2.5, sm: 3, md: 6 },
+                alignItems: "stretch",
+                width: "100%",
               }}
             >
               {/* ═══════════════════════════════════════════════════════════
                   LEFT SIDE - CONTACT INFO CARDS
               ═══════════════════════════════════════════════════════════ */}
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: { xs: 2, sm: 3 },
+                  width: "100%",
+                  flex: { lg: "0 0 42%" },
+                }}
+              >
                 {/* Visit Us Card */}
                 <ContactInfoCard
-                  icon={<LocationOnIcon sx={{ fontSize: 28, color: "#fff" }} />}
+                  icon={
+                    <LocationOnIcon
+                      sx={{
+                        fontSize: { xs: 24, sm: 26, md: 28 },
+                        color: "#fff",
+                      }}
+                    />
+                  }
                   title="Visit Us"
                   delay={0.1}
                 >
                   <Typography
                     sx={{
                       color: "#4A2C17",
-                      fontSize: "1rem",
+                      fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
                       lineHeight: 1.8,
                       "& strong": { color: "#3C1F0E" },
                     }}
@@ -827,7 +908,7 @@ const ContactUs = () => {
                       p: 0,
                       color: "#D9A756",
                       fontWeight: 600,
-                      fontSize: "0.9rem",
+                      fontSize: { xs: "0.85rem", sm: "0.9rem" },
                       textTransform: "none",
                       display: "flex",
                       alignItems: "center",
@@ -839,18 +920,30 @@ const ContactUs = () => {
                       },
                     }}
                   >
-                    Get Directions <ArrowForwardIcon sx={{ fontSize: 16 }} />
+                    Get Directions{" "}
+                    <ArrowForwardIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />
                   </Button>
                 </ContactInfoCard>
 
                 {/* Contact Card */}
                 <ContactInfoCard
-                  icon={<PhoneIcon sx={{ fontSize: 28, color: "#fff" }} />}
+                  icon={
+                    <PhoneIcon
+                      sx={{
+                        fontSize: { xs: 24, sm: 26, md: 28 },
+                        color: "#fff",
+                      }}
+                    />
+                  }
                   title="Get in Touch"
                   delay={0.2}
                 >
                   <Box
-                    sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 1.5 } }}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: { xs: 1.5, sm: 2, md: 1.5 },
+                    }}
                   >
                     <Box
                       component={motion.a}
@@ -859,29 +952,40 @@ const ContactUs = () => {
                       sx={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 1.5,
+                        gap: { xs: 1, sm: 1.5 },
                         textDecoration: "none",
                         color: "#4A2C17",
                         transition: "color 0.3s",
-                        py: { xs: 0.75, md: 0 }, // Better touch area
+                        py: { xs: 0.5, md: 0 },
                         "&:hover": { color: "#D9A756" },
                         "&:active": { color: "#B08030" },
                       }}
                     >
                       <Box
                         sx={{
-                          width: { xs: 44, md: 36 },
-                          height: { xs: 44, md: 36 },
-                          borderRadius: { xs: "12px", md: "10px" },
+                          width: { xs: 36, sm: 40, md: 36 },
+                          height: { xs: 36, sm: 40, md: 36 },
+                          borderRadius: { xs: "10px", md: "10px" },
                           bgcolor: "rgba(217,167,86,0.15)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          flexShrink: 0,
                         }}
                       >
-                        <PhoneIcon sx={{ fontSize: { xs: 22, md: 18 }, color: "#D9A756" }} />
+                        <PhoneIcon
+                          sx={{
+                            fontSize: { xs: 18, sm: 20, md: 18 },
+                            color: "#D9A756",
+                          }}
+                        />
                       </Box>
-                      <Typography sx={{ fontWeight: 600, fontSize: { xs: "1.05rem", md: "1rem" } }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.9rem", sm: "1rem", md: "1rem" },
+                        }}
+                      >
                         (905) 655-3513
                       </Typography>
                     </Box>
@@ -892,29 +996,45 @@ const ContactUs = () => {
                       sx={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 1.5,
+                        gap: { xs: 1, sm: 1.5 },
                         textDecoration: "none",
                         color: "#4A2C17",
                         transition: "color 0.3s",
-                        py: { xs: 0.75, md: 0 }, // Better touch area
+                        py: { xs: 0.5, md: 0 },
                         "&:hover": { color: "#D9A756" },
                         "&:active": { color: "#B08030" },
                       }}
                     >
                       <Box
                         sx={{
-                          width: { xs: 44, md: 36 },
-                          height: { xs: 44, md: 36 },
-                          borderRadius: { xs: "12px", md: "10px" },
+                          width: { xs: 36, sm: 40, md: 36 },
+                          height: { xs: 36, sm: 40, md: 36 },
+                          borderRadius: { xs: "10px", md: "10px" },
                           bgcolor: "rgba(217,167,86,0.15)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          flexShrink: 0,
                         }}
                       >
-                        <EmailIcon sx={{ fontSize: { xs: 22, md: 18 }, color: "#D9A756" }} />
+                        <EmailIcon
+                          sx={{
+                            fontSize: { xs: 18, sm: 20, md: 18 },
+                            color: "#D9A756",
+                          }}
+                        />
                       </Box>
-                      <Typography sx={{ fontWeight: 600, fontSize: { xs: "1.05rem", md: "1rem" } }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: {
+                            xs: "0.85rem",
+                            sm: "0.95rem",
+                            md: "1rem",
+                          },
+                          wordBreak: "break-word",
+                        }}
+                      >
                         brooklinpub@gmail.com
                       </Typography>
                     </Box>
@@ -923,12 +1043,23 @@ const ContactUs = () => {
 
                 {/* Hours Card - Condensed Format */}
                 <ContactInfoCard
-                  icon={<AccessTimeIcon sx={{ fontSize: 28, color: "#fff" }} />}
+                  icon={
+                    <AccessTimeIcon
+                      sx={{
+                        fontSize: { xs: 24, sm: 26, md: 28 },
+                        color: "#fff",
+                      }}
+                    />
+                  }
                   title="Opening Hours"
                   delay={0.3}
                 >
                   <Box
-                    sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: { xs: 0.5, sm: 1 },
+                    }}
                   >
                     {displayHours.map((h, idx) => (
                       <Box
@@ -937,7 +1068,7 @@ const ContactUs = () => {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          py: 0.75,
+                          py: { xs: 0.5, sm: 0.75 },
                           borderBottom:
                             idx < displayHours.length - 1
                               ? "1px solid rgba(217,167,86,0.15)"
@@ -948,7 +1079,11 @@ const ContactUs = () => {
                           sx={{
                             fontWeight: 700,
                             color: "#3C1F0E",
-                            fontSize: "0.9rem",
+                            fontSize: {
+                              xs: "0.8rem",
+                              sm: "0.85rem",
+                              md: "0.9rem",
+                            },
                             letterSpacing: "0.05em",
                           }}
                         >
@@ -958,7 +1093,11 @@ const ContactUs = () => {
                           sx={{
                             color: h.time === "Closed" ? "#c44" : "#6A3A1E",
                             fontWeight: h.time === "Closed" ? 600 : 500,
-                            fontSize: "0.9rem",
+                            fontSize: {
+                              xs: "0.8rem",
+                              sm: "0.85rem",
+                              md: "0.9rem",
+                            },
                           }}
                         >
                           {h.time}
@@ -997,35 +1136,38 @@ const ContactUs = () => {
               <Box
                 id="contact-form"
                 component={motion.div}
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
                 sx={{
                   position: "relative",
-                  borderRadius: "32px",
+                  borderRadius: { xs: "16px", sm: "24px", md: "32px" },
                   background:
-                    "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(253,248,243,0.9) 100%)",
+                    "linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(253,248,243,0.95) 100%)",
                   backdropFilter: "blur(20px)",
-                  p: { xs: 3, sm: 4, md: 5 },
+                  p: { xs: 2, sm: 3, md: 5 },
                   boxShadow: "0 20px 60px rgba(106,58,30,0.12)",
-                  border: "1px solid rgba(217,167,86,0.2)",
+                  border: "1px solid rgba(217,167,86,0.25)",
                   overflow: "hidden",
+                  width: "100%",
+                  flex: { lg: 1 },
                   "&::before": {
                     content: '""',
                     position: "absolute",
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: "5px",
+                    height: { xs: "4px", md: "5px" },
                     background:
                       "linear-gradient(90deg, #D9A756, #B08030, #D9A756)",
                   },
                 }}
               >
-                {/* Decorative Corner Elements */}
+                {/* Decorative Corner Elements - Hidden on mobile */}
                 <Box
                   sx={{
+                    display: { xs: "none", sm: "block" },
                     position: "absolute",
                     top: 20,
                     right: 20,
@@ -1039,6 +1181,7 @@ const ContactUs = () => {
                 />
                 <Box
                   sx={{
+                    display: { xs: "none", sm: "block" },
                     position: "absolute",
                     bottom: 20,
                     left: 20,
@@ -1064,14 +1207,23 @@ const ContactUs = () => {
                       onSubmit={handleSubmit}
                     >
                       {/* Form Header */}
-                      <Box sx={{ textAlign: "center", mb: 4 }}>
+                      <Box
+                        sx={{
+                          textAlign: "center",
+                          mb: { xs: 2.5, sm: 3, md: 4 },
+                        }}
+                      >
                         <Typography
                           sx={{
                             fontFamily: '"Cormorant Garamond", Georgia, serif',
-                            fontSize: { xs: "1.8rem", md: "2.2rem" },
+                            fontSize: {
+                              xs: "1.35rem",
+                              sm: "1.6rem",
+                              md: "2.2rem",
+                            },
                             fontWeight: 700,
                             color: "#3C1F0E",
-                            mb: 1.5,
+                            mb: { xs: 1, md: 1.5 },
                           }}
                         >
                           Let's Talk
@@ -1079,9 +1231,13 @@ const ContactUs = () => {
                         <Typography
                           sx={{
                             color: "#6A3A1E",
-                            fontSize: "1rem",
-                            lineHeight: 1.7,
-                            mb: 2,
+                            fontSize: {
+                              xs: "0.85rem",
+                              sm: "0.9rem",
+                              md: "1rem",
+                            },
+                            lineHeight: 1.6,
+                            mb: { xs: 1.5, md: 2 },
                             maxWidth: "480px",
                             mx: "auto",
                           }}
@@ -1094,9 +1250,9 @@ const ContactUs = () => {
                           sx={{
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: 1,
-                            px: 2.5,
-                            py: 1,
+                            gap: { xs: 0.75, md: 1 },
+                            px: { xs: 1.5, md: 2.5 },
+                            py: { xs: 0.75, md: 1 },
                             borderRadius: "20px",
                             background: "rgba(217,167,86,0.1)",
                             border: "1px solid rgba(217,167,86,0.25)",
@@ -1104,8 +1260,8 @@ const ContactUs = () => {
                         >
                           <Box
                             sx={{
-                              width: 8,
-                              height: 8,
+                              width: { xs: 6, md: 8 },
+                              height: { xs: 6, md: 8 },
                               borderRadius: "50%",
                               background: "#22C55E",
                               animation: "pulse 2s infinite",
@@ -1118,7 +1274,11 @@ const ContactUs = () => {
                           <Typography
                             sx={{
                               color: "#6A3A1E",
-                              fontSize: "0.85rem",
+                              fontSize: {
+                                xs: "0.75rem",
+                                sm: "0.8rem",
+                                md: "0.85rem",
+                              },
                               fontWeight: 600,
                             }}
                           >
@@ -1131,7 +1291,7 @@ const ContactUs = () => {
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          gap: 2.5,
+                          gap: { xs: 2, sm: 2.5 },
                         }}
                       >
                         {/* Name Field */}
@@ -1152,7 +1312,7 @@ const ContactUs = () => {
                           sx={{
                             display: "grid",
                             gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                            gap: 2.5,
+                            gap: { xs: 2, sm: 2.5 },
                           }}
                         >
                           <TextField
@@ -1226,8 +1386,8 @@ const ContactUs = () => {
                               exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.4 }}
                               sx={{
-                                p: 3,
-                                borderRadius: "20px",
+                                p: { xs: 2, sm: 2.5, md: 3 },
+                                borderRadius: { xs: "14px", md: "20px" },
                                 background:
                                   "linear-gradient(135deg, rgba(217,167,86,0.08) 0%, rgba(217,167,86,0.03) 100%)",
                                 border: "2px dashed rgba(217,167,86,0.3)",
@@ -1237,15 +1397,15 @@ const ContactUs = () => {
                                 sx={{
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: 1.5,
-                                  mb: 2.5,
+                                  gap: { xs: 1, md: 1.5 },
+                                  mb: { xs: 2, md: 2.5 },
                                 }}
                               >
                                 <Box
                                   sx={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: "12px",
+                                    width: { xs: 36, md: 40 },
+                                    height: { xs: 36, md: 40 },
+                                    borderRadius: { xs: "10px", md: "12px" },
                                     bgcolor: "rgba(217,167,86,0.2)",
                                     display: "flex",
                                     alignItems: "center",
@@ -1253,14 +1413,17 @@ const ContactUs = () => {
                                   }}
                                 >
                                   <CalendarMonthIcon
-                                    sx={{ color: "#D9A756" }}
+                                    sx={{
+                                      color: "#D9A756",
+                                      fontSize: { xs: 20, md: 24 },
+                                    }}
                                   />
                                 </Box>
                                 <Typography
                                   sx={{
                                     fontWeight: 700,
                                     color: "#3C1F0E",
-                                    fontSize: "1.1rem",
+                                    fontSize: { xs: "0.95rem", md: "1.1rem" },
                                   }}
                                 >
                                   Party Reservation Details
@@ -1274,8 +1437,8 @@ const ContactUs = () => {
                                     xs: "1fr",
                                     sm: "1fr 1fr",
                                   },
-                                  gap: 2,
-                                  mb: 2,
+                                  gap: { xs: 1.5, md: 2 },
+                                  mb: { xs: 1.5, md: 2 },
                                 }}
                               >
                                 {/* Custom Date Picker */}
@@ -1357,8 +1520,8 @@ const ContactUs = () => {
                               exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.4 }}
                               sx={{
-                                p: 3,
-                                borderRadius: "20px",
+                                p: { xs: 2, sm: 2.5, md: 3 },
+                                borderRadius: { xs: "14px", md: "20px" },
                                 background:
                                   "linear-gradient(135deg, rgba(217,167,86,0.08) 0%, rgba(217,167,86,0.03) 100%)",
                                 border: "2px dashed rgba(217,167,86,0.3)",
@@ -1368,28 +1531,33 @@ const ContactUs = () => {
                                 sx={{
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: 1.5,
-                                  mb: 2.5,
+                                  gap: { xs: 1, md: 1.5 },
+                                  mb: { xs: 2, md: 2.5 },
                                 }}
                               >
                                 <Box
                                   sx={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: "12px",
+                                    width: { xs: 36, md: 40 },
+                                    height: { xs: 36, md: 40 },
+                                    borderRadius: { xs: "10px", md: "12px" },
                                     bgcolor: "rgba(217,167,86,0.2)",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                   }}
                                 >
-                                  <WorkIcon sx={{ color: "#D9A756" }} />
+                                  <WorkIcon
+                                    sx={{
+                                      color: "#D9A756",
+                                      fontSize: { xs: 20, md: 24 },
+                                    }}
+                                  />
                                 </Box>
                                 <Typography
                                   sx={{
                                     fontWeight: 700,
                                     color: "#3C1F0E",
-                                    fontSize: "1.1rem",
+                                    fontSize: { xs: "0.95rem", md: "1.1rem" },
                                   }}
                                 >
                                   Upload Your CV
@@ -1399,8 +1567,8 @@ const ContactUs = () => {
                               <Box
                                 sx={{
                                   border: "2px dashed rgba(217,167,86,0.4)",
-                                  borderRadius: "16px",
-                                  p: 3,
+                                  borderRadius: { xs: "12px", md: "16px" },
+                                  p: { xs: 2.5, md: 3 },
                                   textAlign: "center",
                                   bgcolor: "rgba(255,255,255,0.5)",
                                   cursor: "pointer",
@@ -1410,46 +1578,86 @@ const ContactUs = () => {
                                     bgcolor: "rgba(217,167,86,0.05)",
                                   },
                                 }}
-                                onClick={() => document.getElementById('cv-upload')?.click()}
+                                onClick={() =>
+                                  document.getElementById("cv-upload")?.click()
+                                }
                               >
                                 <input
                                   type="file"
                                   id="cv-upload"
                                   name="cvFile"
                                   accept=".pdf,.doc,.docx"
-                                  style={{ display: 'none' }}
+                                  style={{ display: "none" }}
                                   onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                      setFormData({ ...formData, cvFile: file });
+                                      setFormData({
+                                        ...formData,
+                                        cvFile: file,
+                                      });
                                     }
                                   }}
                                 />
                                 {formData.cvFile ? (
                                   <Box>
-                                    <Typography sx={{ color: "#4CAF50", fontWeight: 600, mb: 1 }}>
+                                    <Typography
+                                      sx={{
+                                        color: "#4CAF50",
+                                        fontWeight: 600,
+                                        mb: 1,
+                                      }}
+                                    >
                                       ✓ {formData.cvFile.name}
                                     </Typography>
-                                    <Typography sx={{ color: "#6A3A1E", fontSize: "0.85rem" }}>
+                                    <Typography
+                                      sx={{
+                                        color: "#6A3A1E",
+                                        fontSize: "0.85rem",
+                                      }}
+                                    >
                                       Click to change file
                                     </Typography>
                                   </Box>
                                 ) : (
                                   <Box>
-                                    <Typography sx={{ color: "#D9A756", fontSize: "2rem", mb: 1 }}>
+                                    <Typography
+                                      sx={{
+                                        color: "#D9A756",
+                                        fontSize: "2rem",
+                                        mb: 1,
+                                      }}
+                                    >
                                       📄
                                     </Typography>
-                                    <Typography sx={{ color: "#3C1F0E", fontWeight: 600, mb: 0.5 }}>
+                                    <Typography
+                                      sx={{
+                                        color: "#3C1F0E",
+                                        fontWeight: 600,
+                                        mb: 0.5,
+                                      }}
+                                    >
                                       Click to upload your CV
                                     </Typography>
-                                    <Typography sx={{ color: "#6A3A1E", fontSize: "0.85rem" }}>
+                                    <Typography
+                                      sx={{
+                                        color: "#6A3A1E",
+                                        fontSize: "0.85rem",
+                                      }}
+                                    >
                                       PDF, DOC, or DOCX (Max 5MB)
                                     </Typography>
                                   </Box>
                                 )}
                               </Box>
                               {errors.cvFile && (
-                                <Typography sx={{ color: "#d32f2f", fontSize: "0.75rem", mt: 1, ml: 2 }}>
+                                <Typography
+                                  sx={{
+                                    color: "#d32f2f",
+                                    fontSize: "0.75rem",
+                                    mt: 1,
+                                    ml: 2,
+                                  }}
+                                >
                                   {errors.cvFile}
                                 </Typography>
                               )}
@@ -1554,16 +1762,16 @@ const ContactUs = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              sx={{ mt: { xs: 6, md: 10 } }}
+              sx={{ mt: { xs: 4, sm: 6, md: 10 } }}
             >
               {/* Map Header */}
-              <Box sx={{ textAlign: "center", mb: 4 }}>
+              <Box sx={{ textAlign: "center", mb: { xs: 2.5, md: 4 } }}>
                 <Typography
                   sx={{
                     color: "#D9A756",
-                    fontSize: "0.8rem",
+                    fontSize: { xs: "0.7rem", md: "0.8rem" },
                     fontWeight: 700,
-                    letterSpacing: "0.25em",
+                    letterSpacing: { xs: "0.15em", md: "0.25em" },
                     textTransform: "uppercase",
                     mb: 1,
                   }}
@@ -1573,7 +1781,7 @@ const ContactUs = () => {
                 <Typography
                   sx={{
                     fontFamily: '"Cormorant Garamond", Georgia, serif',
-                    fontSize: { xs: "1.8rem", md: "2.2rem" },
+                    fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.2rem" },
                     fontWeight: 700,
                     color: "#3C1F0E",
                   }}
@@ -1586,16 +1794,20 @@ const ContactUs = () => {
               <Box
                 sx={{
                   position: "relative",
-                  borderRadius: { xs: "24px", md: "32px" },
+                  borderRadius: { xs: "16px", sm: "24px", md: "32px" },
                   overflow: "hidden",
                   boxShadow: "0 20px 60px rgba(106,58,30,0.15)",
-                  height: { xs: 350, sm: 400, md: 500 },
+                  height: { xs: 280, sm: 350, md: 500 },
+                  mx: { xs: -0.5, sm: 0 },
                   "&::before": {
                     content: '""',
                     position: "absolute",
                     inset: 0,
-                    border: { xs: "3px solid rgba(217,167,86,0.4)", md: "4px solid rgba(217,167,86,0.4)" },
-                    borderRadius: { xs: "24px", md: "32px" },
+                    border: {
+                      xs: "2px solid rgba(217,167,86,0.4)",
+                      md: "4px solid rgba(217,167,86,0.4)",
+                    },
+                    borderRadius: { xs: "16px", sm: "24px", md: "32px" },
                     pointerEvents: "none",
                     zIndex: 2,
                   },
@@ -1623,7 +1835,7 @@ const ContactUs = () => {
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
           sx={{
-            bottom: { xs: 'calc(80px + env(safe-area-inset-bottom))', md: 24 }, // Clear bottom nav on mobile
+            bottom: { xs: "calc(80px + env(safe-area-inset-bottom))", md: 24 }, // Clear bottom nav on mobile
           }}
         >
           <Alert

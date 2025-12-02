@@ -119,7 +119,7 @@ export default function MainMenu() {
               desc: item.description || "",
               price: priceDisplay,
               image:
-                getImageUrl(item.imageUrls?.[0]) || "/placeholder-food.svg",
+                getImageUrl(item.imageUrls?.[0]) || "/brooklinpub-logo.png",
               measurements: item.measurements,
               hasMeasurements: item.hasMeasurements,
             } as DisplayMenuItem;
@@ -140,7 +140,7 @@ export default function MainMenu() {
           mainImage:
             getImageUrl(category.imageUrl) ||
             categoryItems[0]?.image ||
-            "/placeholder-category.svg",
+            "/brooklinpub-logo.png",
           name: category.name,
           description: category.description || "",
           namePath: generateNamePath(category.name),

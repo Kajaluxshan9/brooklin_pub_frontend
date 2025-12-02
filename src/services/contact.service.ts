@@ -18,8 +18,6 @@ export interface ContactResponse {
   message: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export const contactService = {
   /**
    * Submit the contact form to the backend
@@ -27,7 +25,7 @@ export const contactService = {
    * @returns Promise with success status and message
    */
   async submitContactForm(formData: ContactFormData): Promise<ContactResponse> {
-    // If there's a CV file, use FormData for multipart upload
+    // If there's a CV file, send as multipart/form-data
     if (formData.cvFile) {
       const multipartData = new FormData();
       multipartData.append("name", formData.name);
@@ -35,26 +33,32 @@ export const contactService = {
       if (formData.phone) multipartData.append("phone", formData.phone);
       multipartData.append("subject", formData.subject);
       multipartData.append("message", formData.message);
+      if (formData.reservationDate)
+        multipartData.append("reservationDate", formData.reservationDate);
+      if (formData.reservationTime)
+        multipartData.append("reservationTime", formData.reservationTime);
+      if (formData.guestCount)
+        multipartData.append("guestCount", formData.guestCount.toString());
       if (formData.position)
         multipartData.append("position", formData.position);
       multipartData.append("cvFile", formData.cvFile);
 
-      // Use fetch directly for multipart form data (don't set Content-Type header, browser sets it with boundary)
-      const response = await fetch(`${API_BASE_URL}/contact`, {
-        method: "POST",
-        body: multipartData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      return response.json();
+      return api.postFormData<ContactResponse>("/contact", multipartData);
     }
 
-    return api.post<ContactResponse>("/contact", formData);
+    // Otherwise send as JSON
+    const jsonData = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone || undefined,
+      subject: formData.subject,
+      message: formData.message,
+      reservationDate: formData.reservationDate || undefined,
+      reservationTime: formData.reservationTime || undefined,
+      guestCount: formData.guestCount || undefined,
+      position: formData.position || undefined,
+    };
+
+    return api.post<ContactResponse>("/contact", jsonData);
   },
 };
