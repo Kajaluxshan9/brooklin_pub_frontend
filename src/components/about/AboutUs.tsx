@@ -7,7 +7,6 @@ import ShowCase from "../../assets/images/Story/brooklin-pub-show-case.jpg";
 import BrooklinPubPillers from "../../assets/images/Story/brooklin-pub-eligent.jpg";
 import IndoorView from "../../assets/images/Story/brooklin-pub-indoor-view.jpg";
 
-
 // Real content for the About section
 const pages = [
   {
@@ -104,16 +103,14 @@ export default function AboutUs() {
     <Box
       sx={{
         height: { xs: "auto", md: "100vh" },
+        minHeight: { xs: "400px", md: "100vh" },
         width: "100%",
-        overflowY: { xs: "auto", md: "hidden" },
+        overflowY: { xs: "hidden", md: "hidden" },
+        overflowX: "hidden",
         position: "relative",
         backgroundColor: "transparent",
-        // hide native scrollbars but keep scrolling functional (mobile)
-        scrollbarWidth: "none",
-        "-ms-overflow-style": "none",
-        "&::-webkit-scrollbar": {
-          display: "none",
-        },
+        // Fixed container to prevent layout shifts during transitions
+        contain: "layout",
       }}
     >
       {/* Simple Pagination Dots */}
@@ -141,12 +138,20 @@ export default function AboutUs() {
               height: 10,
               borderRadius: "50%",
               backgroundColor:
-                idx === pageIndex ? "#D9A756" : "rgba(255, 253, 251, 0.5)",
+                idx === pageIndex
+                  ? "#D9A756"
+                  : isMobile
+                  ? "rgba(60, 31, 14, 0.3)"
+                  : "rgba(255, 253, 251, 0.5)",
               cursor: "pointer",
               transition: "all 0.3s ease",
               "&:hover": {
                 backgroundColor:
-                  idx === pageIndex ? "#D9A756" : "rgba(255, 253, 251, 0.8)",
+                  idx === pageIndex
+                    ? "#D9A756"
+                    : isMobile
+                    ? "rgba(60, 31, 14, 0.5)"
+                    : "rgba(255, 253, 251, 0.8)",
                 transform: "scale(1.2)",
               },
             }}
@@ -154,7 +159,7 @@ export default function AboutUs() {
         ))}
       </Box>
 
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="sync">
         <motion.div
           key={pageIndex}
           variants={getVariants(direction)}
@@ -163,13 +168,14 @@ export default function AboutUs() {
           exit="exit"
           transition={{ duration: 1 }}
           style={{
-            position: isMobile ? "relative" : "absolute",
+            position: "absolute",
             width: "100%",
-            height: isMobile ? "auto" : "100%",
-            background:
-              !isMobile && currentPage.image
-                ? `linear-gradient(rgba(60,31,14,0.55), rgba(106,58,30,0.45)), url(${currentPage.image})`
-                : undefined,
+            height: "100%",
+            background: isMobile
+              ? "#FDF8F3"
+              : currentPage.image
+              ? `linear-gradient(rgba(60,31,14,0.55), rgba(106,58,30,0.45)), url(${currentPage.image})`
+              : undefined,
             backgroundSize: !isMobile ? "cover" : undefined,
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -178,8 +184,9 @@ export default function AboutUs() {
             alignItems: "center",
             justifyContent: "center",
             textAlign: "center",
-            padding: isMobile ? "0px" : "32px",
-            gap: isMobile ? 2 : 0,
+            padding: isMobile ? "20px" : "32px",
+            gap: isMobile ? 16 : 0,
+            boxSizing: "border-box",
           }}
         >
           {/* On mobile render the image as an actual <img> with elegant styling */}
@@ -191,8 +198,10 @@ export default function AboutUs() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               sx={{
                 width: "100%",
-                padding: "20px",
+                maxWidth: "400px",
+                padding: "0 20px",
                 position: "relative",
+                flexShrink: 0,
               }}
             >
               {/* Decorative gradient border container */}
