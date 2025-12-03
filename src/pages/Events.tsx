@@ -24,6 +24,9 @@ import { useApiWithCache } from "../hooks/useApi";
 import { eventsService } from "../services/events.service";
 import { getImageUrl } from "../services/api";
 import type { Event } from "../types/api.types";
+import Callicon from "../components/icons/CalendarIcon";
+import SocialMedia from "../components/common/SocialFloatingMenu";
+import SocialFloatingMenu from "../components/common/SocialFloatingMenu";
 
 // Format event date - display directly as stored (already in EST)
 const formatEventDate = (dateString: string): string => {
@@ -916,6 +919,8 @@ const Events = () => {
       <AnimatedBackground variant="subtle" />
       <EventsSEO />
       <Nav />
+      <Callicon />
+      <SocialMedia />
 
       {/* Premium Hero Section */}
       <Box
@@ -2344,7 +2349,8 @@ const Events = () => {
           </Box>
         </Container>
       </Box>
-
+      <SocialMedia/>
+      <Callicon/>
       <Footer />
     </Box>
   );
