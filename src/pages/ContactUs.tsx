@@ -927,7 +927,7 @@ const ContactUs = () => {
                     <ArrowForwardIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />
                   </Button>
                 </ContactInfoCard>
-                
+
 
                 {/* Contact Card */}
                 <ContactInfoCard
@@ -990,7 +990,7 @@ const ContactUs = () => {
                           fontSize: { xs: "0.9rem", sm: "1rem", md: "1rem" },
                         }}
                       >
-                        (905) 655-3513
+                        (905) 425-3055
                       </Typography>
                     </Box>
                     <Box

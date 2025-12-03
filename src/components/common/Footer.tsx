@@ -1027,7 +1027,7 @@ const Footer = () => {
           <Typography
             sx={{ color: "rgba(245, 239, 230, 0.4)", fontSize: "0.8rem" }}
           >
-            Crafted with ♥ by{" "}
+            Site by{" "}
             <MUILink
               href="https://www.akvisionsystems.com/"
               target="_blank"

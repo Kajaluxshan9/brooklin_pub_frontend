@@ -95,7 +95,7 @@ export default function SEO({
           image: fullImage,
           "@id": SITE_URL,
           url: SITE_URL,
-          telephone: "(905) 655-3513",
+          telephone: "(905) 425-3055",
           priceRange: "$$",
           address: {
             "@type": "PostalAddress",

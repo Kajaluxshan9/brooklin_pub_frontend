@@ -142,3 +142,69 @@ body {
   pointer-events: none;
 }
 
+/* ============================================
+   Image Protection - Prevent Downloads
+   ============================================ */
+
+/* Disable right-click context menu on images */
+img {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  pointer-events: auto;
+}
+
+/* Prevent image dragging */
+img[draggable="false"] {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Protected image container - adds invisible overlay */
+.protected-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.protected-image::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.protected-image img {
+  pointer-events: none;
+}
+
+/* Background image protection */
+.protected-bg {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Disable text selection on image containers */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+

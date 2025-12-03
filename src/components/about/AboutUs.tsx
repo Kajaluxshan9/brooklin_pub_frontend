@@ -26,9 +26,9 @@ const pages = [
   },
   {
     id: 3,
-    title: "Our Kitchen",
+    title: "Our Lounge",
     subtitle:
-      "Fresh local ingredients meet time-honoured recipes. Every dish is crafted with love and passion.",
+      "Relax, unwind, and enjoy crafted drinks in a warm lounge atmosphere.",
     image: ShowCase,
   },
   {
