@@ -954,13 +954,13 @@ export default function Gallery() {
         overflowX: "hidden",
         // reduced top padding so header sits closer to gallery rows
         pt: { xs: 8, md: 10 },
-        pb: 0,
+        pb: { xs: 6, md: 0 },
         display: "flex",
         flexDirection: "column",
         gap: { xs: 3, md: 4 },
         background:
           "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 35%, #E8D5C4 65%, #F5EBE0 85%, #FDF8F3 100%)",
-        minHeight: isMobile ? "100vh" : "auto",
+        minHeight: "auto",
         position: "relative",
       }}
     >
@@ -1154,51 +1154,7 @@ export default function Gallery() {
       </Box>
 
       {/* Enhanced premium progress indicator for mobile */}
-      {isMobile && !isGalleryComplete && galleryRows.length > 1 && (
-        <Box
-          component={motion.div}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          sx={{
-            position: "fixed",
-            bottom: 100,
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: 1.5,
-            zIndex: 1000,
-            background:
-              "linear-gradient(145deg, rgba(255,253,251,0.95) 0%, rgba(253,248,243,0.9) 100%)",
-            backdropFilter: "blur(25px)",
-            p: 2.5,
-            borderRadius: 5,
-            border: "1px solid rgba(217,167,86,0.3)",
-            boxShadow:
-              "0 15px 50px rgba(0,0,0,0.15), 0 5px 20px rgba(217,167,86,0.1)",
-          }}
-        >
-          {galleryRows.map((_, idx) => (
-            <Box
-              key={idx}
-              component={motion.div}
-              animate={{
-                width: idx === activeRowIndex ? 36 : 10,
-                backgroundColor:
-                  idx <= activeRowIndex ? "#D9A756" : "rgba(217,167,86,0.2)",
-              }}
-              transition={{ duration: 0.4, type: "spring", stiffness: 350 }}
-              sx={{
-                height: 10,
-                borderRadius: 5,
-                boxShadow:
-                  idx === activeRowIndex
-                    ? "0 3px 12px rgba(217,167,86,0.5)"
-                    : "none",
-              }}
-            />
-          ))}
-        </Box>
-      )}
+
     </Box>
   );
 }
