@@ -1,11 +1,6 @@
 import { useMemo, useState, useRef } from "react";
 import { Box, Typography, Chip, Container } from "@mui/material";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useTransform,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
@@ -19,6 +14,7 @@ import Nav from "../components/common/Nav";
 import Footer from "../components/common/Footer";
 import AnimatedBackground from "../components/common/AnimatedBackground";
 import MenuBackground from "../components/menu/MenuBackground";
+import HeroSection from "../components/common/HeroSection";
 import { EventsSEO } from "../config/seo.presets";
 import { useApiWithCache } from "../hooks/useApi";
 import { eventsService } from "../services/events.service";
@@ -26,7 +22,6 @@ import { getImageUrl } from "../services/api";
 import type { Event } from "../types/api.types";
 import Callicon from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
-import SocialFloatingMenu from "../components/common/SocialFloatingMenu";
 
 // Format event date - display directly as stored (already in EST)
 const formatEventDate = (dateString: string): string => {
@@ -62,10 +57,26 @@ const getEventPeriod = (startDate: string, endDate: string): string => {
   const timezone = "America/Toronto";
 
   // Get time components
-  const startHour = parseInt(start.toLocaleTimeString("en-US", { hour: "numeric", hour12: false, timeZone: timezone }));
-  const startMinute = parseInt(start.toLocaleTimeString("en-US", { minute: "numeric", timeZone: timezone }));
-  const endHour = parseInt(end.toLocaleTimeString("en-US", { hour: "numeric", hour12: false, timeZone: timezone }));
-  const endMinute = parseInt(end.toLocaleTimeString("en-US", { minute: "numeric", timeZone: timezone }));
+  const startHour = parseInt(
+    start.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: timezone,
+    })
+  );
+  const startMinute = parseInt(
+    start.toLocaleTimeString("en-US", { minute: "numeric", timeZone: timezone })
+  );
+  const endHour = parseInt(
+    end.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: timezone,
+    })
+  );
+  const endMinute = parseInt(
+    end.toLocaleTimeString("en-US", { minute: "numeric", timeZone: timezone })
+  );
 
   // Helper to format time
   const formatTime = (date: Date): string => {
@@ -82,22 +93,46 @@ const getEventPeriod = (startDate: string, endDate: string): string => {
   const isEndMidnight = endHour === 0 && endMinute === 0;
 
   // Calculate day difference based on calendar dates
-  const startDateOnly = new Date(start.toLocaleDateString("en-US", { timeZone: timezone }));
-  const endDateOnly = new Date(end.toLocaleDateString("en-US", { timeZone: timezone }));
-  const dayDiff = Math.round((endDateOnly.getTime() - startDateOnly.getTime()) / (1000 * 60 * 60 * 24));
+  const startDateOnly = new Date(
+    start.toLocaleDateString("en-US", { timeZone: timezone })
+  );
+  const endDateOnly = new Date(
+    end.toLocaleDateString("en-US", { timeZone: timezone })
+  );
+  const dayDiff = Math.round(
+    (endDateOnly.getTime() - startDateOnly.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   // Get the actual end date for display (if ends at midnight, use previous day)
-  const displayEnd = isEndMidnight && dayDiff >= 1 ? new Date(end.getTime() - 1) : end;
+  const displayEnd =
+    isEndMidnight && dayDiff >= 1 ? new Date(end.getTime() - 1) : end;
 
   // Get date components for display
-  const startDay = start.toLocaleDateString("en-US", { day: "numeric", timeZone: timezone });
-  const startMonth = start.toLocaleDateString("en-US", { month: "short", timeZone: timezone });
-  const displayEndDay = displayEnd.toLocaleDateString("en-US", { day: "numeric", timeZone: timezone });
-  const displayEndMonth = displayEnd.toLocaleDateString("en-US", { month: "short", timeZone: timezone });
+  const startDay = start.toLocaleDateString("en-US", {
+    day: "numeric",
+    timeZone: timezone,
+  });
+  const startMonth = start.toLocaleDateString("en-US", {
+    month: "short",
+    timeZone: timezone,
+  });
+  const displayEndDay = displayEnd.toLocaleDateString("en-US", {
+    day: "numeric",
+    timeZone: timezone,
+  });
+  const displayEndMonth = displayEnd.toLocaleDateString("en-US", {
+    month: "short",
+    timeZone: timezone,
+  });
 
   // Recalculate effective day difference using display dates
-  const displayEndDateOnly = new Date(displayEnd.toLocaleDateString("en-US", { timeZone: timezone }));
-  const effectiveDayDiff = Math.round((displayEndDateOnly.getTime() - startDateOnly.getTime()) / (1000 * 60 * 60 * 24));
+  const displayEndDateOnly = new Date(
+    displayEnd.toLocaleDateString("en-US", { timeZone: timezone })
+  );
+  const effectiveDayDiff = Math.round(
+    (displayEndDateOnly.getTime() - startDateOnly.getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
 
   // Same calendar day - show time range
   if (dayDiff === 0) {
@@ -111,14 +146,20 @@ const getEventPeriod = (startDate: string, endDate: string): string => {
 
   // Single full day (starts at midnight, ends at midnight next day)
   if (dayDiff === 1 && isStartMidnight && isEndMidnight) {
-    const weekday = start.toLocaleDateString("en-US", { weekday: "short", timeZone: timezone });
+    const weekday = start.toLocaleDateString("en-US", {
+      weekday: "short",
+      timeZone: timezone,
+    });
     return `${weekday}, ${startMonth} ${startDay}`;
   }
 
   // Multi-day event - show date range using actual last day of event
   if (effectiveDayDiff === 0) {
     // Event is actually same day (e.g., 6 PM Jan 1 to 12 AM Jan 2 = just Jan 1)
-    const weekday = start.toLocaleDateString("en-US", { weekday: "short", timeZone: timezone });
+    const weekday = start.toLocaleDateString("en-US", {
+      weekday: "short",
+      timeZone: timezone,
+    });
     return `${weekday}, ${startMonth} ${startDay}`;
   }
 
@@ -601,10 +642,7 @@ const DiagonalEventItem = ({
                     letterSpacing: "0.05em",
                   }}
                 >
-                  {getEventPeriod(
-                        event.eventStartDate,
-                        event.eventEndDate
-                      )}
+                  {getEventPeriod(event.eventStartDate, event.eventEndDate)}
                 </Typography>
               </Box>
             )}
@@ -824,15 +862,6 @@ const Events = () => {
     () => eventsService.getAllEvents()
   );
 
-  // Parallax for hero
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
   // Separate events into upcoming and past
   const { upcomingEvents, pastEvents } = useMemo(() => {
     if (!eventsData) return { upcomingEvents: [], pastEvents: [] };
@@ -922,527 +951,18 @@ const Events = () => {
       <Callicon />
       <SocialMedia />
 
-      {/* Premium Hero Section */}
-      <Box
-        ref={heroRef}
-        sx={{
-          minHeight: { xs: "70vh", sm: "80vh", md: "90vh" },
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          overflow: "hidden",
-          background:
-            "linear-gradient(180deg, #FDF8F3 0%, #F5EBE0 50%, #E8D5C4 100%)",
-          pt: { xs: 10, sm: 8, md: 0 },
-          pb: { xs: 6, sm: 4, md: 0 },
-        }}
-      >
-        {/* Premium Background Pattern */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0.02,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236A3A1E' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Animated background shapes */}
-        <Box
-          component={motion.div}
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-          sx={{
-            position: "absolute",
-            top: "-20%",
-            right: "-10%",
-            width: "60vw",
-            height: "60vw",
-            maxWidth: 800,
-            maxHeight: 800,
-            borderRadius: "50%",
-            border: "2px solid rgba(217, 167, 86, 0.1)",
-            pointerEvents: "none",
-          }}
-        />
-        <Box
-          component={motion.div}
-          animate={{
-            rotate: [360, 0],
-          }}
-          transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
-          sx={{
-            position: "absolute",
-            bottom: "-30%",
-            left: "-15%",
-            width: "50vw",
-            height: "50vw",
-            maxWidth: 600,
-            maxHeight: 600,
-            borderRadius: "50%",
-            border: "2px solid rgba(217, 167, 86, 0.08)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Additional decorative circle */}
-        <Box
-          component={motion.div}
-          animate={{
-            scale: [1, 1.05, 1],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          sx={{
-            position: "absolute",
-            top: "10%",
-            left: "5%",
-            width: "30vw",
-            height: "30vw",
-            maxWidth: 400,
-            maxHeight: 400,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(217, 167, 86, 0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Floating decorative elements */}
-        {[...Array(8)].map((_, i) => (
-          <Box
-            key={i}
-            component={motion.div}
-            animate={{
-              y: [0, -25, 0],
-              opacity: [0.2, 0.5, 0.2],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 5 + i * 0.5,
-              repeat: Infinity,
-              delay: i * 0.3,
-              ease: "easeInOut",
-            }}
-            sx={{
-              position: "absolute",
-              width: 6 + i * 3,
-              height: 6 + i * 3,
-              borderRadius: "50%",
-              background: `radial-gradient(circle, rgba(217, 167, 86, ${
-                0.4 + i * 0.05
-              }) 0%, rgba(217, 167, 86, ${0.1 + i * 0.03}) 100%)`,
-              top: `${10 + i * 10}%`,
-              left: `${5 + i * 12}%`,
-              pointerEvents: "none",
-              boxShadow: `0 0 ${10 + i * 3}px rgba(217, 167, 86, 0.2)`,
-            }}
-          />
-        ))}
-
-        {/* Hero Content */}
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          <Box
-            component={motion.div}
-            style={{ y: heroY, opacity: heroOpacity }}
-            sx={{
-              textAlign: "center",
-              position: "relative",
-              zIndex: 2,
-              px: { xs: 1, sm: 2, md: 0 },
-            }}
-          >
-            {/* Overline with enhanced styling */}
-            <Box
-              component={motion.div}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 2,
-                mb: 3,
-              }}
-            >
-              <Box
-                sx={{
-                  width: { xs: 40, md: 80 },
-                  height: 2,
-                  background: "linear-gradient(90deg, transparent, #D9A756)",
-                  borderRadius: 1,
-                }}
-              />
-              <Typography
-                sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: { xs: "0.7rem", md: "0.85rem" },
-                  fontWeight: 700,
-                  color: "#D9A756",
-                  letterSpacing: "0.35em",
-                  textTransform: "uppercase",
-                  textShadow: "0 2px 10px rgba(217, 167, 86, 0.3)",
-                }}
-              >
-                What's Happening
-              </Typography>
-              <Box
-                sx={{
-                  width: { xs: 40, md: 80 },
-                  height: 2,
-                  background: "linear-gradient(90deg, #D9A756, transparent)",
-                  borderRadius: 1,
-                }}
-              />
-            </Box>
-
-            {/* Main Title with enhanced styling */}
-            <Typography
-              component={motion.h1}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              sx={{
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontSize: { xs: "2.5rem", sm: "4rem", md: "6rem" },
-                fontWeight: 700,
-                color: "#4A2C17",
-                lineHeight: 1.05,
-                letterSpacing: "-0.03em",
-                mb: { xs: 2, md: 3 },
-                textShadow: "0 4px 30px rgba(74, 44, 23, 0.1)",
-              }}
-            >
-              Discover{" "}
-              <Box
-                component="span"
-                sx={{
-                  background:
-                    "linear-gradient(135deg, #D9A756 0%, #B08030 50%, #D9A756 100%)",
-                  backgroundSize: "200% auto",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  position: "relative",
-                  animation: "shimmer 3s linear infinite",
-                  "@keyframes shimmer": {
-                    "0%": { backgroundPosition: "0% center" },
-                    "100%": { backgroundPosition: "200% center" },
-                  },
-                }}
-              >
-                Events
-              </Box>
-            </Typography>
-
-            {/* Subtitle */}
-            <Typography
-              component={motion.p}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
-                color: "#6A3A1E",
-                maxWidth: 600,
-                mx: "auto",
-                lineHeight: 1.85,
-                letterSpacing: "0.01em",
-                mb: { xs: 3, md: 4 },
-                px: { xs: 1, sm: 0 },
-              }}
-            >
-              Live music, trivia nights, game days, and more—there's always a
-              reason to gather at The Brooklin Pub.
-            </Typography>
-
-            {/* Stats/Quick Info */}
-            <Box
-              component={motion.div}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: { xs: 2, sm: 3, md: 6 },
-                flexWrap: "wrap",
-                mb: { xs: 4, md: 5 },
-              }}
-            >
-              {[
-                { value: upcomingEvents.length, label: "Upcoming Events" },
-                { value: pastEvents.length, label: "Past Events" },
-                { value: "Live", label: "Entertainment" },
-              ].map((stat, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    textAlign: "center",
-                    px: { xs: 2, sm: 3 },
-                    py: { xs: 1.5, sm: 2 },
-                    background: "rgba(255,255,255,0.7)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: { xs: "16px", md: "20px" },
-                    border: "1px solid rgba(217, 167, 86, 0.25)",
-                    minWidth: { xs: "100px", sm: "auto" },
-                    boxShadow: "0 8px 32px rgba(106, 58, 30, 0.08)",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 12px 40px rgba(106, 58, 30, 0.12)",
-                    },
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontFamily: '"Cormorant Garamond", Georgia, serif',
-                      fontSize: { xs: "1.6rem", md: "2rem" },
-                      fontWeight: 700,
-                      color: "#D9A756",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {stat.value}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontFamily: '"Inter", sans-serif',
-                      fontSize: "0.7rem",
-                      color: "#6A3A1E",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                      mt: 0.5,
-                    }}
-                  >
-                    {stat.label}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-
-            {/* Featured Next Event Card */}
-            {upcomingEvents.length > 0 && (
-              <Box
-                component={motion.div}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-                sx={{
-                  maxWidth: 600,
-                  mx: "auto",
-                  p: { xs: 2, md: 3 },
-                  background: "rgba(255,255,255,0.85)",
-                  backdropFilter: "blur(20px)",
-                  borderRadius: "24px",
-                  border: "2px solid rgba(217, 167, 86, 0.3)",
-                  boxShadow: "0 20px 60px rgba(106, 58, 30, 0.15)",
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  alignItems: "center",
-                  gap: { xs: 2, sm: 3 },
-                }}
-              >
-                {/* Event Image */}
-                <Box
-                  sx={{
-                    width: { xs: "100%", sm: 120 },
-                    height: { xs: 120, sm: 120 },
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={
-                      upcomingEvents[0].imageUrls?.[0]
-                        ? getImageUrl(upcomingEvents[0].imageUrls[0])
-                        : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&q=80"
-                    }
-                    alt={upcomingEvents[0].title}
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </Box>
-
-                {/* Event Details */}
-                <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
-                  <Typography
-                    sx={{
-                      fontFamily: '"Inter", sans-serif',
-                      fontSize: "0.65rem",
-                      fontWeight: 700,
-                      color: "#D9A756",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.15em",
-                      mb: 0.5,
-                    }}
-                  >
-                    Next Up
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontFamily: '"Cormorant Garamond", Georgia, serif',
-                      fontSize: { xs: "1.2rem", md: "1.4rem" },
-                      fontWeight: 700,
-                      color: "#3C1F0E",
-                      lineHeight: 1.2,
-                      mb: 1,
-                    }}
-                  >
-                    {upcomingEvents[0].title}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 2,
-                      flexWrap: "wrap",
-                      justifyContent: { xs: "center", sm: "flex-start" },
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                    >
-                      <CalendarTodayOutlinedIcon
-                        sx={{ fontSize: 14, color: "#D9A756" }}
-                      />
-                      <Typography
-                        sx={{
-                          fontFamily: '"Inter", sans-serif',
-                          fontSize: "0.75rem",
-                          color: "#6A3A1E",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {formatEventDate(upcomingEvents[0].eventStartDate)}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                    >
-                      <AccessTimeOutlinedIcon
-                        sx={{ fontSize: 14, color: "#D9A756" }}
-                      />
-                      <Typography
-                        sx={{
-                          fontFamily: '"Inter", sans-serif',
-                          fontSize: "0.75rem",
-                          color: "#6A3A1E",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {formatEventTime(upcomingEvents[0].eventStartDate)}
-                        {upcomingEvents[0].eventEndDate &&
-                          upcomingEvents[0].eventEndDate !==
-                            upcomingEvents[0].eventStartDate &&
-                          ` - ${formatEventTime(
-                            upcomingEvents[0].eventEndDate
-                          )}`}
-                      </Typography>
-                    </Box>
-                    {/* Duration Badge in Hero */}
-                    {upcomingEvents[0].eventEndDate &&
-                      upcomingEvents[0].eventEndDate !==
-                        upcomingEvents[0].eventStartDate && (
-                        <Box
-                          sx={{
-                            px: 1.5,
-                            py: 0.25,
-                            background:
-                              "linear-gradient(135deg, #D9A756, #B08030)",
-                            borderRadius: "12px",
-                          }}
-                        >
-                          <Typography
-                            sx={{
-                              fontFamily: '"Inter", sans-serif',
-                              fontSize: "0.65rem",
-                              color: "#FFFDFB",
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                            }}
-                          >
-                            {getEventPeriod(
-                                  upcomingEvents[0].eventStartDate,
-                                  upcomingEvents[0].eventEndDate
-                                )}
-                          </Typography>
-                        </Box>
-                      )}
-                  </Box>
-                </Box>
-              </Box>
-            )}
-
-            {/* Scroll indicator */}
-            <Box
-              component={motion.div}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, y: [0, 10, 0] }}
-              transition={{
-                opacity: { delay: 1, duration: 0.6 },
-                y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-              }}
-              sx={{
-                display: { xs: "none", sm: "flex" },
-                position: "absolute",
-                bottom: { sm: -60, md: -80 },
-                left: "50%",
-                transform: "translateX(-50%)",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <Typography
-                sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: "0.7rem",
-                  color: "rgba(106, 58, 30, 0.6)",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Explore
-              </Typography>
-              <Box
-                sx={{
-                  width: 24,
-                  height: 40,
-                  borderRadius: 12,
-                  border: "2px solid rgba(217, 167, 86, 0.4)",
-                  display: "flex",
-                  justifyContent: "center",
-                  pt: 1,
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 4,
-                    height: 8,
-                    borderRadius: 2,
-                    background: "#D9A756",
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
+      {/* Hero Section - using reusable component */}
+      <HeroSection
+        id="events-hero"
+        title="Discover Events"
+        subtitle="From trivia nights to game days, there's always something happening at The Brooklin Pub. Pull up a chair."
+        overlineText="✦ WHAT'S HAPPENING ✦"
+        variant="light"
+      />
 
       {/* Events List Section */}
       <Box
+        id="events-list"
         sx={{
           py: { xs: 10, md: 14 },
           position: "relative",
@@ -2273,8 +1793,8 @@ const Events = () => {
                   p: { xs: 3, md: 4 },
                   borderRadius: "20px",
                   background:
-                    "linear-gradient(135deg, #6A3A1E 0%, #4A2C17 100%)",
-                  boxShadow: "0 15px 40px rgba(106,58,30,0.35)",
+                    "linear-gradient(135deg, #8B5A3C 0%, #6A3A1E 100%)",
+                  boxShadow: "0 15px 40px rgba(139,90,60,0.3)",
                   minWidth: { md: 280 },
                 }}
               >
@@ -2349,8 +1869,8 @@ const Events = () => {
           </Box>
         </Container>
       </Box>
-      <SocialMedia/>
-      <Callicon/>
+      <SocialMedia />
+      <Callicon />
       <Footer />
     </Box>
   );

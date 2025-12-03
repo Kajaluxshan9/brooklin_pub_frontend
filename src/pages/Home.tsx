@@ -34,7 +34,7 @@ interface PopupCard {
 // Session storage key for popup visibility
 const POPUP_SESSION_KEY = "brooklin_popup_shown";
 
-// Get current day of week in lowercase
+// Get current day of week in lowercase (based on Canadian EST timezone)
 const getCurrentDayOfWeek = (): DayOfWeek => {
   const days: DayOfWeek[] = [
     "sunday",
@@ -45,7 +45,12 @@ const getCurrentDayOfWeek = (): DayOfWeek => {
     "friday",
     "saturday",
   ] as DayOfWeek[];
-  return days[new Date().getDay()];
+  // Use Canadian timezone to get the correct day
+  const now = new Date();
+  const canadaDay = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Toronto" })
+  );
+  return days[canadaDay.getDay()];
 };
 
 // Check if a special should be shown in the popup
