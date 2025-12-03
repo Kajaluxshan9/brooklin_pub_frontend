@@ -28,7 +28,7 @@ const About = () => {
       {/* Hero Section - using reusable component */}
       <HeroSection
         id="about-hero"
-        title="Our Story"
+        title="About Us"
         subtitle="A local favorite since 2014, where great food meets warm hospitality"
         overlineText="✦ DISCOVER OUR HERITAGE ✦"
         variant="light"

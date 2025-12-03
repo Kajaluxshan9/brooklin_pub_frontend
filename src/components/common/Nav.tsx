@@ -133,13 +133,13 @@ const Nav = () => {
       dropdown:
         primaryCategories && primaryCategories.length > 0
           ? primaryCategories
-              .filter((pc) => pc.isActive)
-              .sort((a, b) => a.sortOrder - b.sortOrder)
-              .map((pc) => ({
-                label: pc.name,
-                path: `/menu?category=${pc.id}`,
-                id: pc.id,
-              }))
+            .filter((pc) => pc.isActive)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((pc) => ({
+              label: pc.name,
+              path: `/menu?category=${pc.id}`,
+              id: pc.id,
+            }))
           : [],
     },
     {
@@ -301,6 +301,7 @@ const Nav = () => {
               component="img"
               src="/brooklinpub-logo.png"
               alt="Logo"
+              onClick={() => navigate("/")}
               sx={{
                 height: { xs: 40, sm: 55, md: 80 },
                 padding: "8px 0",
@@ -330,31 +331,31 @@ const Nav = () => {
 
                 const childPathMatch = link.dropdown
                   ? link.dropdown.some((item) => {
-                      if (!item.path) return false;
-                      try {
-                        // Parse the item's path to handle query params (e.g. /menu?category=...)
-                        const parsed = new URL(
-                          item.path,
-                          window.location.origin
-                        );
-                        // Match when pathname matches (or startsWith for nested routes)
-                        if (location.pathname.startsWith(parsed.pathname))
-                          return true;
-                        // If the item's path included a search (query), also compare search strings
-                        if (
-                          parsed.search &&
-                          location.pathname === parsed.pathname
-                        ) {
-                          return location.search.startsWith(parsed.search);
-                        }
-                        return false;
-                      } catch (e) {
-                        // Fallback: plain startsWith if URL parsing fails
-                        return location.pathname.startsWith(
-                          item.path as string
-                        );
+                    if (!item.path) return false;
+                    try {
+                      // Parse the item's path to handle query params (e.g. /menu?category=...)
+                      const parsed = new URL(
+                        item.path,
+                        window.location.origin
+                      );
+                      // Match when pathname matches (or startsWith for nested routes)
+                      if (location.pathname.startsWith(parsed.pathname))
+                        return true;
+                      // If the item's path included a search (query), also compare search strings
+                      if (
+                        parsed.search &&
+                        location.pathname === parsed.pathname
+                      ) {
+                        return location.search.startsWith(parsed.search);
                       }
-                    })
+                      return false;
+                    } catch (e) {
+                      // Fallback: plain startsWith if URL parsing fails
+                      return location.pathname.startsWith(
+                        item.path as string
+                      );
+                    }
+                  })
                   : false;
 
                 const isActive = parentPathMatch || childPathMatch;
@@ -543,8 +544,8 @@ const Nav = () => {
                           );
                           const isChildActive = hasQueryParam
                             ? location.pathname === pathWithoutQuery &&
-                              !!item.id &&
-                              item.id === selectedCategory
+                            !!item.id &&
+                            item.id === selectedCategory
                             : location.pathname === pathWithoutQuery;
 
                           return (
