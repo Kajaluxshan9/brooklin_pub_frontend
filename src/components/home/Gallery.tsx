@@ -1098,8 +1098,7 @@ export default function Gallery() {
           A Glimpse Inside
         </Typography>
 
-        <Typography
-          className="gallery-header-element"
+        <Box
           sx={{
             fontFamily: '"Inter", sans-serif',
             fontSize: { xs: "1rem", md: "1.1rem" },
@@ -1113,21 +1112,41 @@ export default function Gallery() {
             transition: "opacity 0.7s ease, transform 0.7s ease",
             textAlign: "justify",
             px: { xs: 2, sm: 3, md: 4 },
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
           }}
         >
-          Nestled in the heart of Whitby at 15 Baldwin Street, Brooklin Pub &
-          Grill has been a cornerstone of the community, bringing people
-          together over exceptional food and drinks. Our commitment to quality
-          and hospitality has made us a favorite destination for locals and
-          visitors alike. We pride ourselves on creating a warm, welcoming
-          atmosphere where families can enjoy a meal together, friends can catch
-          up over drinks, and everyone feels like they're part of our extended
-          family. Our menu features both classic pub favorites and innovative
-          dishes that celebrate the best of Canadian cuisine. At Brooklin Pub &
-          Grill, we're more than just a restaurant – we're a gathering place
-          where memories are made, celebrations happen, and the community comes
-          together.
-        </Typography>
+          <Typography
+            className="gallery-header-element"
+            sx={{
+              mb: 2,
+            }}
+          >
+            Nestled in the heart of Whitby at 15 Baldwin Street, Brooklin Pub &
+            Grill has been a cornerstone of the community, bringing people
+            together over exceptional food and drinks. Our commitment to quality
+            and hospitality has made us a favorite destination for locals and
+            visitors alike.
+          </Typography>
+          <Typography
+            className="gallery-header-element"
+            sx={{
+              mb: 2,
+            }}
+          >
+            We pride ourselves on creating a warm, welcoming atmosphere where
+            families can enjoy a meal together, friends can catch up over
+            drinks, and everyone feels like they're part of our extended family.
+            Our menu features both classic pub favorites and innovative dishes
+            that celebrate the best of Canadian cuisine.
+          </Typography>
+          <Typography className="gallery-header-element">
+            At Brooklin Pub & Grill, we're more than just a restaurant – we're a
+            gathering place where memories are made, celebrations happen, and
+            the community comes together.
+          </Typography>
+        </Box>
 
         {/* Bottom Decorative Divider */}
         <Box
