@@ -646,10 +646,10 @@ const Home = () => {
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
                 style={{
                   position: "relative",
-                  width: isMobile ? "calc(100% - 24px)" : "min(900px, 90vw)",
-                  maxWidth: isMobile ? "95vw" : "900px",
+                  width: isMobile ? "calc(100% - 24px)" : "min(820px, 90vw)",
+                  maxWidth: isMobile ? "95vw" : "820px",
                   height: "auto",
-                  maxHeight: isMobile ? "calc(100dvh - 48px)" : "90vh",
+                  maxHeight: isMobile ? "calc(100dvh - 48px)" : "85vh",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -799,7 +799,7 @@ const Home = () => {
                       color: "#D9A756",
                     }}
                   >
-                    ✦ Specials ✦
+                    ✦ UPDATES ✦
                   </span>
                   <div
                     style={{
@@ -851,13 +851,17 @@ const Home = () => {
                         transition={{ duration: 0.5, ease: "easeInOut" }}
                         style={{
                           position: idx === 0 ? "relative" : "absolute",
-                          width: "100%",
-                          height: "100%",
+                          width: "auto",
+                          maxWidth: isMobile ? "calc(100vw - 56px)" : "720px",
+                          height: "auto",
+                          maxHeight: isMobile
+                            ? "calc(100dvh - 220px)"
+                            : "calc(80vh - 180px)",
                           objectFit: "contain",
                           borderRadius: isMobile ? "12px" : "20px",
                           boxShadow:
                             idx === slideshowIndex
-                              ? "0 20px 60px rgba(106,58,30,0.25), 0 0 0 1px rgba(217,167,86,0.2)"
+                              ? "0 20px 60px rgba(106,58,30,0.25)"
                               : "none",
                           pointerEvents:
                             idx === slideshowIndex ? "auto" : "none",
