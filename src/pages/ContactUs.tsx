@@ -737,7 +737,7 @@ const ContactUs = () => {
       <Box
         sx={{
           minHeight: "100vh",
-          background: "#FDF8F3",
+          background: "transparent",
           position: "relative",
           overflowX: "hidden",
           width: "100%",
@@ -767,7 +767,7 @@ const ContactUs = () => {
         <Box
           sx={{
             position: "relative",
-            background: "#FDF8F3",
+            background: "transparent",
             py: { xs: 4, sm: 6, md: 10 },
             px: { xs: 0, sm: 0 },
             width: "100%",

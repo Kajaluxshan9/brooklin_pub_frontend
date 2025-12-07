@@ -850,10 +850,12 @@ export default function Gallery() {
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [activeRowIndex, setActiveRowIndex] = useState(0);
-  const [isGalleryComplete, setIsGalleryComplete] = useState(false);
+  const [_isGalleryComplete, setIsGalleryComplete] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isInView = useInView(containerRef, { once: false, margin: "-20%" });
+  // Keep for future use if needed - gallery in-view detection
+  // @ts-expect-error - kept for potential future use
+  const _isInView = useInView(containerRef, { once: false, margin: "-20%" });
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-50px" });
 
   // GSAP animation for header
@@ -909,29 +911,17 @@ export default function Gallery() {
       .filter((row) => row.images.length > 0);
   }, [categoriesData]);
 
-  // Lock scroll on mobile when gallery is active
+  // Lock scroll on mobile when gallery is active - disabled to fix scroll issues
+  // The gallery works fine without scroll locking
   useEffect(() => {
-    if (isMobile && isInView && !isGalleryComplete && galleryRows.length > 0) {
-      containerRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-      document.body.style.top = `-${window.scrollY}px`;
-
-      return () => {
-        const scrollY = document.body.style.top;
-        document.body.style.overflow = "";
-        document.body.style.position = "";
-        document.body.style.width = "";
-        document.body.style.top = "";
-        window.scrollTo(0, parseInt(scrollY || "0") * -1);
-      };
-    }
-  }, [isMobile, isInView, isGalleryComplete, galleryRows.length]);
+    // Always ensure scroll is unlocked when component unmounts
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+    };
+  }, []);
 
   // Handle row cycle complete
   const handleRowComplete = () => {

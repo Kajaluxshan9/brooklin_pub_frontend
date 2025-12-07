@@ -344,7 +344,6 @@ export default function CylinderMenuPopup() {
           touchAction: "pan-y",
           userSelect: "none",
           background: "transparent",
-          marginTop: `${verticalGap}px`,
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}

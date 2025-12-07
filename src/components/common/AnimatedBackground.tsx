@@ -55,6 +55,13 @@ export default function AnimatedBackground({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Kill any existing ScrollTrigger instances for this container
+    ScrollTrigger.getAll().forEach((trigger) => {
+      if (trigger.vars.trigger === document.body) {
+        // Refresh instead of killing to maintain proper state
+      }
+    });
+
     const ctx = gsap.context(() => {
       const shapes = containerRef.current?.querySelectorAll(".bg-shape");
       const particles = containerRef.current?.querySelectorAll(".bg-particle");
@@ -153,7 +160,16 @@ export default function AnimatedBackground({
       });
     }, containerRef);
 
-    return () => ctx.revert();
+    // Refresh ScrollTrigger after animations are set up to ensure proper scroll behavior
+    // Use a small delay to allow DOM to settle after navigation
+    const refreshTimeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => {
+      clearTimeout(refreshTimeout);
+      ctx.revert();
+    };
   }, [variant, enableParallax, config]);
 
   // Generate shapes array

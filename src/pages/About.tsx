@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Nav from "../components/common/Nav";
 import Footer from "../components/common/Footer";
 import AboutUs from "../components/about/AboutUs";
@@ -10,13 +11,22 @@ import { AboutSEO } from "../config/seo.presets";
 import { Box } from "@mui/material";
 
 const About = () => {
+  // Ensure scroll is restored when navigating to About page
+  useEffect(() => {
+    // Reset any scroll locks from Gallery or other components
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.top = "";
+  }, []);
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        background: "#FDF8F3",
+        background: "transparent",
         position: "relative",
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       <AnimatedBackground variant="subtle" />
@@ -40,7 +50,7 @@ const About = () => {
       <Box
         sx={{
           height: { xs: 0, md: 80 },
-          background: "linear-gradient(180deg, #EDE4D9 0%, #D9CFC2 100%)",
+          background: "transparent",
         }}
       />
       <Footer />

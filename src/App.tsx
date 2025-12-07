@@ -20,35 +20,6 @@ const Special = lazy(() => import("./pages/Special"));
 const MainMenu = lazy(() => import("./pages/MainMenu"));
 const Events = lazy(() => import("./pages/Events"));
 
-// Global image protection - prevent right-click and drag on all images
-const setupImageProtection = () => {
-  // Prevent right-click context menu on images
-  document.addEventListener("contextmenu", (e) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === "IMG" || target.closest(".protected-image")) {
-      e.preventDefault();
-      return false;
-    }
-  });
-
-  // Prevent drag on images
-  document.addEventListener("dragstart", (e) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === "IMG") {
-      e.preventDefault();
-      return false;
-    }
-  });
-
-  // Disable keyboard shortcuts for saving images (Ctrl+S, etc.)
-  document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-      e.preventDefault();
-      return false;
-    }
-  });
-};
-
 const theme = createTheme({
   palette: {
     primary: {
@@ -172,11 +143,6 @@ const theme = createTheme({
 });
 
 function App() {
-  // Initialize image protection on mount
-  useEffect(() => {
-    setupImageProtection();
-  }, []);
-
   return (
     <ErrorBoundary>
       <ThemeProvider theme={theme}>

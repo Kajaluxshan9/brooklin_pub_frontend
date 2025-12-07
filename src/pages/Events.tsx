@@ -940,7 +940,7 @@ const Events = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "#FDF8F3",
+        background: "transparent",
         position: "relative",
         overflow: "hidden",
       }}
@@ -966,8 +966,7 @@ const Events = () => {
         sx={{
           py: { xs: 10, md: 14 },
           position: "relative",
-          background:
-            "linear-gradient(180deg, #FDF8F3 0%, #FAF7F2 50%, #FDF8F3 100%)",
+          background: "transparent",
         }}
       >
         {/* Premium Background */}

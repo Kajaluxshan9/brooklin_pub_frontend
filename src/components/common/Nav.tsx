@@ -20,9 +20,10 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useApiWithCache } from "../../hooks/useApi";
+import { useVisibleSpecials } from "../../hooks/useVisibleSpecials";
 import { menuService } from "../../services/menu.service";
-import { specialsService } from "../../services/specials.service";
-import type { PrimaryCategory, Special } from "../../types/api.types";
+import { EXTERNAL_URLS, UI_CONFIG } from "../../config/constants";
+import type { PrimaryCategory } from "../../types/api.types";
 
 type NavNode = {
   label: string;
@@ -31,32 +32,9 @@ type NavNode = {
   id?: string;
 };
 
-// Helper function to check if a special is currently visible based on display dates
-const isSpecialVisible = (special: Special): boolean => {
-  if (!special.isActive) return false;
-
-  const now = new Date();
-
-  // For specials with display date range (game_time, seasonal, chef)
-  if (special.displayStartDate && special.displayEndDate) {
-    const startDate = new Date(special.displayStartDate);
-    const endDate = new Date(special.displayEndDate);
-    return now >= startDate && now <= endDate;
-  }
-
-  // For daily specials, always visible if active
-  if (special.type === "daily") {
-    return true;
-  }
-
-  // If no display dates but active, show it
-  return true;
-};
-
 const Nav = () => {
-  // EastServe ordering URL
-  const orderUrl =
-    "https://www.eastserve.ca/ordering/restaurant/menu?company_uid=f0d6a7d8-6663-43c6-af55-0d11a9773920&restaurant_uid=29e4ef84-c523-4a58-9e4b-6546d6637312&facebook=true";
+  // Use centralized constants for external URLs
+  const orderUrl = EXTERNAL_URLS.ORDER_ONLINE;
 
   // Fetch primary categories from backend
   const { data: primaryCategories } = useApiWithCache<PrimaryCategory[]>(
@@ -64,63 +42,8 @@ const Nav = () => {
     () => menuService.getPrimaryCategories()
   );
 
-  // Fetch active specials from backend
-  const { data: specialsData } = useApiWithCache<Special[]>(
-    "active-specials",
-    () => specialsService.getActiveSpecials()
-  );
-
-  // Fetch all menu items from backend
-  const { data: _menuItems } = useApiWithCache<any[]>("all-menu-items", () =>
-    menuService.getAllMenuItems()
-  );
-
-  // Filter specials that are currently visible (within display date range)
-  const visibleSpecials = useMemo(() => {
-    if (!specialsData) return [];
-    return specialsData.filter(isSpecialVisible);
-  }, [specialsData]);
-
-  // Create two categories: "Daily Specials" (daily + late_night + all_day) and "Specials" (everything else)
-  const specialTypes = useMemo(() => {
-    if (!visibleSpecials || visibleSpecials.length === 0) return [];
-
-    // Check if there are daily specials (daily type, late_night category, or day_time type)
-    const hasDailySpecials = visibleSpecials.some(
-      (s) =>
-        s.type === "daily" ||
-        s.type === "day_time" ||
-        s.specialCategory === "late_night"
-    );
-
-    // Check if there are other specials (game_time, chef, seasonal, etc.)
-    const hasOtherSpecials = visibleSpecials.some(
-      (s) =>
-        s.type !== "daily" &&
-        s.type !== "day_time" &&
-        s.specialCategory !== "late_night"
-    );
-
-    const categories: { label: string; path: string; id: string }[] = [];
-
-    if (hasDailySpecials) {
-      categories.push({
-        label: "Daily Specials",
-        path: "/special/daily",
-        id: "daily",
-      });
-    }
-
-    if (hasOtherSpecials) {
-      categories.push({
-        label: "Other Specials",
-        path: "/special/other",
-        id: "other",
-      });
-    }
-
-    return categories;
-  }, [visibleSpecials]);
+  // Use the custom hook for visible specials logic
+  const { specialCategories: specialTypes } = useVisibleSpecials();
 
   // Build navigation links dynamically
   const navLinks: NavNode[] = [
@@ -153,7 +76,7 @@ const Nav = () => {
   const [openParent, setOpenParent] = useState<string | null>(null);
   const [mobileOpenParent, setMobileOpenParent] = useState<string | null>(null);
   // Track which category is expanded in the dropdown
-  const [_expandedCategory, setExpandedCategory] = useState<string | null>(
+  const [, setExpandedCategory] = useState<string | null>(
     null
   );
 
@@ -163,7 +86,7 @@ const Nav = () => {
   const mobileDropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Helper to parse `categories` fields which might be string, string[] or other
-  const parseCategories = (val: any): string[] => {
+  const parseCategories = (val: unknown): string[] => {
     if (!val && val !== 0) return [];
     if (Array.isArray(val))
       return val
@@ -184,13 +107,11 @@ const Nav = () => {
       .filter((pc) => pc && pc.id)
       .flatMap((pc) => parseCategories(pc.id));
 
-    // add special types from backend data
-    const fromSpecials = (specialsData || [])
-      .map((s) => s.type)
-      .filter(Boolean);
+    // add special types from specialTypes
+    const fromSpecials = specialTypes.map((s) => s.id).filter(Boolean);
 
     return Array.from(new Set(["all", ...fromPrimary, ...fromSpecials]));
-  }, [primaryCategories, specialsData]);
+  }, [primaryCategories, specialTypes]);
 
   const getCategoryFromQuery = () => {
     try {
@@ -198,7 +119,7 @@ const Nav = () => {
       const q = params.get("category");
       if (!q) return allCategoryNames[0] || "all";
       return q;
-    } catch (e) {
+    } catch {
       return allCategoryNames[0] || "all";
     }
   };
@@ -253,7 +174,7 @@ const Nav = () => {
       setOpenParent(null);
       // also clear child when parent closes
       parentCloseTimeout.current = null;
-    }, 200); // small delay for pointer movement
+    }, UI_CONFIG.DROPDOWN_CLOSE_DELAY); // use centralized config
   };
 
   const closeParentNow = () => {
@@ -349,7 +270,7 @@ const Nav = () => {
                         return location.search.startsWith(parsed.search);
                       }
                       return false;
-                    } catch (e) {
+                    } catch {
                       // Fallback: plain startsWith if URL parsing fails
                       return location.pathname.startsWith(
                         item.path as string

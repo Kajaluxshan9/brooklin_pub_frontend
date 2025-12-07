@@ -311,7 +311,7 @@ const HeroMiddleSection = () => {
               backgroundClip: "text",
             }}
           >
-            Over Four Decades
+            Over a Decade
           </Box>
         </Typography>
 
@@ -536,7 +536,7 @@ const Home = () => {
   }, [showSlideshow, popupCards.length]);
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#FDF8F3" }}>
+    <Box sx={{ minHeight: "100vh", background: "transparent" }}>
       <HomeSEO />
       <Nav />
       {showSlideshow &&
@@ -548,13 +548,13 @@ const Home = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              style={{
+                style={{
                 position: "fixed",
                 top: 0,
                 left: 0,
                 width: "100vw",
                 height: "100dvh", // Use dvh for better mobile viewport handling
-                background: "rgba(26, 13, 10, 0.85)",
+                background: "transparent",
                 backdropFilter: "blur(20px)",
                 display: "flex",
                 alignItems: "center",
@@ -646,16 +646,16 @@ const Home = () => {
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
                 style={{
                   position: "relative",
-                  width: isMobile ? "100%" : "min(900px, 90vw)",
-                  maxWidth: "900px",
-                  maxHeight: isMobile ? "calc(100dvh - 32px)" : "88vh",
+                  width: isMobile ? "calc(100% - 24px)" : "min(900px, 90vw)",
+                  maxWidth: isMobile ? "95vw" : "900px",
+                  height: "auto",
+                  maxHeight: isMobile ? "calc(100dvh - 48px)" : "90vh",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  background:
-                    "linear-gradient(180deg, rgba(255,253,251,0.98) 0%, rgba(250,247,242,0.98) 100%)",
-                  borderRadius: isMobile ? "24px" : "32px",
-                  padding: isMobile ? "16px" : "24px",
+                  background: "transparent",
+                  borderRadius: isMobile ? "20px" : "32px",
+                  padding: isMobile ? "12px" : "24px",
                   boxShadow:
                     "0 40px 100px rgba(0,0,0,0.4), 0 0 0 1px rgba(217,167,86,0.3), inset 0 1px 0 rgba(255,255,255,0.8)",
                   overflow: "hidden",
@@ -799,7 +799,7 @@ const Home = () => {
                       color: "#D9A756",
                     }}
                   >
-                    ✦ Today's Special ✦
+                    ✦ Specials ✦
                   </span>
                   <div
                     style={{
@@ -851,12 +851,10 @@ const Home = () => {
                         transition={{ duration: 0.5, ease: "easeInOut" }}
                         style={{
                           position: idx === 0 ? "relative" : "absolute",
-                          maxWidth: "100%",
-                          maxHeight: isMobile
-                            ? "calc(100dvh - 260px)"
-                            : "calc(88vh - 200px)",
+                          width: "100%",
+                          height: "100%",
                           objectFit: "contain",
-                          borderRadius: isMobile ? "16px" : "20px",
+                          borderRadius: isMobile ? "12px" : "20px",
                           boxShadow:
                             idx === slideshowIndex
                               ? "0 20px 60px rgba(106,58,30,0.25), 0 0 0 1px rgba(217,167,86,0.2)"

@@ -105,7 +105,8 @@ export default function AboutUs() {
         height: { xs: "auto", md: "100vh" },
         minHeight: { xs: "400px", md: "100vh" },
         width: "100%",
-        overflowY: { xs: "hidden", md: "hidden" },
+        // Allow parent page to scroll - don't hide overflow on mobile
+        overflowY: "visible",
         overflowX: "hidden",
         position: "relative",
         backgroundColor: "transparent",

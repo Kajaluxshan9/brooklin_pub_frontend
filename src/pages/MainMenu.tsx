@@ -55,7 +55,7 @@ const MainMenuPage = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "#FDF8F3",
+        background: "transparent",
         position: "relative",
         overflow: "hidden",
       }}
