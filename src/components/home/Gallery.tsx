@@ -1104,17 +1104,29 @@ export default function Gallery() {
             fontFamily: '"Inter", sans-serif',
             fontSize: { xs: "1rem", md: "1.1rem" },
             color: "#6A3A1E",
-            maxWidth: 600,
+            maxWidth: { xs: 600, md: 900, lg: 1100 },
             mx: "auto",
             lineHeight: 1.85,
             letterSpacing: "0.01em",
             fontWeight: 400,
             opacity: 1,
             transition: "opacity 0.7s ease, transform 0.7s ease",
+            textAlign: "justify",
+            px: { xs: 2, sm: 3, md: 4 },
           }}
         >
-          Step inside and see why Brooklin calls us home—the laughter, the
-          celebrations, and the moments that matter
+          Nestled in the heart of Whitby at 15 Baldwin Street, Brooklin Pub &
+          Grill has been a cornerstone of the community, bringing people
+          together over exceptional food and drinks. Our commitment to quality
+          and hospitality has made us a favorite destination for locals and
+          visitors alike. We pride ourselves on creating a warm, welcoming
+          atmosphere where families can enjoy a meal together, friends can catch
+          up over drinks, and everyone feels like they're part of our extended
+          family. Our menu features both classic pub favorites and innovative
+          dishes that celebrate the best of Canadian cuisine. At Brooklin Pub &
+          Grill, we're more than just a restaurant – we're a gathering place
+          where memories are made, celebrations happen, and the community comes
+          together.
         </Typography>
 
         {/* Bottom Decorative Divider */}
@@ -1154,7 +1166,6 @@ export default function Gallery() {
       </Box>
 
       {/* Enhanced premium progress indicator for mobile */}
-
     </Box>
   );
 }

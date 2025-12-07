@@ -1025,15 +1025,24 @@ const Footer = () => {
             </Typography>
           </Box>
           <Typography
-            sx={{ color: "rgba(245, 239, 230, 0.4)", fontSize: "0.8rem" }}
+            sx={{
+              color: "rgba(245, 239, 230, 0.4)",
+              fontSize: "0.8rem",
+              fontFamily: '"Inter", sans-serif',
+              fontWeight: 500,
+            }}
           >
-            Site by{" "}
+            Brought to life by{" "}
             <MUILink
               href="https://www.akvisionsystems.com/"
               target="_blank"
               rel="noopener noreferrer"
               underline="hover"
-              sx={{ color: "#D9A756", fontWeight: 600 }}
+              sx={{
+                color: "#D9A756",
+                fontWeight: 600,
+                fontFamily: '"Inter", sans-serif',
+              }}
             >
               AK Vision Systems
             </MUILink>

@@ -928,7 +928,6 @@ const ContactUs = () => {
                   </Button>
                 </ContactInfoCard>
 
-
                 {/* Contact Card */}
                 <ContactInfoCard
                   icon={
@@ -1845,7 +1844,7 @@ const ContactUs = () => {
                 }}
               >
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2872.345!2d-78.9417!3d43.8765!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDUyJzM1LjQiTiA3OMKwNTYnMzAuMSJX!5e0!3m2!1sen!2sca!4v1234567890"
+                  src="https://maps.google.com/maps?q=Brooklin%20Pub%20%26%20Grill%2015%20Baldwin%20St%20Whitby%20ON&t=&z=17&ie=UTF8&iwloc=&output=embed"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}

@@ -36,6 +36,13 @@ const About = () => {
 
       <AboutUs />
       <Gallery />
+      {/* Spacer for desktop before footer with theme background */}
+      <Box
+        sx={{
+          height: { xs: 0, md: 80 },
+          background: "linear-gradient(180deg, #EDE4D9 0%, #D9CFC2 100%)",
+        }}
+      />
       <Footer />
     </Box>
   );

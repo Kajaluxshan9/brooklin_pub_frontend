@@ -16,6 +16,7 @@ import type {
   MenuCategory,
   MenuItem,
   MenuItemMeasurement,
+  PrimaryCategory,
 } from "../../types/api.types";
 
 // Premium card animation variants
@@ -68,6 +69,11 @@ export default function MainMenu() {
   const { data: menuItems } = useApiWithCache<MenuItem[]>(
     "all-menu-items",
     () => menuService.getAllMenuItems()
+  );
+
+  const { data: primaryCategories } = useApiWithCache<PrimaryCategory[]>(
+    "primary-categories",
+    () => menuService.getPrimaryCategories()
   );
 
   // Type definitions matching the UI structure
@@ -185,6 +191,63 @@ export default function MainMenu() {
 
   const selectedPrimaryCategoryId = getCategoryFromQuery();
 
+  // Check if selected category is a "direct display" category (Desserts or Kids)
+  const selectedPrimaryCategory = useMemo(() => {
+    if (
+      !primaryCategories ||
+      !selectedPrimaryCategoryId ||
+      selectedPrimaryCategoryId === "all"
+    ) {
+      return null;
+    }
+    return primaryCategories.find((pc) => pc.id === selectedPrimaryCategoryId);
+  }, [primaryCategories, selectedPrimaryCategoryId]);
+
+  const isDirectDisplayCategory = useMemo(() => {
+    if (!selectedPrimaryCategory) return false;
+    const name = selectedPrimaryCategory.name.toLowerCase();
+    return name.includes("dessert") || name.includes("kid");
+  }, [selectedPrimaryCategory]);
+
+  // Get all menu items for direct display categories
+  const directDisplayItems = useMemo((): DisplayMenuItem[] => {
+    if (!isDirectDisplayCategory || !menuItems || !categories) return [];
+
+    // Get all category IDs that belong to this primary category
+    const categoryIds = categories
+      .filter(
+        (cat) =>
+          cat.primaryCategoryId === selectedPrimaryCategoryId && cat.isActive
+      )
+      .map((cat) => cat.id);
+
+    // Get all menu items from these categories
+    return menuItems
+      .filter(
+        (item) => categoryIds.includes(item.categoryId) && item.isAvailable
+      )
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((item) => {
+        let priceDisplay = "";
+        if (!item.hasMeasurements && item.price != null && item.price > 0) {
+          priceDisplay = `$${item.price.toFixed(2)}`;
+        }
+        return {
+          name: item.name,
+          desc: item.description || "",
+          price: priceDisplay,
+          image: getImageUrl(item.imageUrls?.[0]) || "/brooklinpub-logo.png",
+          measurements: item.measurements,
+          hasMeasurements: item.hasMeasurements,
+        };
+      });
+  }, [
+    isDirectDisplayCategory,
+    menuItems,
+    categories,
+    selectedPrimaryCategoryId,
+  ]);
+
   // Filter menu by primary category
   const filteredMenu = useMemo(() => {
     if (!selectedPrimaryCategoryId || selectedPrimaryCategoryId === "all") {
@@ -239,334 +302,679 @@ export default function MainMenu() {
     >
       <MenuBackground />
 
-      {/* Premium Menu Grid */}
-      <Box
-        sx={{
-          position: "relative",
-          margin: "0 auto",
-          width: "100%",
-          maxWidth: "1400px",
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            lg: "repeat(3, 1fr)",
-          },
-          gap: { xs: "32px", md: "48px" },
-          zIndex: 10,
-          padding: { xs: "24px 16px", md: "48px 32px" },
-        }}
-      >
-        {filteredMenu.map((item: MenuEntry, idx: number) => {
-          const isHovered = hoveredCard === idx || activeCard === idx;
-          const cardColors = [
-            {
-              bg: "linear-gradient(145deg, #6A3A1E 0%, #4A2C17 100%)",
-              accent: "#D9A756",
+      {/* Direct Display for Desserts/Kids - Show items directly with matching card design */}
+      {isDirectDisplayCategory && directDisplayItems.length > 0 ? (
+        <Box
+          sx={{
+            position: "relative",
+            margin: "0 auto",
+            width: "100%",
+            maxWidth: "1400px",
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              lg: "repeat(3, 1fr)",
             },
-            {
-              bg: "linear-gradient(145deg, #D9A756 0%, #B08030 100%)",
-              accent: "#FDF8F3",
-            },
-            {
-              bg: "linear-gradient(145deg, #4A2C17 0%, #3A2212 100%)",
-              accent: "#C5933E",
-            },
-          ];
-          const colorScheme = cardColors[idx % cardColors.length];
+            gap: { xs: "32px", md: "48px" },
+            zIndex: 10,
+            padding: { xs: "24px 16px", md: "48px 32px" },
+          }}
+        >
+          {directDisplayItems.map((item, idx) => {
+            const isHovered = hoveredCard === idx || activeCard === idx;
+            const cardColors = [
+              {
+                bg: "linear-gradient(145deg, #6A3A1E 0%, #4A2C17 100%)",
+                accent: "#D9A756",
+              },
+              {
+                bg: "linear-gradient(145deg, #D9A756 0%, #B08030 100%)",
+                accent: "#FDF8F3",
+              },
+              {
+                bg: "linear-gradient(145deg, #4A2C17 0%, #3A2212 100%)",
+                accent: "#C5933E",
+              },
+            ];
+            const colorScheme = cardColors[idx % cardColors.length];
 
-          return (
-            <motion.div
-              key={idx}
-              custom={idx}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              whileTap={{ scale: 0.98 }}
-              variants={cardVariants}
-              onHoverStart={() => setHoveredCard(idx)}
-              onHoverEnd={() => setHoveredCard(null)}
-              onTouchStart={() => {
-                // On touch, show hover state briefly
-                setActiveCard(idx);
-              }}
-              onTouchEnd={() => {
-                // Keep active briefly for visual feedback
-                setTimeout(() => setActiveCard(null), 150);
-              }}
-              onClick={() => setSelectedItem(item)}
-              style={{ cursor: "pointer" }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  borderRadius: "24px",
-                  overflow: "visible",
-                  background: "transparent",
-                  backdropFilter: isHovered ? "blur(8px)" : "none",
-                  transition: "all 0.5s cubic-bezier(0.215, 0.61, 0.355, 1)",
-                }}
+            return (
+              <motion.div
+                key={idx}
+                custom={idx}
+                initial="hidden"
+                animate="visible"
+                whileHover="hover"
+                whileTap={{ scale: 0.98 }}
+                variants={cardVariants}
+                onHoverStart={() => setHoveredCard(idx)}
+                onHoverEnd={() => setHoveredCard(null)}
+                onTouchStart={() => setActiveCard(idx)}
+                onTouchEnd={() => setTimeout(() => setActiveCard(null), 150)}
+                style={{ cursor: "default" }}
               >
-                {/* Subtle glow on hover */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: "80%",
-                    height: "80%",
-                    background: `radial-gradient(ellipse, ${colorScheme.accent}15 0%, transparent 70%)`,
-                    borderRadius: "50%",
-                    opacity: isHovered ? 1 : 0,
-                    transition: "opacity 0.5s ease",
-                    pointerEvents: "none",
-                  }}
-                />
-
-                {/* Image Container */}
                 <Box
                   sx={{
                     position: "relative",
-                    height: { xs: "220px", md: "280px" },
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    pt: 2,
-                    px: 2,
+                    borderRadius: "24px",
                     overflow: "visible",
+                    background: "transparent",
+                    backdropFilter: isHovered ? "blur(8px)" : "none",
+                    transition: "all 0.5s cubic-bezier(0.215, 0.61, 0.355, 1)",
                   }}
                 >
-                  <motion.div
-                    variants={imageVariants}
-                    initial="rest"
-                    animate={isHovered ? "hover" : "rest"}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={item.mainImage}
-                      alt={item.name}
-                      draggable={false}
-                      sx={{
-                        maxWidth: "90%",
-                        maxHeight: "90%",
-                        objectFit: "contain",
-                        filter: isHovered
-                          ? `drop-shadow(0 30px 50px rgba(0,0,0,0.4))`
-                          : `drop-shadow(0 15px 35px rgba(0,0,0,0.25))`,
-                        transition: "filter 0.4s ease",
-                      }}
-                    />
-                  </motion.div>
-
-                  {/* Floating shadow/reflection */}
+                  {/* Subtle glow on hover */}
                   <Box
                     sx={{
                       position: "absolute",
-                      bottom: "-10px",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: "80%",
+                      height: "80%",
+                      background: `radial-gradient(ellipse, ${colorScheme.accent}15 0%, transparent 70%)`,
+                      borderRadius: "50%",
+                      opacity: isHovered ? 1 : 0,
+                      transition: "opacity 0.5s ease",
+                      pointerEvents: "none",
+                    }}
+                  />
+
+                  {/* Image Container */}
+                  <Box
+                    sx={{
+                      position: "relative",
+                      height: { xs: "220px", md: "280px" },
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      pt: 2,
+                      px: 2,
+                      overflow: "visible",
+                    }}
+                  >
+                    <motion.div
+                      variants={imageVariants}
+                      initial="rest"
+                      animate={isHovered ? "hover" : "rest"}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={item.image}
+                        alt={item.name}
+                        draggable={false}
+                        sx={{
+                          maxWidth: "90%",
+                          maxHeight: "90%",
+                          objectFit: "contain",
+                          filter: isHovered
+                            ? `drop-shadow(0 30px 50px rgba(0,0,0,0.4))`
+                            : `drop-shadow(0 15px 35px rgba(0,0,0,0.25))`,
+                          transition: "filter 0.4s ease",
+                        }}
+                      />
+                    </motion.div>
+
+                    {/* Floating shadow/reflection */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: "-10px",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: "60%",
+                        height: "20px",
+                        background: `radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%)`,
+                        filter: "blur(8px)",
+                        opacity: isHovered ? 0.8 : 0.5,
+                        transition: "all 0.4s ease",
+                      }}
+                    />
+                  </Box>
+
+                  {/* Content */}
+                  <Box
+                    sx={{
+                      p: { xs: 2, md: 2.5 },
+                      pt: 1,
+                      textAlign: "center",
+                    }}
+                  >
+                    {/* Item name */}
+                    <Box
+                      sx={{
+                        minHeight: { xs: "auto", md: "70px" },
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        mb: 1,
+                        px: 2,
+                      }}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{
+                          duration: 0.8,
+                          delay: idx * 0.1,
+                          ease: [0.215, 0.61, 0.355, 1],
+                        }}
+                        style={{ width: "100%" }}
+                      >
+                        <Typography
+                          component={motion.div}
+                          initial={{ backgroundPosition: "0% 50%" }}
+                          animate={{ backgroundPosition: "100% 50%" }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                            ease: "easeInOut",
+                          }}
+                          sx={{
+                            fontFamily: "'Great Vibes', cursive",
+                            fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                            fontWeight: 400,
+                            background: `linear-gradient(90deg, #4A2C17 0%, #6A3A1E 25%, #D9A756 50%, #6A3A1E 75%, #4A2C17 100%)`,
+                            backgroundSize: "200% 100%",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            backgroundClip: "text",
+                            textAlign: "center",
+                            filter: `drop-shadow(-1px -1px 0 #D9A75640)
+                                     drop-shadow(1px -1px 0 #D9A75640)
+                                     drop-shadow(-1px 1px 0 #D9A75640)
+                                     drop-shadow(1px 1px 0 #D9A75640)
+                                     drop-shadow(0 0 8px rgba(217, 167, 86, 0.2))`,
+                            lineHeight: 1.2,
+                            wordWrap: "break-word",
+                            overflowWrap: "break-word",
+                            hyphens: "auto",
+                          }}
+                        >
+                          {item.name}
+                        </Typography>
+                      </motion.div>
+                    </Box>
+
+                    {/* Description */}
+                    {item.desc && (
+                      <Typography
+                        sx={{
+                          fontFamily: '"Inter", sans-serif',
+                          fontSize: { xs: "0.85rem", md: "0.9rem" },
+                          fontWeight: 400,
+                          color: "#6A3A1E",
+                          letterSpacing: "0.01em",
+                          opacity: 0.85,
+                          mb: 1.5,
+                          lineHeight: 1.5,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.desc}
+                      </Typography>
+                    )}
+
+                    {/* Price display */}
+                    {!item.hasMeasurements && item.price && (
+                      <Typography
+                        sx={{
+                          fontFamily: '"Cormorant Garamond", Georgia, serif',
+                          fontSize: { xs: "1.25rem", md: "1.5rem" },
+                          fontWeight: 700,
+                          color: "#D9A756",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        {item.price}
+                      </Typography>
+                    )}
+
+                    {/* Measurements/Sizes */}
+                    {item.hasMeasurements && item.measurements && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          justifyContent: "center",
+                          gap: 1,
+                          mt: 1,
+                        }}
+                      >
+                        {item.measurements
+                          .filter((m) => m.price > 0)
+                          .sort((a, b) => a.sortOrder - b.sortOrder)
+                          .map((m, mIdx) => (
+                            <Box
+                              key={mIdx}
+                              sx={{
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: "8px",
+                                background: "rgba(217, 167, 86, 0.15)",
+                                border: "1px solid rgba(217, 167, 86, 0.3)",
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontFamily:
+                                    '"Cormorant Garamond", Georgia, serif',
+                                  fontSize: "0.9rem",
+                                  fontWeight: 600,
+                                  color: "#4A2C17",
+                                }}
+                              >
+                                {m.measurementTypeEntity?.name ||
+                                  m.measurementType?.name}
+                                : ${m.price.toFixed(2)}
+                              </Typography>
+                            </Box>
+                          ))}
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Subtle underline on hover */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "8px",
                       left: "50%",
                       transform: "translateX(-50%)",
-                      width: "60%",
-                      height: "20px",
-                      background: `radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%)`,
-                      filter: "blur(8px)",
-                      opacity: isHovered ? 0.8 : 0.5,
-                      transition: "all 0.4s ease",
+                      width: isHovered ? "60%" : "0%",
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, #D9A75660, transparent)",
+                      transition: "width 0.4s ease",
                     }}
                   />
                 </Box>
 
-                {/* Content */}
-                <Box
-                  sx={{
-                    p: { xs: 2, md: 2.5 },
-                    pt: 1,
-                    textAlign: "center",
-                  }}
-                >
-                  {/* Category name */}
+                {/* Mobile divider */}
+                {idx < directDisplayItems.length - 1 && (
                   <Box
                     sx={{
-                      minHeight: { xs: "auto", md: "70px" },
-                      display: "flex",
+                      display: { xs: "flex", sm: "none" },
                       justifyContent: "center",
                       alignItems: "center",
-                      mb: 1,
+                      gap: 2,
+                      my: 3,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        flex: 1,
+                        height: "1px",
+                        background:
+                          "linear-gradient(90deg, transparent, #D9A756, transparent)",
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#D9A756",
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        flex: 1,
+                        height: "1px",
+                        background:
+                          "linear-gradient(90deg, transparent, #D9A756, transparent)",
+                      }}
+                    />
+                  </Box>
+                )}
+              </motion.div>
+            );
+          })}
+        </Box>
+      ) : (
+        /* Premium Menu Grid */
+        <Box
+          sx={{
+            position: "relative",
+            margin: "0 auto",
+            width: "100%",
+            maxWidth: "1400px",
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              lg: "repeat(3, 1fr)",
+            },
+            gap: { xs: "32px", md: "48px" },
+            zIndex: 10,
+            padding: { xs: "24px 16px", md: "48px 32px" },
+          }}
+        >
+          {filteredMenu.map((item: MenuEntry, idx: number) => {
+            const isHovered = hoveredCard === idx || activeCard === idx;
+            const cardColors = [
+              {
+                bg: "linear-gradient(145deg, #6A3A1E 0%, #4A2C17 100%)",
+                accent: "#D9A756",
+              },
+              {
+                bg: "linear-gradient(145deg, #D9A756 0%, #B08030 100%)",
+                accent: "#FDF8F3",
+              },
+              {
+                bg: "linear-gradient(145deg, #4A2C17 0%, #3A2212 100%)",
+                accent: "#C5933E",
+              },
+            ];
+            const colorScheme = cardColors[idx % cardColors.length];
+
+            return (
+              <motion.div
+                key={idx}
+                custom={idx}
+                initial="hidden"
+                animate="visible"
+                whileHover="hover"
+                whileTap={{ scale: 0.98 }}
+                variants={cardVariants}
+                onHoverStart={() => setHoveredCard(idx)}
+                onHoverEnd={() => setHoveredCard(null)}
+                onTouchStart={() => {
+                  // On touch, show hover state briefly
+                  setActiveCard(idx);
+                }}
+                onTouchEnd={() => {
+                  // Keep active briefly for visual feedback
+                  setTimeout(() => setActiveCard(null), 150);
+                }}
+                onClick={() => setSelectedItem(item)}
+                style={{ cursor: "pointer" }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    borderRadius: "24px",
+                    overflow: "visible",
+                    background: "transparent",
+                    backdropFilter: isHovered ? "blur(8px)" : "none",
+                    transition: "all 0.5s cubic-bezier(0.215, 0.61, 0.355, 1)",
+                  }}
+                >
+                  {/* Subtle glow on hover */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: "80%",
+                      height: "80%",
+                      background: `radial-gradient(ellipse, ${colorScheme.accent}15 0%, transparent 70%)`,
+                      borderRadius: "50%",
+                      opacity: isHovered ? 1 : 0,
+                      transition: "opacity 0.5s ease",
+                      pointerEvents: "none",
+                    }}
+                  />
+
+                  {/* Image Container */}
+                  <Box
+                    sx={{
+                      position: "relative",
+                      height: { xs: "220px", md: "280px" },
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      pt: 2,
                       px: 2,
+                      overflow: "visible",
                     }}
                   >
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                      whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.3 }}
-                      transition={{
-                        duration: 0.8,
-                        delay: idx * 0.1,
-                        ease: [0.215, 0.61, 0.355, 1],
+                      variants={imageVariants}
+                      initial="rest"
+                      animate={isHovered ? "hover" : "rest"}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                      style={{ width: "100%" }}
                     >
-                      <Typography
-                        component={motion.div}
-                        initial={{ backgroundPosition: "0% 50%" }}
-                        animate={{ backgroundPosition: "100% 50%" }}
-                        transition={{
-                          duration: 3,
-                          repeat: Infinity,
-                          repeatType: "reverse",
-                          ease: "easeInOut",
-                        }}
+                      <Box
+                        component="img"
+                        src={item.mainImage}
+                        alt={item.name}
+                        draggable={false}
                         sx={{
-                          fontFamily: "'Great Vibes', cursive",
-                          fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-                          fontWeight: 400,
-                          background: `linear-gradient(90deg, #4A2C17 0%, #6A3A1E 25%, #D9A756 50%, #6A3A1E 75%, #4A2C17 100%)`,
-                          backgroundSize: "200% 100%",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                          textAlign: "center",
-                          filter: `drop-shadow(-1px -1px 0 #D9A75640)
+                          maxWidth: "90%",
+                          maxHeight: "90%",
+                          objectFit: "contain",
+                          filter: isHovered
+                            ? `drop-shadow(0 30px 50px rgba(0,0,0,0.4))`
+                            : `drop-shadow(0 15px 35px rgba(0,0,0,0.25))`,
+                          transition: "filter 0.4s ease",
+                        }}
+                      />
+                    </motion.div>
+
+                    {/* Floating shadow/reflection */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: "-10px",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: "60%",
+                        height: "20px",
+                        background: `radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%)`,
+                        filter: "blur(8px)",
+                        opacity: isHovered ? 0.8 : 0.5,
+                        transition: "all 0.4s ease",
+                      }}
+                    />
+                  </Box>
+
+                  {/* Content */}
+                  <Box
+                    sx={{
+                      p: { xs: 2, md: 2.5 },
+                      pt: 1,
+                      textAlign: "center",
+                    }}
+                  >
+                    {/* Category name */}
+                    <Box
+                      sx={{
+                        minHeight: { xs: "auto", md: "70px" },
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        mb: 1,
+                        px: 2,
+                      }}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{
+                          duration: 0.8,
+                          delay: idx * 0.1,
+                          ease: [0.215, 0.61, 0.355, 1],
+                        }}
+                        style={{ width: "100%" }}
+                      >
+                        <Typography
+                          component={motion.div}
+                          initial={{ backgroundPosition: "0% 50%" }}
+                          animate={{ backgroundPosition: "100% 50%" }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                            ease: "easeInOut",
+                          }}
+                          sx={{
+                            fontFamily: "'Great Vibes', cursive",
+                            fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                            fontWeight: 400,
+                            background: `linear-gradient(90deg, #4A2C17 0%, #6A3A1E 25%, #D9A756 50%, #6A3A1E 75%, #4A2C17 100%)`,
+                            backgroundSize: "200% 100%",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            backgroundClip: "text",
+                            textAlign: "center",
+                            filter: `drop-shadow(-1px -1px 0 #D9A75640)
                                    drop-shadow(1px -1px 0 #D9A75640)
                                    drop-shadow(-1px 1px 0 #D9A75640)
                                    drop-shadow(1px 1px 0 #D9A75640)
                                    drop-shadow(0 0 8px rgba(217, 167, 86, 0.2))`,
-                          lineHeight: 1.2,
-                          wordWrap: "break-word",
-                          overflowWrap: "break-word",
-                          hyphens: "auto",
+                            lineHeight: 1.2,
+                            wordWrap: "break-word",
+                            overflowWrap: "break-word",
+                            hyphens: "auto",
+                          }}
+                        >
+                          {item.name}
+                        </Typography>
+                      </motion.div>
+                    </Box>
+
+                    {/* Item count - minimal style */}
+                    <Typography
+                      sx={{
+                        fontFamily: '"Inter", sans-serif',
+                        fontSize: "1rem",
+                        fontWeight: 500,
+                        color: "#8B7355",
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        opacity: 0.85,
+                      }}
+                    >
+                      {item.menuItems.length} Items
+                    </Typography>
+
+                    {/* Explore indicator on hover */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{
+                        opacity: isHovered ? 1 : 0,
+                        y: isHovered ? 0 : 10,
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Box
+                        sx={{
+                          mt: 1.5,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 1,
                         }}
                       >
-                        {item.name}
-                      </Typography>
+                        <Typography
+                          sx={{
+                            fontFamily: '"Cormorant Garamond", Georgia, serif',
+                            fontSize: "1rem",
+                            fontWeight: 600,
+                            color: "#D9A756",
+                            letterSpacing: "0.18em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Explore
+                        </Typography>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#D9A756"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                      </Box>
                     </motion.div>
                   </Box>
 
-                  {/* Item count - minimal style */}
-                  <Typography
+                  {/* Subtle underline on hover */}
+                  <Box
                     sx={{
-                      fontFamily: '"Inter", sans-serif',
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      color: "#8B7355",
-                      letterSpacing: "0.18em",
-                      textTransform: "uppercase",
-                      opacity: 0.85,
+                      position: "absolute",
+                      bottom: "8px",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: isHovered ? "60%" : "0%",
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, #D9A75660, transparent)",
+                      transition: "width 0.4s ease",
                     }}
-                  >
-                    {item.menuItems.length} Items
-                  </Typography>
+                  />
+                </Box>
 
-                  {/* Explore indicator on hover */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{
-                      opacity: isHovered ? 1 : 0,
-                      y: isHovered ? 0 : 10,
+                {/* Mobile divider - only show on xs screens and not on last item */}
+                {idx < filteredMenu.length - 1 && (
+                  <Box
+                    sx={{
+                      display: { xs: "flex", sm: "none" },
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 2,
+                      my: 3,
                     }}
-                    transition={{ duration: 0.3 }}
                   >
                     <Box
                       sx={{
-                        mt: 1.5,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 1,
+                        flex: 1,
+                        height: "1px",
+                        background:
+                          "linear-gradient(90deg, transparent, #D9A756, transparent)",
                       }}
-                    >
-                      <Typography
-                        sx={{
-                          fontFamily: '"Cormorant Garamond", Georgia, serif',
-                          fontSize: "1rem",
-                          fontWeight: 600,
-                          color: "#D9A756",
-                          letterSpacing: "0.18em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Explore
-                      </Typography>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#D9A756"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                      </svg>
-                    </Box>
-                  </motion.div>
-                </Box>
-
-                {/* Subtle underline on hover */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: "8px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: isHovered ? "60%" : "0%",
-                    height: "1px",
-                    background:
-                      "linear-gradient(90deg, transparent, #D9A75660, transparent)",
-                    transition: "width 0.4s ease",
-                  }}
-                />
-              </Box>
-
-              {/* Mobile divider - only show on xs screens and not on last item */}
-              {idx < filteredMenu.length - 1 && (
-                <Box
-                  sx={{
-                    display: { xs: "flex", sm: "none" },
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 2,
-                    my: 3,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      flex: 1,
-                      height: "1px",
-                      background:
-                        "linear-gradient(90deg, transparent, #D9A756, transparent)",
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: "#D9A756",
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      flex: 1,
-                      height: "1px",
-                      background:
-                        "linear-gradient(90deg, transparent, #D9A756, transparent)",
-                    }}
-                  />
-                </Box>
-              )}
-            </motion.div>
-          );
-        })}
-      </Box>
+                    />
+                    <Box
+                      sx={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "#D9A756",
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        flex: 1,
+                        height: "1px",
+                        background:
+                          "linear-gradient(90deg, transparent, #D9A756, transparent)",
+                      }}
+                    />
+                  </Box>
+                )}
+              </motion.div>
+            );
+          })}
+        </Box>
+      )}
 
       {/* Premium Category Dialog */}
       <AnimatePresence>

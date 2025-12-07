@@ -392,7 +392,7 @@ const LandingPage = () => {
             textShadow: "0 2px 10px rgba(0,0,0,0.3)",
           }}
         >
-          Craft beer, homemade comfort food, and the warmest welcome in town
+          Beer, wine, spirits, homemade comfort food, and the warmest welcome in town
         </Typography>
 
         {/* CTA Button */}

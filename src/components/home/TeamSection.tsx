@@ -27,14 +27,15 @@ const teamMembers: TeamMember[] = [
     image: Team3,
     name: "Premium Service",
     role: "Fine Dining Specialist",
-    specialty: "Steak & Wine Pairing Expert",
+    specialty:
+      "Serving excellence with every plate, where flavor meets finesse.",
   },
   {
     id: 2,
     image: Team2,
     name: "Hospitality Expert",
     role: "Guest Experience",
-    specialty: "Creating warm welcomes",
+    specialty: "Steak & Wine Pairing Expert",
   },
   {
     id: 3,
