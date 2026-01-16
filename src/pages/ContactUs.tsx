@@ -31,7 +31,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SendIcon from "@mui/icons-material/Send";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import WorkIcon from "@mui/icons-material/Work";
-import Callicon from "../components/icons/CalendarIcon";
+import EventIcon from "@mui/icons-material/Event";
+import CallButton from "../components/icons/CalendarIcon";
 import SocialMedia from "../components/common/SocialFloatingMenu";
 import { motion, AnimatePresence } from "framer-motion";
 import contactAnimation from "../assets/animations/contact-animation.json";
@@ -747,7 +748,7 @@ const ContactUs = () => {
         <AnimatedBackground variant="subtle" />
         <ContactSEO />
         <Nav />
-        <Callicon />
+        <CallButton />
         <SocialMedia />
 
         {/* ═══════════════════════════════════════════════════════════════════
@@ -1027,19 +1028,98 @@ const ContactUs = () => {
                           }}
                         />
                       </Box>
-                      <Typography
+                      <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <Typography
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: {
+                              xs: "0.85rem",
+                              sm: "0.95rem",
+                              md: "1rem",
+                            },
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          brooklinpub@gmail.com
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: {
+                              xs: "0.7rem",
+                              sm: "0.75rem",
+                              md: "0.8rem",
+                            },
+                            color: "#8B6F47",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          General Inquiries
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box
+                      component={motion.a}
+                      href="mailto:brooklinpubevents@gmail.com"
+                      whileHover={{ x: 5 }}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: { xs: 1, sm: 1.5 },
+                        textDecoration: "none",
+                        color: "#4A2C17",
+                        transition: "color 0.3s",
+                        py: { xs: 0.5, md: 0 },
+                        "&:hover": { color: "#D9A756" },
+                        "&:active": { color: "#B08030" },
+                      }}
+                    >
+                      <Box
                         sx={{
-                          fontWeight: 600,
-                          fontSize: {
-                            xs: "0.85rem",
-                            sm: "0.95rem",
-                            md: "1rem",
-                          },
-                          wordBreak: "break-word",
+                          width: { xs: 36, sm: 40, md: 36 },
+                          height: { xs: 36, sm: 40, md: 36 },
+                          borderRadius: { xs: "10px", md: "10px" },
+                          bgcolor: "rgba(217,167,86,0.15)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
                         }}
                       >
-                        brooklinpub@gmail.com
-                      </Typography>
+                        <EventIcon
+                          sx={{
+                            fontSize: { xs: 18, sm: 20, md: 18 },
+                            color: "#D9A756",
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <Typography
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: {
+                              xs: "0.85rem",
+                              sm: "0.95rem",
+                              md: "1rem",
+                            },
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          brooklinpubevents@gmail.com
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: {
+                              xs: "0.7rem",
+                              sm: "0.75rem",
+                              md: "0.8rem",
+                            },
+                            color: "#8B6F47",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          Parties & Events
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                 </ContactInfoCard>
