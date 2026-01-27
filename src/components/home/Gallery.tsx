@@ -40,9 +40,39 @@ function GalleryRow({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [cycleCount, setCycleCount] = useState(0);
   const [_dragStart, _setDragStart] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const x = useMotionValue(0);
+
+  // Preload images to ensure they render correctly on first load
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    let loadedCount = 0;
+    const totalImages = images.length;
+
+    images.forEach((src) => {
+      const img = new Image();
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount >= totalImages) {
+          setImagesLoaded(true);
+        }
+      };
+      img.onerror = () => {
+        loadedCount++;
+        if (loadedCount >= totalImages) {
+          setImagesLoaded(true);
+        }
+      };
+      img.src = src;
+    });
+
+    // Fallback: set as loaded after timeout even if images haven't loaded
+    const timeout = setTimeout(() => setImagesLoaded(true), 2000);
+    return () => clearTimeout(timeout);
+  }, [images]);
   const opacity = useTransform(x, [-100, 0, 100], [0.5, 1, 0.5]);
   const isRowInView = useInView(titleRef, { once: true, margin: "-100px" });
 
@@ -70,20 +100,25 @@ function GalleryRow({
 
   // Measure width for desktop carousel
   useLayoutEffect(() => {
-    if (!isMobile) {
+    if (!isMobile && imagesLoaded) {
       const measure = () => {
         if (rowRef.current) {
           setWidth(rowRef.current.scrollWidth / 4);
         }
       };
+      // Delay measurement to ensure images have loaded
+      const timeoutId = setTimeout(measure, 100);
       measure();
       const resizeObserver = new ResizeObserver(measure);
       if (rowRef.current) {
         resizeObserver.observe(rowRef.current);
       }
-      return () => resizeObserver.disconnect();
+      return () => {
+        clearTimeout(timeoutId);
+        resizeObserver.disconnect();
+      };
     }
-  }, [isMobile]);
+  }, [isMobile, images.length, imagesLoaded]); // Re-measure when images change or load
 
   // Auto-cycle through images for mobile - complete one full cycle then signal
   useEffect(() => {

@@ -147,8 +147,9 @@ const Footer = () => {
     { label: "Contact Us", to: "/contactus", icon: "→" },
   ];
 
-  // Menu PDF download link
+  // Menu PDF download links
   const menuPdfUrl = "/menu/Main Menu - Brooklin Pub.pdf";
+  const drinksPdfUrl = "/menu/Drinks Menu - Brooklin Pub.pdf";
 
   // Fetch opening hours from backend (cached for 5 mins)
   const { data: openingHoursData } = useApiWithCache<OpeningHours[]>(
@@ -624,7 +625,7 @@ const Footer = () => {
                 opacity: 0.9,
               }}
             >
-              Download Menu
+              Download Menus
             </Typography>
             <Box
               sx={{
@@ -664,7 +665,39 @@ const Footer = () => {
                 <Box component="span" sx={{ fontSize: "1rem" }}>
                   📄
                 </Box>
-                Menu (PDF)
+                Main Menu
+              </MUILink>
+              <MUILink
+                href={drinksPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download="Drinks Menu - Brooklin Pub.pdf"
+                underline="none"
+                sx={{
+                  color: "rgba(245, 239, 230, 0.95)",
+                  fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                  fontWeight: 600,
+                  transition: "all 0.2s ease",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  px: { xs: 1.5, sm: 2 },
+                  py: { xs: 0.8, sm: 1 },
+                  borderRadius: "8px",
+                  background: "rgba(217, 167, 86, 0.15)",
+                  border: "1px solid rgba(217, 167, 86, 0.3)",
+                  "&:hover, &:active": {
+                    color: "#FFFDFB",
+                    background: "rgba(217, 167, 86, 0.3)",
+                    transform: "translateX(5px)",
+                    borderColor: "#D9A756",
+                  },
+                }}
+              >
+                <Box component="span" sx={{ fontSize: "1rem" }}>
+                  🍸
+                </Box>
+                Drinks Menu
               </MUILink>
             </Box>
           </Box>
