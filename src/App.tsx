@@ -19,6 +19,7 @@ const ContactUs = lazy(() => import("./pages/ContactUs"));
 const Special = lazy(() => import("./pages/Special"));
 const MainMenu = lazy(() => import("./pages/MainMenu"));
 const Events = lazy(() => import("./pages/Events"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 
 const theme = createTheme({
   palette: {
@@ -163,6 +164,8 @@ function App() {
                 <Route path="/special" element={<Special />} />
                 {/* Generic menu route that responds to query params like ?category=<id> */}
                 <Route path="/menu" element={<MainMenu />} />
+                {/* Newsletter unsubscribe page */}
+                <Route path="/unsubscribe" element={<Unsubscribe />} />
               </Routes>
             </main>
           </Suspense>

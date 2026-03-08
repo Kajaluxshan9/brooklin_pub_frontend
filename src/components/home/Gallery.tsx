@@ -914,9 +914,13 @@ export default function Gallery() {
   }, [isHeaderInView]);
 
   // Fetch story categories with their stories from backend
+  // staleTime: 0 ensures fresh data is always fetched in background on every mount
+  // to prevent stale cache from hiding some categories after navigation
   const { data: categoriesData, loading } = useApiWithCache<StoryCategory[]>(
     "story-categories",
-    () => storiesService.getAllCategories()
+    () => storiesService.getAllCategories(),
+    [],
+    { staleTime: 0 }
   );
 
   // Transform backend data to gallery rows format
