@@ -20,6 +20,8 @@ const Special = lazy(() => import("./pages/Special"));
 const MainMenu = lazy(() => import("./pages/MainMenu"));
 const Events = lazy(() => import("./pages/Events"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
 
 const theme = createTheme({
   palette: {
@@ -166,6 +168,9 @@ function App() {
                 <Route path="/menu" element={<MainMenu />} />
                 {/* Newsletter unsubscribe page */}
                 <Route path="/unsubscribe" element={<Unsubscribe />} />
+                {/* Legal pages */}
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
               </Routes>
             </main>
           </Suspense>

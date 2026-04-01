@@ -797,16 +797,49 @@ const Footer = () => {
               gap: 1,
             }}
           >
-            <Typography
-              sx={{
-                color: "rgba(245,239,230,0.3)",
-                fontSize: "0.72rem",
-                letterSpacing: "0.02em",
-              }}
-            >
-              &copy; {new Date().getFullYear()} Brooklin Pub &amp; Grill. All
-              rights reserved.
-            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, alignItems: { xs: "center", sm: "flex-start" } }}>
+              <Typography
+                sx={{
+                  color: "rgba(245,239,230,0.3)",
+                  fontSize: "0.72rem",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                &copy; {new Date().getFullYear()} Brooklin Pub &amp; Grill. All
+                rights reserved.
+              </Typography>
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: { xs: "center", sm: "flex-start" } }}>
+                <Link
+                  to="/privacy-policy"
+                  style={{
+                    color: "rgba(245,239,230,0.35)",
+                    fontSize: "0.68rem",
+                    textDecoration: "none",
+                    letterSpacing: "0.02em",
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(217,167,86,0.8)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,239,230,0.35)")}
+                >
+                  Privacy Policy
+                </Link>
+                <Typography sx={{ color: "rgba(245,239,230,0.15)", fontSize: "0.68rem" }}>|</Typography>
+                <Link
+                  to="/terms-and-conditions"
+                  style={{
+                    color: "rgba(245,239,230,0.35)",
+                    fontSize: "0.68rem",
+                    textDecoration: "none",
+                    letterSpacing: "0.02em",
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(217,167,86,0.8)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,239,230,0.35)")}
+                >
+                  Terms &amp; Conditions
+                </Link>
+              </Box>
+            </Box>
             <Typography
               sx={{
                 color: "rgba(245,239,230,0.2)",

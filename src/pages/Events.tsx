@@ -3,7 +3,6 @@ import { Box, Typography, Chip, Container } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import CakeOutlinedIcon from "@mui/icons-material/CakeOutlined";
@@ -51,125 +50,6 @@ const formatEventTime = (dateString: string): string => {
 // - Single full day (12 AM to 12 AM next day): "Sat, Jan 2"
 // - Multiple full days: "Jan 2 - Jan 3" (if ends at midnight Jan 4, show Jan 2 - Jan 3)
 // - Multi-day with specific times: "Jan 1 - Jan 2" (if ends at midnight Jan 3, show Jan 1 - Jan 2)
-const getEventPeriod = (startDate: string, endDate: string): string => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const timezone = "America/Toronto";
-
-  // Get time components
-  const startHour = parseInt(
-    start.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      hour12: false,
-      timeZone: timezone,
-    })
-  );
-  const startMinute = parseInt(
-    start.toLocaleTimeString("en-US", { minute: "numeric", timeZone: timezone })
-  );
-  const endHour = parseInt(
-    end.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      hour12: false,
-      timeZone: timezone,
-    })
-  );
-  const endMinute = parseInt(
-    end.toLocaleTimeString("en-US", { minute: "numeric", timeZone: timezone })
-  );
-
-  // Helper to format time
-  const formatTime = (date: Date): string => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: timezone,
-    });
-  };
-
-  // Check if time is midnight (12:00 AM)
-  const isStartMidnight = startHour === 0 && startMinute === 0;
-  const isEndMidnight = endHour === 0 && endMinute === 0;
-
-  // Calculate day difference based on calendar dates
-  const startDateOnly = new Date(
-    start.toLocaleDateString("en-US", { timeZone: timezone })
-  );
-  const endDateOnly = new Date(
-    end.toLocaleDateString("en-US", { timeZone: timezone })
-  );
-  const dayDiff = Math.round(
-    (endDateOnly.getTime() - startDateOnly.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  // Get the actual end date for display (if ends at midnight, use previous day)
-  const displayEnd =
-    isEndMidnight && dayDiff >= 1 ? new Date(end.getTime() - 1) : end;
-
-  // Get date components for display
-  const startDay = start.toLocaleDateString("en-US", {
-    day: "numeric",
-    timeZone: timezone,
-  });
-  const startMonth = start.toLocaleDateString("en-US", {
-    month: "short",
-    timeZone: timezone,
-  });
-  const displayEndDay = displayEnd.toLocaleDateString("en-US", {
-    day: "numeric",
-    timeZone: timezone,
-  });
-  const displayEndMonth = displayEnd.toLocaleDateString("en-US", {
-    month: "short",
-    timeZone: timezone,
-  });
-
-  // Recalculate effective day difference using display dates
-  const displayEndDateOnly = new Date(
-    displayEnd.toLocaleDateString("en-US", { timeZone: timezone })
-  );
-  const effectiveDayDiff = Math.round(
-    (displayEndDateOnly.getTime() - startDateOnly.getTime()) /
-      (1000 * 60 * 60 * 24)
-  );
-
-  // Same calendar day - show time range
-  if (dayDiff === 0) {
-    return `${formatTime(start)} - ${formatTime(end)}`;
-  }
-
-  // Overnight event (ends next day at midnight or before noon) - show time range
-  if (dayDiff === 1 && (isEndMidnight || endHour < 12)) {
-    return `${formatTime(start)} - ${formatTime(end)}`;
-  }
-
-  // Single full day (starts at midnight, ends at midnight next day)
-  if (dayDiff === 1 && isStartMidnight && isEndMidnight) {
-    const weekday = start.toLocaleDateString("en-US", {
-      weekday: "short",
-      timeZone: timezone,
-    });
-    return `${weekday}, ${startMonth} ${startDay}`;
-  }
-
-  // Multi-day event - show date range using actual last day of event
-  if (effectiveDayDiff === 0) {
-    // Event is actually same day (e.g., 6 PM Jan 1 to 12 AM Jan 2 = just Jan 1)
-    const weekday = start.toLocaleDateString("en-US", {
-      weekday: "short",
-      timeZone: timezone,
-    });
-    return `${weekday}, ${startMonth} ${startDay}`;
-  }
-
-  // Show date range
-  if (startMonth === displayEndMonth) {
-    return `${startMonth} ${startDay} - ${displayEndDay}`;
-  }
-  return `${startMonth} ${startDay} - ${displayEndMonth} ${displayEndDay}`;
-};
-
 // Get day of month
 const getEventDay = (dateString: string): number => {
   const date = new Date(dateString);
@@ -240,7 +120,6 @@ const DiagonalEventItem = ({
   index: number;
   isPastEvent?: boolean;
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const color = isPastEvent ? "#8B5A2B" : getEventColor(event.type);
@@ -252,13 +131,9 @@ const DiagonalEventItem = ({
   // Handle toggle with scroll-into-view on collapse
   const handleToggleExpand = () => {
     if (isExpanded) {
-      // Collapsing - scroll to the card
       setIsExpanded(false);
       setTimeout(() => {
-        cardRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+        cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 100);
     } else {
       setIsExpanded(true);
@@ -272,19 +147,10 @@ const DiagonalEventItem = ({
       initial={{ opacity: 0, x: isEven ? -80 : 80, y: 40 }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{
-        duration: 0.9,
-        delay: 0.1,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      transition={{ duration: 0.9, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
       sx={{
         display: "flex",
-        flexDirection: {
-          xs: "column",
-          md: isEven ? "row" : "row-reverse",
-        },
+        flexDirection: { xs: "column", md: isEven ? "row" : "row-reverse" },
         alignItems: "center",
         gap: { xs: 4, md: 6, lg: 8 },
         mb: { xs: 8, md: 0 },
@@ -293,9 +159,6 @@ const DiagonalEventItem = ({
     >
       {/* Image Section */}
       <Box
-        component={motion.div}
-        whileHover={{ scale: 1.02 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
         sx={{
           position: "relative",
           width: { xs: "100%", md: "50%" },
@@ -315,10 +178,7 @@ const DiagonalEventItem = ({
             width: { sm: "70%", md: "85%" },
             height: { sm: "70%", md: "85%" },
             border: "2px solid",
-            borderColor: isHovered
-              ? "rgba(217,167,86,0.6)"
-              : "rgba(217,167,86,0.25)",
-            transition: "all 0.5s ease",
+            borderColor: "rgba(217,167,86,0.25)",
             zIndex: 0,
           }}
         />
@@ -327,47 +187,20 @@ const DiagonalEventItem = ({
         <Box
           sx={{
             position: "relative",
-            aspectRatio: "4/5",
             overflow: "hidden",
             zIndex: 1,
-            boxShadow: isHovered
-              ? "0 30px 70px rgba(106,58,30,0.35)"
-              : "0 15px 40px rgba(106,58,30,0.2)",
-            transition: "box-shadow 0.5s ease",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              background: isHovered
-                ? "linear-gradient(180deg, transparent 40%, rgba(60,31,14,0.6) 100%)"
-                : "linear-gradient(180deg, transparent 50%, rgba(60,31,14,0.4) 100%)",
-              zIndex: 2,
-              transition: "all 0.5s ease",
-              pointerEvents: "none",
-            },
+            boxShadow: "0 15px 40px rgba(106,58,30,0.2)",
           }}
         >
           <Box
-            component={motion.img}
+            component="img"
             src={
               event.imageUrls?.[0]
                 ? getImageUrl(event.imageUrls[0])
                 : "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&q=80"
             }
             alt={event.title}
-            animate={{
-              scale: isHovered ? 1.08 : 1,
-            }}
-            transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              filter: isHovered
-                ? "brightness(1.05) saturate(1.1)"
-                : "brightness(1)",
-              transition: "filter 0.5s ease",
-            }}
+            sx={{ width: "100%", height: "auto", display: "block", objectFit: "contain" }}
           />
 
           {/* Event Type Badge on Image */}
@@ -412,8 +245,6 @@ const DiagonalEventItem = ({
                 ? "polygon(0 100%, 0 0, 100% 100%)"
                 : "polygon(100% 100%, 100% 0, 0 100%)",
               zIndex: 3,
-              opacity: isHovered ? 1 : 0.85,
-              transition: "opacity 0.4s ease",
             }}
           />
         </Box>
@@ -428,8 +259,7 @@ const DiagonalEventItem = ({
             display: { xs: "none", sm: "grid" },
             gridTemplateColumns: "repeat(3, 8px)",
             gap: "8px",
-            opacity: isHovered ? 1 : 0.4,
-            transition: "opacity 0.4s ease",
+            opacity: 0.4,
           }}
         >
           {[...Array(9)].map((_, i) => (
@@ -448,12 +278,6 @@ const DiagonalEventItem = ({
 
         {/* Date Circle Badge */}
         <Box
-          component={motion.div}
-          animate={{
-            rotate: isHovered ? 0 : -12,
-            scale: isHovered ? 1.1 : 1,
-          }}
-          transition={{ duration: 0.4 }}
           sx={{
             position: "absolute",
             bottom: { xs: 15, sm: 20, md: 40 },
@@ -468,6 +292,7 @@ const DiagonalEventItem = ({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            transform: "rotate(-12deg)",
             boxShadow: `0 15px 40px ${color}50`,
             zIndex: 10,
           }}
@@ -562,6 +387,7 @@ const DiagonalEventItem = ({
             },
           }}
         >
+          {/* Date & Time */}
           <Box
             sx={{
               display: "flex",
@@ -585,67 +411,11 @@ const DiagonalEventItem = ({
                 fontWeight: 600,
               }}
             >
-              {formatEventDate(event.eventStartDate)}
+              {formatEventDate(event.eventStartDate)}, {formatEventTime(event.eventStartDate)}
+              {event.eventEndDate && event.eventEndDate !== event.eventStartDate &&
+                ` – ${formatEventDate(event.eventEndDate)}, ${formatEventTime(event.eventEndDate)}`}
             </Typography>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: { xs: 0.75, md: 1 },
-              px: { xs: 1.5, md: 2 },
-              py: { xs: 0.5, md: 0.75 },
-              background: "rgba(217,167,86,0.12)",
-              borderRadius: "20px",
-              border: "1px solid rgba(217,167,86,0.25)",
-            }}
-          >
-            <AccessTimeOutlinedIcon
-              sx={{ fontSize: { xs: 14, md: 16 }, color: color }}
-            />
-            <Typography
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: { xs: "0.7rem", md: "0.8rem" },
-                color: "#6A3A1E",
-                fontWeight: 600,
-              }}
-            >
-              {formatEventTime(event.eventStartDate)}
-              {event.eventEndDate &&
-                event.eventEndDate !== event.eventStartDate &&
-                ` - ${formatEventTime(event.eventEndDate)}`}
-            </Typography>
-          </Box>
-          {/* Duration Badge */}
-          {event.eventEndDate &&
-            event.eventEndDate !== event.eventStartDate && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: { xs: 0.75, md: 1 },
-                  px: { xs: 1.5, md: 2 },
-                  py: { xs: 0.5, md: 0.75 },
-                  background: `linear-gradient(135deg, ${color}20, ${color}10)`,
-                  borderRadius: "20px",
-                  border: `1px solid ${color}40`,
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontFamily: '"Inter", sans-serif',
-                    fontSize: { xs: "0.65rem", md: "0.75rem" },
-                    color: color,
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {getEventPeriod(event.eventStartDate, event.eventEndDate)}
-                </Typography>
-              </Box>
-            )}
           <Box
             sx={{
               display: "flex",

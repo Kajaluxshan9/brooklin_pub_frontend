@@ -10,6 +10,19 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "mui-vendor": [
+            "@mui/material",
+            "@mui/icons-material",
+            "@emotion/react",
+            "@emotion/styled",
+          ],
+          animation: ["framer-motion", "gsap", "lottie-react"],
+          maps: ["@react-google-maps/api"],
+        },
+      },
       // Suppress the lottie-web eval warning (it's in the library's source code, not ours)
       onwarn(warning, warn) {
         if (warning.code === "EVAL" && warning.id?.includes("lottie-web")) {
@@ -19,6 +32,6 @@ export default defineConfig({
       },
     },
     // Reasonable chunk size warning limit
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 600,
   },
 });

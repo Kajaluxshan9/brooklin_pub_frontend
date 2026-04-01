@@ -28,11 +28,11 @@ export const EXTERNAL_URLS = {
 // =============================================================================
 
 export const API_CONFIG = {
-  /** Cache duration in milliseconds (5 minutes) */
-  CACHE_DURATION: 5 * 60 * 1000,
+  /** Cache duration in milliseconds (15 minutes – menu/specials change infrequently) */
+  CACHE_DURATION: 15 * 60 * 1000,
 
-  /** Stale time before background revalidation (2 minutes) */
-  STALE_TIME: 2 * 60 * 1000,
+  /** Stale time before background revalidation (10 minutes) */
+  STALE_TIME: 10 * 60 * 1000,
 
   /** Request timeout in milliseconds */
   REQUEST_TIMEOUT: 30000,
