@@ -23,12 +23,14 @@ import { useApiWithCache } from "../hooks/useApi";
 import { specialsService } from "../services/specials.service";
 import { getImageUrl } from "../services/api";
 import type { Special, DayOfWeek } from "../types/api.types";
+import PromoSubscribeImg from "../assets/images/Landing page/promo-subscribe.jpg";
 
 // Transform Special to popup card format
 interface PopupCard {
   title: string;
   popupImg: string;
   type: string;
+  isPromo?: boolean;
 }
 
 // Session storage key for popup visibility
@@ -491,16 +493,30 @@ const Home = () => {
 
   // Filter specials for popup display
   const popupCards = useMemo((): PopupCard[] => {
-    if (!specialsData || specialsData.length === 0) return [];
+    const cards: PopupCard[] = [];
 
-    return specialsData.filter(shouldShowInPopup).map((special) => ({
-      title: special.title,
-      popupImg:
-        getImageUrl(special.imageUrls?.[1]) ||
-        getImageUrl(special.imageUrls?.[0]) ||
-        "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
-      type: special.type,
-    }));
+    if (specialsData && specialsData.length > 0) {
+      cards.push(
+        ...specialsData.filter(shouldShowInPopup).map((special) => ({
+          title: special.title,
+          popupImg:
+            getImageUrl(special.imageUrls?.[1]) ||
+            getImageUrl(special.imageUrls?.[0]) ||
+            "https://images.template.net/278326/Restaurant-Menu-Template-edit-online.png",
+          type: special.type,
+        })),
+      );
+    }
+
+    // Always add promo subscribe card as the last slide
+    cards.push({
+      title: "Subscribe & Save!",
+      popupImg: PromoSubscribeImg,
+      type: "promo",
+      isPromo: true,
+    });
+
+    return cards;
   }, [specialsData]);
 
   const [showSlideshow, setShowSlideshow] = useState(false);
@@ -530,10 +546,21 @@ const Home = () => {
     if (!showSlideshow || popupCards.length <= 1) return;
     const t = setInterval(
       () => setSlideshowIndex((i) => (i + 1) % popupCards.length),
-      4000
+      4000,
     );
     return () => clearInterval(t);
   }, [showSlideshow, popupCards.length]);
+
+  // Handle promo card click — close popup and scroll to subscribe section
+  const handlePromoCardClick = () => {
+    setShowSlideshow(false);
+    setTimeout(() => {
+      const el = document.getElementById("subscribe");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 300);
+  };
 
   return (
     <Box sx={{ minHeight: "100vh", background: "transparent" }}>
@@ -849,6 +876,14 @@ const Home = () => {
                           scale: idx === slideshowIndex ? 1 : 0.98,
                         }}
                         transition={{ duration: 0.5, ease: "easeInOut" }}
+                        onClick={
+                          card.isPromo && idx === slideshowIndex
+                            ? (e) => {
+                                e.stopPropagation();
+                                handlePromoCardClick();
+                              }
+                            : undefined
+                        }
                         style={{
                           position: idx === 0 ? "relative" : "absolute",
                           width: "auto",
@@ -859,6 +894,7 @@ const Home = () => {
                             : "calc(80vh - 180px)",
                           objectFit: "contain",
                           borderRadius: isMobile ? "12px" : "20px",
+                          cursor: card.isPromo ? "pointer" : "default",
                           boxShadow:
                             idx === slideshowIndex
                               ? "0 20px 60px rgba(106,58,30,0.25)"
@@ -912,7 +948,7 @@ const Home = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSlideshowIndex(
-                        (i) => (i - 1 + popupCards.length) % popupCards.length
+                        (i) => (i - 1 + popupCards.length) % popupCards.length,
                       );
                     }}
                     style={{
@@ -1005,8 +1041,8 @@ const Home = () => {
                                     ? 24
                                     : 28
                                   : isMobile
-                                  ? 12
-                                  : 10,
+                                    ? 12
+                                    : 10,
                               background:
                                 idx === slideshowIndex
                                   ? "linear-gradient(90deg, #D9A756, #B08030)"
@@ -1098,7 +1134,7 @@ const Home = () => {
               </motion.div>
             </motion.div>
           </AnimatePresence>,
-          document.body
+          document.body,
         )}{" "}
       <LandingPage />
       <Callicon />

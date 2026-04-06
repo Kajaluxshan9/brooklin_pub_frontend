@@ -182,6 +182,7 @@ const Footer = () => {
       {/* ══════ NEWSLETTER — only on home page ══════ */}
       {isHomePage && (
         <Box
+          id="subscribe"
           sx={{
             background: "linear-gradient(180deg, #FDF8F3 0%, #F0E4D3 100%)",
             py: { xs: 5, md: 7 },
@@ -317,7 +318,9 @@ const Footer = () => {
             </Box>
           </Box>
 
-          <Divider sx={{ borderColor: "rgba(245,239,230,0.08)", mb: { xs: 4, md: 5 } }} />
+          <Divider
+            sx={{ borderColor: "rgba(245,239,230,0.08)", mb: { xs: 4, md: 5 } }}
+          />
 
           {/* ── 4-Column Grid ── */}
           <Box
@@ -367,7 +370,10 @@ const Footer = () => {
                       transition: "all 0.2s ease",
                       "&:hover": {
                         color: "#F5EFE6",
-                        "& .link-arrow": { opacity: 1, transform: "translate(2px, -2px)" },
+                        "& .link-arrow": {
+                          opacity: 1,
+                          transform: "translate(2px, -2px)",
+                        },
                       },
                     }}
                   >
@@ -396,9 +402,7 @@ const Footer = () => {
                   mb: 2,
                 }}
               >
-                <AccessTimeIcon
-                  sx={{ fontSize: 14, color: "#D9A756" }}
-                />
+                <AccessTimeIcon sx={{ fontSize: 14, color: "#D9A756" }} />
                 <Typography
                   sx={{
                     fontSize: "0.68rem",
@@ -461,8 +465,10 @@ const Footer = () => {
                       dayAbbr[hours.dayOfWeek.toLowerCase()] ||
                       hours.dayOfWeek.slice(0, 3);
                     const closed =
-                      !hours.isOpen || !hours.isActive ||
-                      !hours.openTime || !hours.closeTime;
+                      !hours.isOpen ||
+                      !hours.isActive ||
+                      !hours.openTime ||
+                      !hours.closeTime;
                     const timeStr = closed
                       ? "Closed"
                       : `${formatTime(hours.openTime!)} – ${formatTime(hours.closeTime!)}`;
@@ -485,9 +491,7 @@ const Footer = () => {
                           sx={{
                             fontSize: "0.78rem",
                             fontWeight: today ? 700 : 400,
-                            color: today
-                              ? "#D9A756"
-                              : "rgba(245,239,230,0.4)",
+                            color: today ? "#D9A756" : "rgba(245,239,230,0.4)",
                             minWidth: 30,
                           }}
                         >
@@ -500,8 +504,8 @@ const Footer = () => {
                             color: closed
                               ? "rgba(220,38,38,0.7)"
                               : today
-                              ? "#F5EFE6"
-                              : "rgba(245,239,230,0.4)",
+                                ? "#F5EFE6"
+                                : "rgba(245,239,230,0.4)",
                           }}
                         >
                           {timeStr}
@@ -768,8 +772,8 @@ const Footer = () => {
                   maxWidth: 220,
                 }}
               >
-                Great food, cold beer, and the kind of atmosphere where
-                everyone feels at home.
+                Great food, cold beer, and the kind of atmosphere where everyone
+                feels at home.
               </Typography>
             </Box>
           </Box>
@@ -797,7 +801,14 @@ const Footer = () => {
               gap: 1,
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, alignItems: { xs: "center", sm: "flex-start" } }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.75,
+                alignItems: { xs: "center", sm: "flex-start" },
+              }}
+            >
               <Typography
                 sx={{
                   color: "rgba(245,239,230,0.3)",
@@ -808,7 +819,14 @@ const Footer = () => {
                 &copy; {new Date().getFullYear()} Brooklin Pub &amp; Grill. All
                 rights reserved.
               </Typography>
-              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: { xs: "center", sm: "flex-start" } }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  flexWrap: "wrap",
+                  justifyContent: { xs: "center", sm: "flex-start" },
+                }}
+              >
                 <Link
                   to="/privacy-policy"
                   style={{
@@ -818,12 +836,20 @@ const Footer = () => {
                     letterSpacing: "0.02em",
                     transition: "color 0.2s",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(217,167,86,0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,239,230,0.35)")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "rgba(217,167,86,0.8)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "rgba(245,239,230,0.35)")
+                  }
                 >
                   Privacy Policy
                 </Link>
-                <Typography sx={{ color: "rgba(245,239,230,0.15)", fontSize: "0.68rem" }}>|</Typography>
+                <Typography
+                  sx={{ color: "rgba(245,239,230,0.15)", fontSize: "0.68rem" }}
+                >
+                  |
+                </Typography>
                 <Link
                   to="/terms-and-conditions"
                   style={{
@@ -833,8 +859,12 @@ const Footer = () => {
                     letterSpacing: "0.02em",
                     transition: "color 0.2s",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(217,167,86,0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,239,230,0.35)")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "rgba(217,167,86,0.8)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "rgba(245,239,230,0.35)")
+                  }
                 >
                   Terms &amp; Conditions
                 </Link>
