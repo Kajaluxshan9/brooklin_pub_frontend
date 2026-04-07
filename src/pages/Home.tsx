@@ -534,40 +534,31 @@ const Home = () => {
         sessionStorage.setItem(POPUP_SESSION_KEY, "true");
         hasCheckedSession.current = true;
 
-        // Remove hash so browser doesn't do its own early (wrong-position) scroll
+        // Remove hash so browser doesn't attempt its own premature scroll
         history.replaceState(null, "", window.location.pathname);
 
-        const scrollToSubscribe = () => {
+        // GSAP ScrollTrigger + framer-motion keep shifting the layout for ~1-2s after load.
+        // We fire instant scrolls at increasing intervals to chase layout shifts,
+        // then a final smooth scroll once the layout has settled.
+        const snapToSubscribe = (smooth = false) => {
           const el = document.getElementById("subscribe");
           if (!el) return;
-          // Wait for all images to finish loading so layout heights are settled
-          const imgs = Array.from(document.querySelectorAll<HTMLImageElement>("img"));
-          const pending = imgs.filter((img) => !img.complete);
-          if (pending.length === 0) {
-            // All images loaded — scroll now
-            const top = el.getBoundingClientRect().top + window.pageYOffset;
-            window.scrollTo({ top, behavior: "smooth" });
-          } else {
-            // Wait for remaining images then scroll
-            let resolved = 0;
-            const onDone = () => {
-              resolved++;
-              if (resolved === pending.length) {
-                const top = el.getBoundingClientRect().top + window.pageYOffset;
-                window.scrollTo({ top, behavior: "smooth" });
-              }
-            };
-            pending.forEach((img) => {
-              img.addEventListener("load", onDone, { once: true });
-              img.addEventListener("error", onDone, { once: true });
-            });
-          }
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({ top, behavior: smooth ? "smooth" : "instant" });
+        };
+
+        const startRetries = () => {
+          snapToSubscribe(false);          // immediate — gets us in the ballpark
+          setTimeout(() => snapToSubscribe(false), 400);
+          setTimeout(() => snapToSubscribe(false), 900);
+          setTimeout(() => snapToSubscribe(false), 1500);
+          setTimeout(() => snapToSubscribe(true), 2000);  // final smooth correction
         };
 
         if (document.readyState === "complete") {
-          scrollToSubscribe();
+          startRetries();
         } else {
-          window.addEventListener("load", scrollToSubscribe, { once: true });
+          window.addEventListener("load", startRetries, { once: true });
         }
         return;
       }
