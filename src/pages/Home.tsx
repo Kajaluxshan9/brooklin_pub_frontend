@@ -529,6 +529,17 @@ const Home = () => {
     if (hasCheckedSession.current) return;
 
     if (popupCards.length > 0) {
+      // If URL targets #subscribe directly (e.g. from QR code), skip popup and scroll there
+      if (window.location.hash === "#subscribe") {
+        sessionStorage.setItem(POPUP_SESSION_KEY, "true");
+        hasCheckedSession.current = true;
+        setTimeout(() => {
+          const el = document.getElementById("subscribe");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 500);
+        return;
+      }
+
       // Check if popup was already shown in this session
       const popupAlreadyShown = sessionStorage.getItem(POPUP_SESSION_KEY);
 
