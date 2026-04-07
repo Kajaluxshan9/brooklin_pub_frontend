@@ -533,10 +533,18 @@ const Home = () => {
       if (window.location.hash === "#subscribe") {
         sessionStorage.setItem(POPUP_SESSION_KEY, "true");
         hasCheckedSession.current = true;
-        setTimeout(() => {
+        // Wait for the full page (images, layout) to load before scrolling
+        const scrollToSubscribe = () => {
           const el = document.getElementById("subscribe");
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 500);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        };
+        if (document.readyState === "complete") {
+          setTimeout(scrollToSubscribe, 300);
+        } else {
+          window.addEventListener("load", () => setTimeout(scrollToSubscribe, 300), { once: true });
+        }
         return;
       }
 
