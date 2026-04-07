@@ -533,17 +533,41 @@ const Home = () => {
       if (window.location.hash === "#subscribe") {
         sessionStorage.setItem(POPUP_SESSION_KEY, "true");
         hasCheckedSession.current = true;
-        // Wait for the full page (images, layout) to load before scrolling
+
+        // Remove hash so browser doesn't do its own early (wrong-position) scroll
+        history.replaceState(null, "", window.location.pathname);
+
         const scrollToSubscribe = () => {
           const el = document.getElementById("subscribe");
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (!el) return;
+          // Wait for all images to finish loading so layout heights are settled
+          const imgs = Array.from(document.querySelectorAll<HTMLImageElement>("img"));
+          const pending = imgs.filter((img) => !img.complete);
+          if (pending.length === 0) {
+            // All images loaded — scroll now
+            const top = el.getBoundingClientRect().top + window.pageYOffset;
+            window.scrollTo({ top, behavior: "smooth" });
+          } else {
+            // Wait for remaining images then scroll
+            let resolved = 0;
+            const onDone = () => {
+              resolved++;
+              if (resolved === pending.length) {
+                const top = el.getBoundingClientRect().top + window.pageYOffset;
+                window.scrollTo({ top, behavior: "smooth" });
+              }
+            };
+            pending.forEach((img) => {
+              img.addEventListener("load", onDone, { once: true });
+              img.addEventListener("error", onDone, { once: true });
+            });
           }
         };
+
         if (document.readyState === "complete") {
-          setTimeout(scrollToSubscribe, 300);
+          scrollToSubscribe();
         } else {
-          window.addEventListener("load", () => setTimeout(scrollToSubscribe, 300), { once: true });
+          window.addEventListener("load", scrollToSubscribe, { once: true });
         }
         return;
       }
