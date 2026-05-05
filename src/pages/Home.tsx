@@ -508,6 +508,13 @@ const Home = () => {
       );
     }
 
+    // Patio image slide
+    cards.push({
+      title: "Our Patio",
+      popupImg: "/patio.jpeg",
+      type: "patio",
+    });
+
     // Always add promo subscribe card as the last slide
     cards.push({
       title: "Subscribe & Save!",
@@ -522,6 +529,43 @@ const Home = () => {
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [slideshowIndex, setSlideshowIndex] = useState(0);
   const hasCheckedSession = useRef(false);
+
+  // Track each image's natural dimensions so the popup can match the ratio
+  const [imageDimensions, setImageDimensions] = useState<
+    Record<number, { w: number; h: number }>
+  >({});
+
+  const handleImageLoad = (
+    idx: number,
+    e: React.SyntheticEvent<HTMLImageElement>,
+  ) => {
+    const img = e.currentTarget;
+    setImageDimensions((prev) => ({
+      ...prev,
+      [idx]: { w: img.naturalWidth, h: img.naturalHeight },
+    }));
+  };
+
+  // Compute the image slot dimensions for the current slide.
+  // Constrains to viewport while preserving the image's exact aspect ratio.
+  const popupPad = isMobile ? 12 : 24;
+  const chromH = isMobile ? 170 : 200; // header badge + nav + bottom CTA + padding
+
+  const maxSlotW = isMobile
+    ? Math.max(window.innerWidth * 0.95 - popupPad * 2, 200)
+    : Math.min(820 - popupPad * 2, window.innerWidth * 0.9 - popupPad * 2);
+  const maxSlotH = isMobile
+    ? Math.max(window.innerHeight - chromH - popupPad * 2, 150)
+    : Math.max(window.innerHeight * 0.9 - chromH - popupPad * 2, 150);
+
+  const currentDims = imageDimensions[slideshowIndex];
+  let slotW = maxSlotW;
+  let slotH = maxSlotH;
+  if (currentDims && currentDims.w > 0 && currentDims.h > 0) {
+    const scale = Math.min(maxSlotW / currentDims.w, maxSlotH / currentDims.h, 1);
+    slotW = Math.round(currentDims.w * scale);
+    slotH = Math.round(currentDims.h * scale);
+  }
 
   // Show popup only once per session (on page refresh)
   useEffect(() => {
@@ -707,16 +751,14 @@ const Home = () => {
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
                 style={{
                   position: "relative",
-                  width: isMobile ? "calc(100% - 24px)" : "min(820px, 90vw)",
-                  maxWidth: isMobile ? "95vw" : "820px",
+                  width: "auto",
                   height: "auto",
-                  maxHeight: isMobile ? "calc(100dvh - 48px)" : "85vh",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   background: "transparent",
                   borderRadius: isMobile ? "20px" : "32px",
-                  padding: isMobile ? "12px" : "24px",
+                  padding: `${popupPad}px`,
                   boxShadow:
                     "0 40px 100px rgba(0,0,0,0.4), 0 0 0 1px rgba(217,167,86,0.3), inset 0 1px 0 rgba(255,255,255,0.8)",
                   overflow: "hidden",
@@ -872,91 +914,54 @@ const Home = () => {
                   />
                 </motion.div>
 
-                {/* Image container with premium frame */}
+                {/* Image slot — sized exactly to the current image's natural ratio */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
                   style={{
                     position: "relative",
-                    width: "100%",
-                    flex: 1,
-                    minHeight: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: isMobile ? "8px" : "12px",
+                    width: `${slotW}px`,
+                    height: `${slotH}px`,
+                    transition: "width 0.4s ease, height 0.4s ease",
+                    borderRadius: isMobile ? "12px" : "20px",
+                    overflow: "hidden",
+                    flexShrink: 0,
+                    boxShadow: "0 20px 60px rgba(106,58,30,0.25)",
                   }}
                 >
-                  {/* Stack all images and crossfade between them - no close/open effect */}
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {popupCards.map((card, idx) => (
-                      <motion.img
-                        key={idx}
-                        src={card.popupImg}
-                        alt={card.title}
-                        initial={false}
-                        animate={{
-                          opacity: idx === slideshowIndex ? 1 : 0,
-                          scale: idx === slideshowIndex ? 1 : 0.98,
-                        }}
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                        onClick={
-                          card.isPromo && idx === slideshowIndex
-                            ? (e) => {
-                                e.stopPropagation();
-                                handlePromoCardClick();
-                              }
-                            : undefined
-                        }
-                        style={{
-                          position: idx === 0 ? "relative" : "absolute",
-                          width: "auto",
-                          maxWidth: isMobile ? "calc(100vw - 56px)" : "720px",
-                          height: "auto",
-                          maxHeight: isMobile
-                            ? "calc(100dvh - 220px)"
-                            : "calc(80vh - 180px)",
-                          objectFit: "contain",
-                          borderRadius: isMobile ? "12px" : "20px",
-                          cursor: card.isPromo ? "pointer" : "default",
-                          boxShadow:
-                            idx === slideshowIndex
-                              ? "0 20px 60px rgba(106,58,30,0.25)"
-                              : "none",
-                          pointerEvents:
-                            idx === slideshowIndex ? "auto" : "none",
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Image glow effect - hide on mobile */}
-                  {!isMobile && (
-                    <div
+                  {popupCards.map((card, idx) => (
+                    <motion.img
+                      key={idx}
+                      src={card.popupImg}
+                      alt={card.title}
+                      onLoad={(e) => handleImageLoad(idx, e)}
+                      initial={false}
+                      animate={{
+                        opacity: idx === slideshowIndex ? 1 : 0,
+                        scale: idx === slideshowIndex ? 1 : 0.98,
+                      }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                      onClick={
+                        card.isPromo && idx === slideshowIndex
+                          ? (e) => {
+                              e.stopPropagation();
+                              handlePromoCardClick();
+                            }
+                          : undefined
+                      }
                       style={{
                         position: "absolute",
-                        bottom: "0",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: "60%",
-                        height: "40px",
-                        background:
-                          "radial-gradient(ellipse, rgba(217,167,86,0.2) 0%, transparent 70%)",
-                        filter: "blur(15px)",
-                        pointerEvents: "none",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        cursor: card.isPromo ? "pointer" : "default",
+                        pointerEvents:
+                          idx === slideshowIndex ? "auto" : "none",
                       }}
                     />
-                  )}
+                  ))}
                 </motion.div>
 
                 {/* Card info and navigation - premium style */}
