@@ -6,10 +6,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MenuBackground from "../menu/MenuBackground";
 
 // Import team images
-import Team2 from "../../assets/images/team/team-2.png";
-import Team3 from "../../assets/images/team/team-3.png";
-import Team4 from "../../assets/images/team/team-4.png";
-import Team5 from "../../assets/images/team/team-5.png";
+import Team2 from "../../assets/images/team/team-2.webp";
+import Team3 from "../../assets/images/team/team-3.webp";
+import Team4 from "../../assets/images/team/team-4.webp";
+import Team5 from "../../assets/images/team/team-5.webp";
 
 gsap.registerPlugin(ScrollTrigger);
 
