@@ -70,6 +70,7 @@ const Nav = () => {
       path: undefined, // Do not navigate when clicking parent; open dropdown instead
       dropdown: specialTypes.length > 0 ? specialTypes : [],
     },
+    { label: "Gift Cards", path: "/gift-cards" },
     { label: "Contact Us", path: "/contactus" },
   ];
   // which top-level parent is open

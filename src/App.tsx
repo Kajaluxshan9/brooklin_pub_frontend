@@ -22,6 +22,8 @@ const Events = lazy(() => import("./pages/Events"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const GiftCards = lazy(() => import("./pages/GiftCards"));
+const GiftCardCheck = lazy(() => import("./pages/GiftCardCheck"));
 
 const theme = createTheme({
   palette: {
@@ -171,6 +173,9 @@ function App() {
                 {/* Legal pages */}
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+                {/* Gift cards */}
+                <Route path="/gift-cards" element={<GiftCards />} />
+                <Route path="/gift-cards/check" element={<GiftCardCheck />} />
               </Routes>
             </main>
           </Suspense>

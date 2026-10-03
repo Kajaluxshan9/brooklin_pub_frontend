@@ -5,7 +5,7 @@ import AnimatedBackground from "../components/common/AnimatedBackground";
 import HeroSection from "../components/common/HeroSection";
 import SEO from "../components/common/SEO";
 
-const LAST_UPDATED = "March 29, 2025";
+const LAST_UPDATED = "October 4, 2026";
 const CONTACT_EMAIL = "info@brooklinpub.com";
 const BUSINESS_ADDRESS = "15 Baldwin St, Whitby, ON L1M 1A2";
 const BUSINESS_PHONE = "(905) 425-3055";
@@ -156,7 +156,31 @@ export default function TermsAndConditions() {
           </Para>
         </Section>
 
-        <Section title="8. Changes to These Terms">
+        <Section title="8. Gift Cards">
+          <Para>
+            Brooklin Pub gift cards can be purchased online by Interac e-Transfer or bank
+            deposit. An online order is activated only after we verify that the payment has
+            been received. If the amount we receive differs from the amount requested, the
+            gift card is issued for the amount actually received and the buyer is notified.
+            Orders where payment cannot be verified are not approved.
+          </Para>
+          <Para>
+            Each gift card has a unique Gift Card ID and a 4-digit PIN, which is emailed to
+            the recipient once the card is approved. Please keep the ID and PIN private;
+            anyone who has both can use the balance. After five incorrect PIN attempts within
+            ten minutes, the card is locked for your protection until you contact us.
+          </Para>
+          <Para>
+            In accordance with Ontario's Consumer Protection Act, our gift cards do not expire
+            and carry no fees. Gift cards are redeemable for food and beverages at Brooklin Pub,
+            may be used over multiple visits until the balance is used, and are not redeemable
+            for cash except where required by law. Lost cards can be re-sent to the recipient's
+            email on request. For any gift card enquiry, call us at {BUSINESS_PHONE} or use our
+            Contact Us form and quote your Gift Card ID.
+          </Para>
+        </Section>
+
+        <Section title="9. Changes to These Terms">
           <Para>
             We may update these Terms from time to time. We will notify you of any
             changes by posting the updated Terms on our website. Continued use of our
@@ -165,7 +189,7 @@ export default function TermsAndConditions() {
           </Para>
         </Section>
 
-        <Section title="9. Contact Us">
+        <Section title="10. Contact Us">
           <Para>If you have any questions about these Terms and Conditions, please contact us:</Para>
           <Box
             sx={{
