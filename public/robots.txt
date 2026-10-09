@@ -1,0 +1,10 @@
+# Brooklin Pub & Grill — https://brooklinpub.com
+# Search engines and AI assistants are welcome to read and cite this site.
+
+User-agent: *
+Allow: /
+# Personal / transactional pages with no search value
+Disallow: /unsubscribe
+Disallow: /gift-cards/check
+
+Sitemap: https://brooklinpub.com/sitemap.xml

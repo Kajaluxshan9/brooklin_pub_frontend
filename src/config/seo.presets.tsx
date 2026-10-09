@@ -9,8 +9,9 @@ import SEO from "../components/common/SEO";
 export function HomeSEO() {
   return (
     <SEO
+      title="Pub, Food & Live Events in Brooklin (Whitby), ON"
       canonical="/"
-      description="The Brooklin Pub - A beloved neighborhood pub since 2014. Great food, craft beers, live music, and warm hospitality in Whitby, Ontario."
+      description="Brooklin Pub & Grill at 15 Baldwin Street, Brooklin (Whitby), Ontario. Neighbourhood pub since 2014 with pub food, drinks, daily specials, live events and gift cards. Call (905) 425-3055."
     />
   );
 }
@@ -20,7 +21,7 @@ export function AboutSEO() {
     <SEO
       title="About Us"
       canonical="/about"
-      description="Learn about The Brooklin Pub's history since 2014. Family-owned pub serving great food and drinks in a welcoming atmosphere in Whitby, Ontario."
+      description="Learn about Brooklin Pub & Grill's history since 2014. Family-owned pub serving great food and drinks in a welcoming atmosphere in Whitby, Ontario."
       keywords={["pub history", "family owned", "local pub"]}
     />
   );
@@ -31,7 +32,7 @@ export function MenuSEO() {
     <SEO
       title="Our Menu"
       canonical="/menu"
-      description="Explore The Brooklin Pub's menu featuring pub classics, gourmet burgers, fresh seafood, and vegetarian options. Something for everyone!"
+      description="Explore Brooklin Pub & Grill's menu featuring pub classics, gourmet burgers, fresh seafood, and vegetarian options. Something for everyone!"
       type="restaurant.menu"
       keywords={["pub menu", "food menu", "burgers", "wings", "beer"]}
     />
@@ -43,7 +44,7 @@ export function EventsSEO() {
     <SEO
       title="Events"
       canonical="/events"
-      description="Check out upcoming events at The Brooklin Pub - live music, trivia nights, sports viewing, and more in Whitby, Ontario."
+      description="Check out upcoming events at Brooklin Pub & Grill - live music, trivia nights, sports viewing, and more in Whitby, Ontario."
       keywords={["live music", "trivia night", "sports bar", "events Whitby"]}
     />
   );
@@ -54,7 +55,7 @@ export function ContactSEO() {
     <SEO
       title="Contact Us"
       canonical="/contactus"
-      description="Contact The Brooklin Pub for reservations, private events, or inquiries. Located at 15 Baldwin Street, Whitby, Ontario."
+      description="Contact Brooklin Pub & Grill for reservations, private events, or inquiries. Located at 15 Baldwin Street, Whitby, Ontario."
       keywords={["reservations", "contact", "directions", "phone number"]}
     />
   );
@@ -69,7 +70,7 @@ export function SpecialsSEO({ type = "daily" }: SpecialsSEOProps) {
     <SEO
       title={`${type.charAt(0).toUpperCase() + type.slice(1)} Specials`}
       canonical={`/special/${type}`}
-      description={`Check out our ${type} specials at The Brooklin Pub. Limited time offers and chef's selections!`}
+      description={`Check out our ${type} specials at Brooklin Pub & Grill. Limited time offers and chef's selections!`}
       keywords={["specials", "deals", "daily specials", "chef specials"]}
     />
   );

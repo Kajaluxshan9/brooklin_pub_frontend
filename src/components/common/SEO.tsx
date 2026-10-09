@@ -1,4 +1,7 @@
 import { Helmet } from "react-helmet-async";
+import { useApiWithCache } from "../../hooks/useApi";
+import { openingHoursService } from "../../services/opening-hours.service";
+import type { OpeningHours } from "../../types/api.types";
 
 interface SEOProps {
   /** Page title - will be appended with site name */
@@ -18,11 +21,33 @@ interface SEOProps {
 }
 
 // Default values
-const SITE_NAME = "The Brooklin Pub";
+const SITE_NAME = "Brooklin Pub & Grill";
 const DEFAULT_DESCRIPTION =
-  "The Brooklin Pub - A beloved neighborhood pub since 2014, offering great food, craft beers, and warm hospitality in Whitby, Ontario.";
+  "Brooklin Pub & Grill - a neighbourhood pub in Brooklin (Whitby), Ontario since 2014. Pub food, drinks, daily specials and live events at 15 Baldwin Street.";
 const DEFAULT_IMAGE = "/og-image.jpg"; // Should be in public folder
 const SITE_URL = "https://brooklinpub.com";
+
+const SCHEMA_DAYS: Record<string, string> = {
+  monday: "Monday",
+  tuesday: "Tuesday",
+  wednesday: "Wednesday",
+  thursday: "Thursday",
+  friday: "Friday",
+  saturday: "Saturday",
+  sunday: "Sunday",
+};
+
+/** Admin-managed hours → schema.org openingHoursSpecification (closing before opening = next day). */
+function toOpeningHoursSpec(hours: OpeningHours[] | null | undefined) {
+  return (hours || [])
+    .filter((h) => h.isOpen && h.isActive && h.openTime && h.closeTime && SCHEMA_DAYS[h.dayOfWeek?.toLowerCase()])
+    .map((h) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: SCHEMA_DAYS[h.dayOfWeek.toLowerCase()],
+      opens: h.openTime!.slice(0, 5),
+      closes: h.closeTime!.slice(0, 5),
+    }));
+}
 
 /**
  * SEO Component - Manages document head for SEO optimization
@@ -40,6 +65,12 @@ export default function SEO({
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const fullUrl = canonical ? `${SITE_URL}${canonical}` : SITE_URL;
   const fullImage = image.startsWith("http") ? image : `${SITE_URL}${image}`;
+
+  // Same cache key as the footer, so this adds no extra request
+  const { data: openingHours } = useApiWithCache<OpeningHours[]>("opening-hours", () =>
+    openingHoursService.getAllOpeningHours()
+  );
+  const openingHoursSpecification = toOpeningHoursSpec(openingHours);
 
   // Default keywords for the pub
   const defaultKeywords = [
@@ -86,17 +117,22 @@ export default function SEO({
       <meta property="twitter:description" content={description} />
       <meta property="twitter:image" content={fullImage} />
 
-      {/* Restaurant-specific structured data */}
+      {/* Business structured data (schema.org BarOrPub) */}
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Restaurant",
+          "@type": "BarOrPub",
+          "@id": `${SITE_URL}/#pub`,
           name: SITE_NAME,
-          image: fullImage,
-          "@id": SITE_URL,
+          alternateName: "Brooklin Pub",
+          description: DEFAULT_DESCRIPTION,
           url: SITE_URL,
-          telephone: "(905) 425-3055",
+          image: [`${SITE_URL}/og-image.jpg`, `${SITE_URL}/brooklinpub-logo.png`],
+          logo: `${SITE_URL}/brooklinpub-logo.png`,
+          telephone: "+1-905-425-3055",
+          email: "brooklinpub@gmail.com",
           priceRange: "$$",
+          foundingDate: "2014",
           address: {
             "@type": "PostalAddress",
             streetAddress: "15 Baldwin Street",
@@ -105,13 +141,18 @@ export default function SEO({
             postalCode: "L1M 1A2",
             addressCountry: "CA",
           },
-          geo: {
-            "@type": "GeoCoordinates",
-            latitude: 43.8765,
-            longitude: -78.9417,
-          },
-          servesCuisine: ["American", "Pub Food", "Canadian"],
-          acceptsReservations: "Yes",
+          areaServed: ["Brooklin", "Whitby", "Durham Region"],
+          hasMap: "https://maps.google.com/?q=15+Baldwin+St,+Whitby,+ON+L1M+1A2",
+          menu: `${SITE_URL}/menu`,
+          hasMenu: `${SITE_URL}/menu`,
+          servesCuisine: ["Pub Food", "Canadian", "American"],
+          acceptsReservations: "True",
+          ...(openingHoursSpecification.length ? { openingHoursSpecification } : {}),
+          sameAs: [
+            "https://www.facebook.com/brooklinpub",
+            "https://www.instagram.com/brooklinpubngrill/",
+            "https://www.tiktok.com/@brooklinpubngrill",
+          ],
         })}
       </script>
     </Helmet>

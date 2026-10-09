@@ -12,7 +12,54 @@
     <!-- Accent/decorative fonts for special elements -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
 
-    <title>Brooklin Pub & Grill</title>
+    <title>Brooklin Pub &amp; Grill | Pub, Food &amp; Live Events in Brooklin (Whitby), ON</title>
+    <!--
+      Static SEO for crawlers that do not run JavaScript (many AI crawlers, link previews).
+      Tags marked data-static-seo are removed by src/main.tsx on start-up, and each page
+      then sets its own tags via react-helmet-async, so browsers never see duplicates.
+    -->
+    <meta data-static-seo name="description" content="Brooklin Pub &amp; Grill at 15 Baldwin Street, Brooklin (Whitby), Ontario. Neighbourhood pub since 2014 with pub food, drinks, daily specials, live events and gift cards. Call (905) 425-3055." />
+    <link data-static-seo rel="canonical" href="https://brooklinpub.com/" />
+    <meta data-static-seo property="og:type" content="website" />
+    <meta data-static-seo property="og:site_name" content="Brooklin Pub &amp; Grill" />
+    <meta data-static-seo property="og:title" content="Brooklin Pub &amp; Grill | Brooklin (Whitby), ON" />
+    <meta data-static-seo property="og:description" content="Neighbourhood pub in Brooklin (Whitby), Ontario since 2014. Pub food, drinks, daily specials and live events." />
+    <meta data-static-seo property="og:url" content="https://brooklinpub.com/" />
+    <meta data-static-seo property="og:image" content="https://brooklinpub.com/og-image.jpg" />
+    <meta data-static-seo property="og:locale" content="en_CA" />
+    <meta data-static-seo name="twitter:card" content="summary_large_image" />
+    <script data-static-seo type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BarOrPub",
+        "@id": "https://brooklinpub.com/#pub",
+        "name": "Brooklin Pub & Grill",
+        "alternateName": "Brooklin Pub",
+        "url": "https://brooklinpub.com",
+        "image": "https://brooklinpub.com/og-image.jpg",
+        "logo": "https://brooklinpub.com/brooklinpub-logo.png",
+        "telephone": "+1-905-425-3055",
+        "email": "brooklinpub@gmail.com",
+        "priceRange": "$$",
+        "foundingDate": "2014",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "15 Baldwin Street",
+          "addressLocality": "Whitby",
+          "addressRegion": "ON",
+          "postalCode": "L1M 1A2",
+          "addressCountry": "CA"
+        },
+        "hasMap": "https://maps.google.com/?q=15+Baldwin+St,+Whitby,+ON+L1M+1A2",
+        "menu": "https://brooklinpub.com/menu",
+        "servesCuisine": ["Pub Food", "Canadian", "American"],
+        "sameAs": [
+          "https://www.facebook.com/brooklinpub",
+          "https://www.instagram.com/brooklinpubngrill/",
+          "https://www.tiktok.com/@brooklinpubngrill"
+        ]
+      }
+    </script>
       <style>
         /* Ultra-thin single-line scrollbar UI */
         html, body {
@@ -51,6 +98,20 @@
   </head>
   <body style="overflow-x: hidden;">
     <div id="root"></div>
+    <noscript>
+      <h1>Brooklin Pub &amp; Grill</h1>
+      <p>Neighbourhood pub and grill in Brooklin (Whitby), Ontario since 2014, serving pub food, drinks, daily specials and live events.</p>
+      <p>15 Baldwin Street, Brooklin (Whitby), ON L1M 1A2, Canada &middot; <a href="tel:+19054253055">(905) 425-3055</a> &middot; <a href="mailto:brooklinpub@gmail.com">brooklinpub@gmail.com</a></p>
+      <ul>
+        <li><a href="https://brooklinpub.com/menu">Menu</a></li>
+        <li><a href="https://brooklinpub.com/special/daily">Daily specials</a></li>
+        <li><a href="https://brooklinpub.com/events">Events</a></li>
+        <li><a href="https://brooklinpub.com/gift-cards">Gift cards</a></li>
+        <li><a href="https://brooklinpub.com/about">About us</a></li>
+        <li><a href="https://brooklinpub.com/contactus">Hours, directions and contact</a></li>
+      </ul>
+      <p>Please enable JavaScript to view the full website.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
