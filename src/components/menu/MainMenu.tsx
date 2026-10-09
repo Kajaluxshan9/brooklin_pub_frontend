@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -10,6 +10,7 @@ import { useTheme } from "@mui/material/styles";
 import { useApiWithCache } from "../../hooks/useApi";
 import { menuService } from "../../services/menu.service";
 import { getImageUrl } from "../../services/api";
+import { buildCategorySlugs, isUuid, resolveCategoryId } from "../../lib/categorySlug";
 import MenuBackground from "./PopupBackground";
 import PopupCloseButton from "./PopupCloseButton";
 import type {
@@ -189,7 +190,20 @@ export default function MainMenu() {
     }
   };
 
-  const selectedPrimaryCategoryId = getCategoryFromQuery();
+  // ?category= holds a readable slug; legacy links may still carry the raw id
+  const categoryParam = getCategoryFromQuery();
+  const selectedPrimaryCategoryId =
+    categoryParam === "all"
+      ? "all"
+      : resolveCategoryId(categoryParam, primaryCategories) ?? categoryParam;
+
+  // Rewrite old id-based links (/menu?category=<uuid>) to the slug form
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isUuid(categoryParam) || !primaryCategories) return;
+    const slug = buildCategorySlugs(primaryCategories).get(categoryParam);
+    if (slug) navigate(`/menu?category=${encodeURIComponent(slug)}`, { replace: true });
+  }, [categoryParam, primaryCategories, navigate]);
 
   // Check if selected category is a "direct display" category (Desserts or Kids)
   const selectedPrimaryCategory = useMemo(() => {

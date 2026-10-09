@@ -53,8 +53,8 @@ const Footer = () => {
     { label: "Contact Us", to: "/contactus" },
   ];
 
-  const menuPdfUrl = "/menu/Main Menu - Brooklin Pub.pdf";
-  const drinksPdfUrl = "/menu/Drinks Menu - Brooklin Pub.pdf";
+  const menuPdfUrl = "/menu-pdfs/Main Menu - Brooklin Pub.pdf";
+  const drinksPdfUrl = "/menu-pdfs/Drinks Menu - Brooklin Pub.pdf";
 
   const { data: openingHoursData } = useApiWithCache<OpeningHours[]>(
     "opening-hours",

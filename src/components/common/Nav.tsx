@@ -20,6 +20,7 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useApiWithCache } from "../../hooks/useApi";
+import { buildCategorySlugs, isUuid } from "../../lib/categorySlug";
 import { useVisibleSpecials } from "../../hooks/useVisibleSpecials";
 import { menuService } from "../../services/menu.service";
 import { EXTERNAL_URLS, UI_CONFIG } from "../../config/constants";
@@ -41,6 +42,7 @@ const Nav = () => {
     "primary-categories",
     () => menuService.getPrimaryCategories()
   );
+  const categorySlugs = useMemo(() => buildCategorySlugs(primaryCategories), [primaryCategories]);
 
   // Use the custom hook for visible specials logic
   const { specialCategories: specialTypes } = useVisibleSpecials();
@@ -58,11 +60,15 @@ const Nav = () => {
           ? primaryCategories
             .filter((pc) => pc.isActive)
             .sort((a, b) => a.sortOrder - b.sortOrder)
-            .map((pc) => ({
-              label: pc.name,
-              path: `/menu?category=${pc.id}`,
-              id: pc.id,
-            }))
+            .map((pc) => {
+              // Readable slug in the URL instead of the database id
+              const slug = categorySlugs.get(pc.id) || pc.id;
+              return {
+                label: pc.name,
+                path: `/menu?category=${encodeURIComponent(slug)}`,
+                id: slug,
+              };
+            })
           : [],
     },
     {
@@ -119,6 +125,8 @@ const Nav = () => {
       const params = new URLSearchParams(location.search);
       const q = params.get("category");
       if (!q) return allCategoryNames[0] || "all";
+      // Legacy id links: highlight the matching slug item
+      if (isUuid(q)) return categorySlugs.get(q) || q;
       return q;
     } catch {
       return allCategoryNames[0] || "all";
