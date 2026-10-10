@@ -1,4 +1,5 @@
 import Nav from "../components/common/Nav";
+import { getTorontoNow } from "../lib/torontoTime";
 import LandingPage from "../components/home/LandingPage";
 import EventsSection from "../components/home/eventSection";
 import TeamSection from "../components/home/TeamSection";
@@ -37,23 +38,8 @@ interface PopupCard {
 const POPUP_SESSION_KEY = "brooklin_popup_shown";
 
 // Get current day of week in lowercase (based on Canadian EST timezone)
-const getCurrentDayOfWeek = (): DayOfWeek => {
-  const days: DayOfWeek[] = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-  ] as DayOfWeek[];
-  // Use Canadian timezone to get the correct day
-  const now = new Date();
-  const canadaDay = new Date(
-    now.toLocaleString("en-US", { timeZone: "America/Toronto" })
-  );
-  return days[canadaDay.getDay()];
-};
+// "Today" is always the pub's day in Toronto (DST-aware), not the visitor's device day
+const getCurrentDayOfWeek = (): DayOfWeek => getTorontoNow().dayKey as DayOfWeek;
 
 // Check if a special should be shown in the popup
 // Only show: seasonal, game_time, chef, and current day's daily special
@@ -507,13 +493,6 @@ const Home = () => {
         })),
       );
     }
-
-    // Patio image slide
-    cards.push({
-      title: "Our Patio",
-      popupImg: "/patio.jpeg",
-      type: "patio",
-    });
 
     // Always add promo subscribe card as the last slide
     cards.push({
