@@ -16,7 +16,8 @@ const STATIC_PAGES: { path: string; changefreq: string; priority: string }[] = [
   { path: "/special/daily", changefreq: "daily", priority: "0.8" },
   { path: "/special/other", changefreq: "weekly", priority: "0.6" },
   { path: "/events", changefreq: "daily", priority: "0.8" },
-  { path: "/gift-cards", changefreq: "monthly", priority: "0.7" },
+  // Hidden from sitemap — page still reachable by direct link
+  // { path: "/gift-cards", changefreq: "monthly", priority: "0.7" },
   { path: "/about", changefreq: "monthly", priority: "0.6" },
   { path: "/contactus", changefreq: "monthly", priority: "0.7" },
   { path: "/privacy-policy", changefreq: "yearly", priority: "0.2" },
