@@ -14,7 +14,7 @@
 - [Menu](https://brooklinpub.com/menu): full food and drinks menu with prices
 - [Daily specials](https://brooklinpub.com/special/daily): this week's daily specials
 - [Events](https://brooklinpub.com/events): live music and upcoming events
-- [Gift cards](https://brooklinpub.com/gift-cards): buy a gift card (never expires, no fees)
+<!-- - [Gift cards](https://brooklinpub.com/gift-cards): buy a gift card (never expires, no fees)  -->
 - [About](https://brooklinpub.com/about): the pub's story and team
 - [Contact](https://brooklinpub.com/contactus): hours, directions, reservations and private event enquiries
 
