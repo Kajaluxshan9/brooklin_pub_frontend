@@ -221,6 +221,7 @@ export default function GiftCards() {
       <SEO
         title="Gift Cards"
         canonical="/gift-cards"
+        noIndex
         description="Give the gift of great food and drinks. Buy a Brooklin Pub gift card online — never expires, no fees."
         keywords={["gift card", "Brooklin Pub gift card", "restaurant gift card Whitby"]}
       />
