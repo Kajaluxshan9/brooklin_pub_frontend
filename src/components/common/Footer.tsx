@@ -49,7 +49,8 @@ const Footer = () => {
     { label: "Menu", to: "/menu" },
     { label: "Daily Specials", to: "/special/daily" },
     { label: "Events", to: "/events" },
-    { label: "Gift Cards", to: "/gift-cards" },
+    // Hidden from public footer — page still reachable by direct link
+    // { label: "Gift Cards", to: "/gift-cards" },
     { label: "Contact Us", to: "/contactus" },
   ];
 

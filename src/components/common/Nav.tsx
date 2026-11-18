@@ -76,7 +76,8 @@ const Nav = () => {
       path: undefined, // Do not navigate when clicking parent; open dropdown instead
       dropdown: specialTypes.length > 0 ? specialTypes : [],
     },
-    { label: "Gift Cards", path: "/gift-cards" },
+    // Hidden from public nav — page still reachable by direct link
+    // { label: "Gift Cards", path: "/gift-cards" },
     { label: "Contact Us", path: "/contactus" },
   ];
   // which top-level parent is open
